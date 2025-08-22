@@ -13,6 +13,15 @@ from vit import ViT
 
 from utils import write_to_file, set_seed
 
+"""
+VIT-Tiny Configuration 
+patch_size: 16
+num_layers:12
+num_heads: 3
+d_hidden: 192
+d_mlp: 768
+"""
+
 def args_parser():
     parser = argparse.ArgumentParser(description="Convolutional Nearest Neighbor training and evaluation", add_help=False) 
     
@@ -20,12 +29,12 @@ def args_parser():
     parser.add_argument("--layer", type=str, default="Attention", choices=["Attention", "ConvNN", "ConvNNAttention", "ConvNNAttention_Old", "KvtAttention", "LocalAttention", "NeighborhoodAttention"], help="Layer to use for training and evaluation")
 
     parser.add_argument("--patch_size", type=int, default=16, help="Patch size for Attention Models")
-    parser.add_argument("--num_layers", type=int, default=8, help="Number of layers in the model")   
-    parser.add_argument("--num_heads", type=int, default=4, help="Number of heads for Attention Models")
+    parser.add_argument("--num_layers", type=int, default=12, help="Number of layers in the model")   
+    parser.add_argument("--num_heads", type=int, default=3, help="Number of heads for Attention Models")
 
     # Model Dimension Arguments
-    parser.add_argument("--d_hidden", type=int, default=512, help="Hidden dimension for the model")
-    parser.add_argument("--d_mlp", type=int, default=2048, help="MLP dimension for the model")
+    parser.add_argument("--d_hidden", type=int, default=192, help="Hidden dimension for the model")
+    parser.add_argument("--d_mlp", type=int, default=768, help="MLP dimension for the model")
 
     # Dropout Arguments
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout rate for the model")
