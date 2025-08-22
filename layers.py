@@ -120,20 +120,15 @@ class MultiHeadConvNNAttention(nn.Module):
         return x.view(-1, self.d_k, seq_length)
         
     def forward(self, x):
-    
-        # k = self.batch_combine(self.split_head(self.W_k(x)))
-        # v = self.batch_combine(self.split_head(self.W_v(x)))
-
-        k = self.batch_combine(self.split_head(x))
-        v = self.batch_combine(self.split_head(x))
+        k = self.batch_combine(self.split_head(self.W_k(x)))
+        v = self.batch_combine(self.split_head(self.W_v(x)))
 
         # Coordinate Encoding (optional)
         k = self._add_coordinate_encoding(k) if self.coordinate_encoding else k
         v = self._add_coordinate_encoding(v) if self.coordinate_encoding else v
         
         if self.sampling_type == 'all': # All Samples
-            # q = self.batch_combine(self.split_head(self.W_q(x)))
-            q = self.batch_combine(self.split_head(x))
+            q = self.batch_combine(self.split_head(self.W_q(x)))
             q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
 
             # ConvNN Algorithm
@@ -144,8 +139,7 @@ class MultiHeadConvNNAttention(nn.Module):
             # Sampling
             rand_idx = torch.randperm(x.shape[1], device=x.device)[:self.num_samples]
             x_sample = x[:, rand_idx, :]  
-            # q = self.batch_combine(self.split_head(self.W_q(x_sample))) 
-            q = self.batch_combine(self.split_head(x_sample))
+            q = self.batch_combine(self.split_head(self.W_q(x_sample))) 
             q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
 
             # ConvNN Algorithm 
@@ -158,8 +152,7 @@ class MultiHeadConvNNAttention(nn.Module):
             # Sampling 
             spat_idx = torch.linspace(0 + self.sample_padding, x.shape[1] - self.sample_padding - 1, self.num_samples, device=x.device).long()
             x_sample = x[:, spat_idx, :]
-            # q = self.batch_combine(self.split_head(self.W_q(x_sample)))  
-            q = self.batch_combine(self.split_head(x_sample))
+            q = self.batch_combine(self.split_head(self.W_q(x_sample)))  
             q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
 
             # ConvNN Algorithm 
@@ -173,22 +166,21 @@ class MultiHeadConvNNAttention(nn.Module):
         x = self.conv(prime)  
         x = self.dropout(x)
         x = self.pointwise_conv(x) if self.coordinate_encoding else x        
-        # x = self.W_o(self.combine_heads(self.batch_split(x.permute(0, 2, 1))))
-        x = self.combine_heads(self.batch_split(x.permute(0, 2, 1)))
+        x = self.W_o(self.combine_heads(self.batch_split(x.permute(0, 2, 1))))
         return x       
 
     def _calculate_similarity_matrix(self, K, Q):
         k_norm = F.normalize(K, p=2, dim=1)
         q_norm = F.normalize(Q, p=2, dim=1)
         similarity_matrix = torch.bmm(k_norm.transpose(2, 1), q_norm) 
-        similarity_matrix = torch.clamp(similarity_matrix, min=0)  
+        similarity_matrix = torch.clamp(similarity_matrix, min=-1, max=1)  
         return similarity_matrix
     
     def _calculate_similarity_matrix_N(self, K, Q):
         k_norm = F.normalize(K, p=2, dim=1)
         q_norm = F.normalize(Q, p=2, dim=1)
         similarity_matrix = torch.bmm(k_norm.transpose(2, 1), q_norm) 
-        similarity_matrix = torch.clamp(similarity_matrix, min=0) 
+        similarity_matrix = torch.clamp(similarity_matrix, min=-1, max=1) 
         return similarity_matrix
 
     def _calculate_distance_matrix(self, K, Q, sqrt=False):
@@ -196,7 +188,7 @@ class MultiHeadConvNNAttention(nn.Module):
         norm_squared_Q = torch.sum(Q**2, dim=1, keepdim=True) 
         dot_product = torch.bmm(K.transpose(2, 1), Q)  
         dist_matrix = norm_squared_K + norm_squared_Q.transpose(2, 1) - 2 * dot_product
-        dist_matrix = torch.clamp(dist_matrix, min=0)  # remove negative values
+        dist_matrix = torch.clamp(dist_matrix, min=-1, max=1)  
         dist_matrix = torch.sqrt(dist_matrix) if sqrt else dist_matrix
         return dist_matrix
 
@@ -205,30 +197,39 @@ class MultiHeadConvNNAttention(nn.Module):
         norm_squared_Q = torch.sum(Q**2, dim=1, keepdim=True).transpose(2, 1).permute(0, 2, 1)
         dot_product = torch.bmm(K.transpose(2, 1), Q)  
         dist_matrix = norm_squared_K + norm_squared_Q - 2 * dot_product
-        dist_matrix = torch.clamp(dist_matrix, min=0)  # remove negative values
+        dist_matrix = torch.clamp(dist_matrix, min=-1, max=1)  
         dist_matrix = torch.sqrt(dist_matrix) if sqrt else dist_matrix
         return dist_matrix
 
     def _prime(self, v, qk, K, maximum):
-        b, c, t = v.shape 
-        _, topk_indices = torch.topk(qk, k=K, dim=-1, largest = maximum)
+        b, c, t = v.shape
+        topk_values, topk_indices = torch.topk(qk, k=K, dim=2, largest=maximum)
         topk_indices_exp = topk_indices.unsqueeze(1).expand(b, c, t, K)
-        v_expanded = v.unsqueeze(-1).expand(b, c, t, K)
+        topk_values_exp = topk_values.unsqueeze(1).expand(b, c, t, K)    
+        v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()
         prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
+        prime = topk_values_exp * prime
         prime = prime.reshape(b, c, -1)
         return prime
 
     def _prime_N(self, v, qk, K, rand_idx, maximum):
         b, c, t = v.shape
-        _, topk_indices = torch.topk(qk, k=K - 1, dim=2, largest=maximum)
+        topk_values, topk_indices = torch.topk(qk, k=K - 1, dim=2, largest=maximum)
         tk = topk_indices.shape[-1]
         assert K == tk + 1, "Error: K must be same as tk + 1. K == tk + 1."
+        
         mapped_tensor = rand_idx[topk_indices]
         token_indices = torch.arange(t, device=v.device).view(1, t, 1).expand(b, t, 1)
         final_indices = torch.cat([token_indices, mapped_tensor], dim=2)
         indices_expanded = final_indices.unsqueeze(1).expand(b, c, t, K)
+
+        topk_values_exp = topk_values.unsqueeze(1).expand(b, c, t, K-1)
+        ones = torch.ones((b, c, t, 1), device=v.device)
+        topk_values_exp = torch.cat((ones, topk_values_exp), dim=1)
+        
         v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()
         prime = torch.gather(v_expanded, dim=2, index=indices_expanded)
+        prime = topk_values_exp * prime
         prime = prime.reshape(b, c, -1)
         return prime
 
@@ -245,6 +246,8 @@ class MultiHeadConvNNAttention(nn.Module):
         x_with_coords = torch.cat((x, expanded_coords), dim=1)  
         return x_with_coords
 
+
+### NOT USING ANYMORE ###
 class MultiHeadConvNN(nn.Module):
     def __init__(self, d_hidden, num_heads, attention_dropout, K, sampling_type, num_samples, sample_padding, magnitude_type, seq_length=197, coordinate_encoding=False):
         super(MultiHeadConvNN, self).__init__() 
@@ -317,18 +320,200 @@ class MultiHeadConvNN(nn.Module):
     def forward(self, x):
         x = x.permute(0, 2, 1) 
 
-        # k = self.batch_combine(self.split_head(self.W_k(x)))
-        # v = self.batch_combine(self.split_head(self.W_v(x)))
-
-        k = self.batch_combine(self.split_head(x))
-        v = self.batch_combine(self.split_head(x))
+        k = self.batch_combine(self.split_head(self.W_k(x)))
+        v = self.batch_combine(self.split_head(self.W_v(x)))
 
         # Coordinate Encoding (optional)
         k = self._add_coordinate_encoding(k) if self.coordinate_encoding else k
         v = self._add_coordinate_encoding(v) if self.coordinate_encoding else v
         
         if self.sampling_type == 'all': # All Samples
-            # q = self.batch_combine(self.split_head(self.W_q(x)))
+            q = self.batch_combine(self.split_head(self.W_q(x)))
+            q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
+
+            # ConvNN Algorithm
+            matrix_magnitude = self._calculate_distance_matrix(k, q, sqrt=True) if self.magnitude_type == 'distance' else self._calculate_similarity_matrix(k, q)
+            prime = self._prime(v, matrix_magnitude, self.K, self.maximum) 
+
+        elif self.sampling_type == 'random': # Random Samples
+            # Sampling 
+            rand_idx = torch.randperm(x.shape[2], device=x.device)[:self.num_samples]
+            x_sample = x[:, :, rand_idx]  
+            q = self.batch_combine(self.split_head(self.W_q(x_sample)))  
+            q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
+
+            # ConvNN Algorithm
+            matrix_magnitude = self._calculate_distance_matrix_N(k, q, sqrt=True) if self.magnitude_type == 'distance' else self._calculate_similarity_matrix_N(k, q)
+            range_idx = torch.arange(len(rand_idx), device=q.device)
+            matrix_magnitude[:, rand_idx, range_idx] = float('inf') if self.magnitude_type == 'distance' else float('-inf')
+            prime = self._prime_N(v, matrix_magnitude, self.K, rand_idx, self.maximum)
+
+        elif self.sampling_type == 'spatial': # Spatial Samples
+            # Sampling
+            spat_idx = torch.linspace(0 + self.sample_padding, x.shape[2] - self.sample_padding - 1, self.num_samples, device=x.device).long()
+            x_sample = x[:, :, spat_idx]
+            q = self.batch_combine(self.split_head(self.W_q(x_sample)))  
+            q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
+            
+            # ConvNN Algorithm 
+            matrix_magnitude = self._calculate_distance_matrix_N(k, q, sqrt=True) if self.magnitude_type == 'distance' else self._calculate_similarity_matrix_N(k, q)
+            range_idx = torch.arange(len(spat_idx), device=q.device)
+            matrix_magnitude[:, spat_idx, range_idx] = float('inf') if self.magnitude_type == 'distance' else float('-inf')
+            prime = self._prime_N(v, matrix_magnitude, self.K, spat_idx, self.maximum)
+        else: 
+            raise ValueError("Invalid sampling_type. Must be one of ['all', 'random', 'spatial']")
+
+        x = self.conv(prime)  
+        x = self.dropout(x)
+        x = self.pointwise_conv(x)  if self.coordinate_encoding else x
+        x = self.W_o(self.combine_heads(self.batch_split(x))).permute(0, 2, 1)
+        return x
+
+    def _calculate_similarity_matrix(self, K, Q):
+        k_norm = F.normalize(K, p=2, dim=1)
+        q_norm = F.normalize(Q, p=2, dim=1)
+        similarity_matrix = torch.bmm(k_norm.transpose(2, 1), q_norm)  
+        similarity_matrix = torch.clamp(similarity_matrix, min=-1, max=1)  
+        return similarity_matrix
+    
+    def _calculate_similarity_matrix_N(self, K, Q):
+        k_norm = F.normalize(K, p=2, dim=1)
+        q_norm = F.normalize(Q, p=2, dim=1)
+        similarity_matrix = torch.bmm(k_norm.transpose(2, 1), q_norm)  
+        similarity_matrix = torch.clamp(similarity_matrix, min=-1, max=1)  
+        return similarity_matrix
+        
+    def _calculate_distance_matrix(self, K, Q, sqrt=False):
+        norm_squared_K = torch.sum(K**2, dim=1, keepdim=True) 
+        norm_squared_Q = torch.sum(Q**2, dim=1, keepdim=True) 
+        dot_product = torch.bmm(K.transpose(2, 1), Q)  
+        dist_matrix = norm_squared_K + norm_squared_Q.transpose(2, 1) - 2 * dot_product
+        dist_matrix = torch.clamp(dist_matrix, min=-1, max=1)  
+        dist_matrix = torch.sqrt(dist_matrix) if sqrt else dist_matrix
+        return dist_matrix
+
+    def _calculate_distance_matrix_N(self, K, Q, sqrt=False):
+        norm_squared_K = torch.sum(K**2, dim=1, keepdim=True).permute(0, 2, 1)
+        norm_squared_Q = torch.sum(Q**2, dim=1, keepdim=True).transpose(2, 1).permute(0, 2, 1)
+        dot_product = torch.bmm(K.transpose(2, 1), Q)  
+        dist_matrix = norm_squared_K + norm_squared_Q - 2 * dot_product
+        dist_matrix = torch.clamp(dist_matrix, min=-1, max=1)  
+        dist_matrix = torch.sqrt(dist_matrix) if sqrt else dist_matrix
+        return dist_matrix
+
+    def _prime(self, v, qk, K, maximum):
+        b, c, t = v.shape 
+        _, topk_indices = torch.topk(qk, k=K, dim=-1, largest = maximum)
+        topk_indices_exp = topk_indices.unsqueeze(1).expand(b, c, t, K)
+        v_expanded = v.unsqueeze(-1).expand(b, c, t, K)
+        prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
+        prime = prime.reshape(b, c, -1)
+        return prime
+              
+    def _prime_N(self, v, qk, K, rand_idx, maximum):
+        b, c, t = v.shape
+        _, topk_indices = torch.topk(qk, k=K - 1, dim=2, largest=maximum)
+        tk = topk_indices.shape[-1]
+        assert K == tk + 1, "Error: K must be same as tk + 1. K == tk + 1."
+        mapped_tensor = rand_idx[topk_indices]
+        token_indices = torch.arange(t, device=v.device).view(1, t, 1).expand(b, t, 1)
+        final_indices = torch.cat([token_indices, mapped_tensor], dim=2)
+        indices_expanded = final_indices.unsqueeze(1).expand(b, c, t, K)
+        v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()
+        prime = torch.gather(v_expanded, dim=2, index=indices_expanded) 
+        prime = prime.reshape(b, c, -1)
+        return prime
+    
+    def _add_coordinate_encoding(self, x):
+        b, c, t = x.shape 
+        cache_key = f"{b}_{t}_{x.device}"
+        if cache_key in self.coordinate_cache:
+            expanded_coords = self.coordinate_cache[cache_key]
+        else:
+            coords_vec = torch.linspace(start=-1, end=1, steps=t, device=x.device).unsqueeze(0).expand(b, -1)
+            expanded_coords = coords_vec.unsqueeze(1).expand(b, -1, -1)
+            self.coordinate_cache[cache_key] = expanded_coords
+            
+        x_with_coords = torch.cat((x, expanded_coords), dim=1)  
+        return x_with_coords
+
+
+class MultiHeadConvNN_No_Proj(nn.Module):
+    def __init__(self, d_hidden, num_heads, attention_dropout, K, sampling_type, num_samples, sample_padding, magnitude_type, seq_length=197, coordinate_encoding=False):
+        super(MultiHeadConvNN_No_Proj, self).__init__() 
+        
+        assert d_hidden % num_heads == 0, "d_hidden must be divisible by num_heads"   
+        assert sampling_type in ["all", "random", "spatial"], "Error: sampling_type must be one of ['all', 'random', 'spatial']"
+        self.d_hidden = d_hidden
+        self.num_heads = num_heads
+        self.attention_dropout = attention_dropout
+        self.d_k = d_hidden // num_heads
+        
+        self.K = K
+        self.sampling_type = sampling_type
+        self.sampling_type = sampling_type
+        self.num_samples = num_samples if num_samples != -1 else 'all' # -1 for all samples 
+        self.sample_padding = sample_padding if sampling_type == 'spatial' else 0    
+        self.magnitude_type = magnitude_type
+        self.maximum = True if self.magnitude_type == 'similarity' else False
+        self.seq_length = seq_length
+
+        # Coordinate Encoding (optional)
+        self.coordinate_encoding = coordinate_encoding
+        self.coordinate_cache = {}
+
+        self.dropout = nn.Dropout(attention_dropout)
+
+        self.in_channels = (d_hidden // num_heads) + 1 if coordinate_encoding else d_hidden // num_heads
+        self.out_channels = (d_hidden // num_heads) + 1 if coordinate_encoding else d_hidden // num_heads
+        self.kernel_size = K
+        self.stride = K
+        self.padding = 0 
+        
+        self.conv = nn.Conv1d(
+            in_channels=self.in_channels,
+            out_channels=self.out_channels,
+            kernel_size=self.kernel_size,
+            stride=self.stride,
+            padding=self.padding,
+        )
+
+        self.pointwise_conv = nn.Conv1d(
+            in_channels=self.in_channels,
+            out_channels=self.out_channels - 1 ,
+            kernel_size=1
+        )
+
+    def split_head(self, x):
+        batch_size, d_hidden, seq_length = x.size()
+        self.batch_size = batch_size
+        return x.contiguous().view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2) 
+    
+    def combine_heads(self, x): 
+        batch_size, _, seq_length, d_k = x.size()
+        return x.transpose(1, 2).contiguous().view(batch_size, self.d_hidden, seq_length) 
+    
+    def batch_split(self, x): 
+        x = x.reshape(self.batch_size, -1, self.d_k, self.seq_length)
+        return x.permute(0, 1, 3, 2).contiguous()
+        
+    def batch_combine(self, x): 
+        batch_size, _, seq_length, d_k = x.size()
+        x = x.permute(0, 1, 3, 2).contiguous() 
+        return x.view(-1, self.d_k, seq_length)
+
+    def forward(self, x):
+        x = x.permute(0, 2, 1) 
+
+        k = self.batch_combine(self.split_head(x))
+        v = self.batch_combine(self.split_head(x))
+
+
+        # Coordinate Encoding (optional)
+        k = self._add_coordinate_encoding(k) if self.coordinate_encoding else k
+        v = self._add_coordinate_encoding(v) if self.coordinate_encoding else v
+        
+        if self.sampling_type == 'all': # All Samples
             q = self.batch_combine(self.split_head(x))
             q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
 
@@ -340,7 +525,6 @@ class MultiHeadConvNN(nn.Module):
             # Sampling 
             rand_idx = torch.randperm(x.shape[2], device=x.device)[:self.num_samples]
             x_sample = x[:, :, rand_idx]  
-            # q = self.batch_combine(self.split_head(self.W_q(x_sample)))  
             q = self.batch_combine(self.split_head(x_sample))
             q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
 
@@ -354,7 +538,6 @@ class MultiHeadConvNN(nn.Module):
             # Sampling
             spat_idx = torch.linspace(0 + self.sample_padding, x.shape[2] - self.sample_padding - 1, self.num_samples, device=x.device).long()
             x_sample = x[:, :, spat_idx]
-            # q = self.batch_combine(self.split_head(self.W_q(x_sample)))  
             q = self.batch_combine(self.split_head(x_sample))
             q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
             
@@ -369,7 +552,6 @@ class MultiHeadConvNN(nn.Module):
         x = self.conv(prime)  
         x = self.dropout(x)
         x = self.pointwise_conv(x)  if self.coordinate_encoding else x
-        # x = self.W_o(self.combine_heads(self.batch_split(x))).permute(0, 2, 1)
         x = self.combine_heads(self.batch_split(x)).permute(0, 2, 1)
         return x
 
@@ -441,6 +623,194 @@ class MultiHeadConvNN(nn.Module):
         x_with_coords = torch.cat((x, expanded_coords), dim=1)  
         return x_with_coords
 
+
+class MultiHeadConvNNAttention_Old(nn.Module):
+    def __init__(self, d_hidden, num_heads, attention_dropout,K, sampling_type, num_samples, sample_padding, magnitude_type, seq_length=197, coordinate_encoding=False):
+        super(MultiHeadConvNNAttention_Old, self).__init__()
+        assert d_hidden % num_heads == 0, "d_hidden must be divisible by num_heads"
+        self.d_hidden = d_hidden
+        self.num_heads = num_heads
+        self.attention_dropout = attention_dropout
+        self.d_k = d_hidden // num_heads
+        
+        self.seq_length = seq_length
+        self.K = K
+        self.sampling_type = sampling_type
+        self.sampling_type = sampling_type
+        self.num_samples = num_samples if num_samples != -1 else 'all' # -1 for all samples 
+        self.sample_padding = sample_padding if sampling_type == 'spatial' else 0    
+        self.magnitude_type = magnitude_type
+        self.maximum = True if self.magnitude_type == 'similarity' else False
+
+        # Coordinate Encoding (optional) 
+        self.coordinate_encoding = coordinate_encoding
+        self.coordinate_cache = {}
+        
+        # Linear projections for query, key, value
+        self.W_q = nn.Linear(d_hidden, d_hidden)
+        self.W_k = nn.Linear(d_hidden, d_hidden)
+        self.W_v = nn.Linear(d_hidden, d_hidden)
+        self.W_o = nn.Linear(d_hidden, d_hidden)   
+        self.dropout = nn.Dropout(attention_dropout)
+
+
+        self.in_channels = (d_hidden // num_heads) + 1 if coordinate_encoding else d_hidden // num_heads
+        self.out_channels = (d_hidden // num_heads) + 1 if coordinate_encoding else d_hidden // num_heads
+        self.kernel_size = K
+        self.stride = K
+        
+        self.conv = nn.Conv1d(
+            in_channels=self.in_channels,
+            out_channels=self.out_channels,
+            kernel_size=self.kernel_size,
+            stride=self.stride,
+            padding=0,
+        )
+        
+        self.pointwise_conv = nn.Conv1d(
+            in_channels=self.in_channels,
+            out_channels=self.out_channels - 1,
+            kernel_size=1
+        )
+        
+    def split_head(self, x): 
+        batch_size, seq_length, d_hidden = x.size()
+        self.batch_size = batch_size
+        # self.seq_length = seq_length
+        return x.contiguous().view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2) # (B, num_heads, seq_length, d_k)
+        
+    def combine_heads(self, x): 
+        batch_size, _, seq_length, d_k = x.size()
+        return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.d_hidden) 
+    
+    def batch_split(self, x): 
+        x = x.reshape(self.batch_size, -1, self.d_k, self.seq_length)
+        return x.permute(0, 1, 3, 2).contiguous()
+        
+    def batch_combine(self, x): 
+        batch_size, _, seq_length, d_k = x.size()
+        x = x.permute(0, 1, 3, 2).contiguous() 
+        return x.view(-1, self.d_k, seq_length)
+        
+    def forward(self, x):
+    
+        k = self.batch_combine(self.split_head(self.W_k(x)))
+        v = self.batch_combine(self.split_head(self.W_v(x)))
+
+        # Coordinate Encoding (optional)
+        k = self._add_coordinate_encoding(k) if self.coordinate_encoding else k
+        v = self._add_coordinate_encoding(v) if self.coordinate_encoding else v
+        
+        if self.sampling_type == 'all': # All Samples
+            q = self.batch_combine(self.split_head(self.W_q(x)))
+            q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
+
+            # ConvNN Algorithm
+            matrix_magnitude = self._calculate_distance_matrix(k, q, sqrt=True) if self.magnitude_type == 'distance' else self._calculate_similarity_matrix(k, q)
+            prime = self._prime(v, matrix_magnitude, self.K, self.maximum) 
+
+        elif self.sampling_type == 'random': # Random Samples
+            # Sampling
+            rand_idx = torch.randperm(x.shape[1], device=x.device)[:self.num_samples]
+            x_sample = x[:, rand_idx, :]  
+            q = self.batch_combine(self.split_head(self.W_q(x_sample))) 
+            q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
+
+            # ConvNN Algorithm 
+            matrix_magnitude = self._calculate_distance_matrix_N(k, q, sqrt=True) if self.magnitude_type == 'distance' else self._calculate_similarity_matrix_N(k, q)
+            range_idx = torch.arange(len(rand_idx), device=q.device)
+            matrix_magnitude[:, rand_idx, range_idx] = float('inf') if self.magnitude_type == 'distance' else float('-inf')
+            prime = self._prime_N(v, matrix_magnitude, self.K, rand_idx, self.maximum)
+
+        elif self.sampling_type == 'spatial': # Spatial Samples
+            # Sampling 
+            spat_idx = torch.linspace(0 + self.sample_padding, x.shape[1] - self.sample_padding - 1, self.num_samples, device=x.device).long()
+            x_sample = x[:, spat_idx, :]
+            q = self.batch_combine(self.split_head(self.W_q(x_sample)))  
+            q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
+
+            # ConvNN Algorithm 
+            matrix_magnitude = self._calculate_distance_matrix_N(k, q, sqrt=True) if self.magnitude_type == 'distance' else self._calculate_similarity_matrix_N(k, q)
+            range_idx = torch.arange(len(spat_idx), device=q.device)
+            matrix_magnitude[:, spat_idx, range_idx] = float('inf') if self.magnitude_type == 'distance' else float('-inf')
+            prime = self._prime_N(v, matrix_magnitude, self.K, spat_idx, self.maximum)
+        else: 
+            raise ValueError("Invalid sampling_type. Must be one of ['all', 'random', 'spatial']")
+
+        x = self.conv(prime)  
+        x = self.dropout(x)
+        x = self.pointwise_conv(x) if self.coordinate_encoding else x        
+        x = self.W_o(self.combine_heads(self.batch_split(x.permute(0, 2, 1))))
+        return x       
+
+    def _calculate_similarity_matrix(self, K, Q):
+        k_norm = F.normalize(K, p=2, dim=1)
+        q_norm = F.normalize(Q, p=2, dim=1)
+        similarity_matrix = torch.bmm(k_norm.transpose(2, 1), q_norm) 
+        similarity_matrix = torch.clamp(similarity_matrix, min=0)  
+        return similarity_matrix
+    
+    def _calculate_similarity_matrix_N(self, K, Q):
+        k_norm = F.normalize(K, p=2, dim=1)
+        q_norm = F.normalize(Q, p=2, dim=1)
+        similarity_matrix = torch.bmm(k_norm.transpose(2, 1), q_norm) 
+        similarity_matrix = torch.clamp(similarity_matrix, min=0) 
+        return similarity_matrix
+
+    def _calculate_distance_matrix(self, K, Q, sqrt=False):
+        norm_squared_K = torch.sum(K**2, dim=1, keepdim=True) 
+        norm_squared_Q = torch.sum(Q**2, dim=1, keepdim=True) 
+        dot_product = torch.bmm(K.transpose(2, 1), Q)  
+        dist_matrix = norm_squared_K + norm_squared_Q.transpose(2, 1) - 2 * dot_product
+        dist_matrix = torch.clamp(dist_matrix, min=0)  # remove negative values
+        dist_matrix = torch.sqrt(dist_matrix) if sqrt else dist_matrix
+        return dist_matrix
+
+    def _calculate_distance_matrix_N(self, K, Q, sqrt=False):
+        norm_squared_K = torch.sum(K**2, dim=1, keepdim=True).permute(0, 2, 1)
+        norm_squared_Q = torch.sum(Q**2, dim=1, keepdim=True).transpose(2, 1).permute(0, 2, 1)
+        dot_product = torch.bmm(K.transpose(2, 1), Q)  
+        dist_matrix = norm_squared_K + norm_squared_Q - 2 * dot_product
+        dist_matrix = torch.clamp(dist_matrix, min=0)  # remove negative values
+        dist_matrix = torch.sqrt(dist_matrix) if sqrt else dist_matrix
+        return dist_matrix
+
+    def _prime(self, v, qk, K, maximum):
+        b, c, t = v.shape 
+        _, topk_indices = torch.topk(qk, k=K, dim=-1, largest = maximum)
+        topk_indices_exp = topk_indices.unsqueeze(1).expand(b, c, t, K)
+        v_expanded = v.unsqueeze(-1).expand(b, c, t, K)
+        prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
+        prime = prime.reshape(b, c, -1)
+        return prime
+
+    def _prime_N(self, v, qk, K, rand_idx, maximum):
+        b, c, t = v.shape
+        _, topk_indices = torch.topk(qk, k=K - 1, dim=2, largest=maximum)
+        tk = topk_indices.shape[-1]
+        assert K == tk + 1, "Error: K must be same as tk + 1. K == tk + 1."
+        mapped_tensor = rand_idx[topk_indices]
+        token_indices = torch.arange(t, device=v.device).view(1, t, 1).expand(b, t, 1)
+        final_indices = torch.cat([token_indices, mapped_tensor], dim=2)
+        indices_expanded = final_indices.unsqueeze(1).expand(b, c, t, K)
+        v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()
+        prime = torch.gather(v_expanded, dim=2, index=indices_expanded)
+        prime = prime.reshape(b, c, -1)
+        return prime
+
+    def _add_coordinate_encoding(self, x):
+        b, c, t = x.shape 
+        cache_key = f"{b}_{t}_{x.device}"
+        if cache_key in self.coordinate_cache:
+            expanded_coords = self.coordinate_cache[cache_key]
+        else:
+            coords_vec = torch.linspace(start=-1, end=1, steps=t, device=x.device).unsqueeze(0).expand(b, -1)
+            expanded_coords = coords_vec.unsqueeze(1).expand(b, -1, -1)
+            self.coordinate_cache[cache_key] = expanded_coords
+            
+        x_with_coords = torch.cat((x, expanded_coords), dim=1)  
+        return x_with_coords
+    
 ### NOT IN USE ### 
 # class MultiHeadConv1dAttention(nn.Module):
 #     def __init__(self, d_hidden, num_heads, kernel_size): 
@@ -713,3 +1083,82 @@ class MultiHeadLocalAttention(nn.Module):
             return out
 
         return out, kv
+
+
+
+"""(*) PixelShuffle1D"""
+class PixelShuffle1D(nn.Module): 
+    """
+    1D Pixel Shuffle Layer for Convolutional Neural Networks.
+    
+    Attributes: 
+        upscale_factor (int): Upscale factor for pixel shuffle. 
+        
+    Notes:
+        Input's channel size must be divisible by the upscale factor. 
+    """
+    
+    def __init__(self, upscale_factor):
+        """ 
+        Initializes the PixelShuffle1D module.
+        
+        Parameters:
+            upscale_factor (int): Upscale factor for pixel shuffle.
+        """
+        super(PixelShuffle1D, self).__init__()
+        
+        self.upscale_factor = upscale_factor
+
+    def forward(self, x): 
+        batch_size, channel_len, token_len = x.shape[0], x.shape[1], x.shape[2]
+        
+        output_channel_len = channel_len / self.upscale_factor 
+        if output_channel_len.is_integer() == False: 
+            raise ValueError('Input channel length must be divisible by upscale factor')
+        output_channel_len = int(output_channel_len)
+        
+        output_token_len = int(token_len * self.upscale_factor)
+        
+        x = torch.reshape(x, (batch_size, output_channel_len, output_token_len)).contiguous()
+        
+        return x 
+
+"""(*) PixelUnshuffle1D"""
+class PixelUnshuffle1D(nn.Module):  
+    """
+    1D Pixel Unshuffle Layer for Convolutional Neural Networks.
+    
+    Attributes:
+        downscale_factor (int): Downscale factor for pixel unshuffle.
+        
+    Note:
+        Input's token size must be divisible by the downscale factor
+    
+    """
+    
+    def __init__(self, downscale_factor):
+        """
+        Intializes the PixelUnshuffle1D module.
+        
+        Parameters:
+            downscale_factor (int): Downscale factor for pixel unshuffle.
+        """
+        super(PixelUnshuffle1D, self).__init__()
+        
+        self.downscale_factor = downscale_factor
+
+    def forward(self, x):
+        batch_size = x.shape[0]
+        channel_len = x.shape[1]
+        token_len = x.shape[2]
+
+        output_channel_len = int(channel_len * self.downscale_factor)
+        output_token_len = token_len / self.downscale_factor
+        
+        if output_token_len.is_integer() == False:
+            raise ValueError('Input token length must be divisible by downscale factor')
+        output_token_len = int(output_token_len)
+        
+        x = torch.reshape(x, (batch_size, output_channel_len, output_token_len)).contiguous()
+        
+        return x 

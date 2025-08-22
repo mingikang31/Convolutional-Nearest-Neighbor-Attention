@@ -17,8 +17,8 @@ def args_parser():
     parser = argparse.ArgumentParser(description="Convolutional Nearest Neighbor training and evaluation", add_help=False) 
     
     # Model Arguments
-    parser.add_argument("--layer", type=str, default="Attention", choices=["Attention", "ConvNN", "ConvNNAttention", "Conv1d", "Conv1dAttention", "KvtAttention", "LocalAttention", "NeighborhoodAttention"], help="Layer to use for training and evaluation")
-    
+    parser.add_argument("--layer", type=str, default="Attention", choices=["Attention", "ConvNN", "ConvNNAttention", "ConvNNAttention_Old", "KvtAttention", "LocalAttention", "NeighborhoodAttention"], help="Layer to use for training and evaluation")
+
     parser.add_argument("--patch_size", type=int, default=16, help="Patch size for Attention Models")
     parser.add_argument("--num_layers", type=int, default=8, help="Number of layers in the model")   
     parser.add_argument("--num_heads", type=int, default=4, help="Number of heads for Attention Models")
@@ -29,7 +29,7 @@ def args_parser():
 
     # Dropout Arguments
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout rate for the model")
-    parser.add_argument("--attention_dropout", type=float, default=0.1, help="Dropout rate for the model")    
+    parser.add_argument("--attention_dropout", type=float, default=0.1, help="Attention dropout rate for the model")    
     
     # Additional Layer Arguments for ConvNN
     parser.add_argument("--K", type=int, default=9, help="K-nearest neighbor for ConvNN Layer")
@@ -45,11 +45,11 @@ def args_parser():
     parser.add_argument("--data_path", type=str, default="./Data", help="Path to the dataset")
         
     # Training Arguments
-    parser.add_argument("--batch_size", type=int, default=64, help="Batch size for training and evaluation")
-    parser.add_argument("--num_epochs", type=int, default=100, help="Number of epochs for training")
+    parser.add_argument("--batch_size", type=int, default=32, help="Batch size for training and evaluation")
+    parser.add_argument("--num_epochs", type=int, default=300, help="Number of epochs for training")
     parser.add_argument("--use_amp", action="store_true", help="Use mixed precision training")
     parser.set_defaults(use_amp=False)
-    parser.add_argument("--clip_grad_norm", type=float, default=None, help="Gradient clipping value")
+    parser.add_argument("--clip_grad_norm", type=float, default=1.0, help="Gradient clipping value")
     
     
     # Loss Function Arguments
@@ -57,14 +57,14 @@ def args_parser():
     
     # Optimizer Arguments 
     parser.add_argument('--optimizer', type=str, default='adamw', choices=['adam', 'sgd', 'adamw'], help='Default Optimizer: adamw')
-    parser.add_argument('--momentum', type=float, default=0.9, help='Momentum for SGD optimizer')
-    parser.add_argument('--weight_decay', type=float, default=1e-6, help='Weight decay for optimizer')
+    parser.add_argument('--momentum', type=float, default=0.9, help='Momentum for SGD optimizer') # Only for SGD
+    parser.add_argument('--weight_decay', type=float, default=5e-2, help='Weight decay for optimizer') # For Adam & Adamw
     
     # Learning Rate Arguments
-    parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate for the optimizer")
-    parser.add_argument('--lr_step', type=int, default=20, help='Step size for learning rate scheduler')
-    parser.add_argument('--lr_gamma', type=float, default=0.1, help='Gamma for learning rate scheduler')
-    parser.add_argument('--scheduler', type=str, default='step', choices=['step', 'cosine', 'plateau'], help='Learning rate scheduler')
+    parser.add_argument("--lr", type=float, default=5e-4, help="Learning rate for the optimizer")
+    parser.add_argument('--lr_step', type=int, default=20, help='Step size for learning rate scheduler') # Only for StepLR
+    parser.add_argument('--lr_gamma', type=float, default=0.1, help='Gamma for learning rate scheduler') # Only for StepLR
+    parser.add_argument('--scheduler', type=str, default='cosine', choices=['step', 'cosine', 'plateau'], help='Learning rate scheduler')
     
     # Device Arguments
     parser.add_argument("--device", type=str, default="cuda", choices=["cpu", "cuda", "mps"], help="Device to use for training and evaluation")

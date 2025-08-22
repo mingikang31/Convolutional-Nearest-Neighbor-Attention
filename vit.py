@@ -8,7 +8,14 @@ import numpy as np
 
 
 # from natten import NeighborhoodAttention1D, NeighborhoodAttention2D
-from layers import MultiHeadAttention, MultiHeadConvNN, MultiHeadConvNNAttention, MultiHeadConv1d, MultiHeadConv1dAttention, MultiHeadKvtAttention, MultiHeadLocalAttention
+from layers import (
+    MultiHeadAttention, 
+    MultiHeadConvNN, 
+    MultiHeadConvNNAttention, 
+    MultiHeadConvNNAttention_Old, 
+    MultiHeadKvtAttention, 
+    MultiHeadLocalAttention
+)
 
 
 '''VGG Model Class'''
@@ -127,6 +134,10 @@ class PositionalEncoding(nn.Module):
         x = x + self.pe[:, :x.size(1)].to(x.device) 
         return x
 
+""" TODO 
+Maybe add the coordinate encoding to the Transformer Encoder instead of inside MultiHeadConvNN & MultiHeadConvNNAttention 
+"""
+
 class TransformerEncoder(nn.Module): 
     def __init__(self, args, d_hidden, d_mlp, num_heads, dropout, attention_dropout):
         super(TransformerEncoder, self).__init__()
@@ -144,10 +155,8 @@ class TransformerEncoder(nn.Module):
             self.attention = MultiHeadConvNN(d_hidden, num_heads, attention_dropout, args.K, args.sampling_type, args.num_samples, args.sample_padding, args.magnitude_type, coordinate_encoding=args.coordinate_encoding)
         elif args.layer == "ConvNNAttention":
             self.attention = MultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, args.K, args.sampling_type, args.num_samples, args.sample_padding, args.magnitude_type, coordinate_encoding=args.coordinate_encoding)
-        elif args.layer == "Conv1d":
-            self.attention = MultiHeadConv1d(d_hidden, num_heads, args.K)
-        elif args.layer == "Conv1dAttention":
-            self.attention = MultiHeadConv1dAttention(d_hidden, num_heads, args.K)
+        elif args.layer == "ConvNNAttention_Old":
+            self.attention = MultiHeadConvNNAttention_Old(d_hidden, num_heads, attention_dropout, args.K, args.sampling_type, args.num_samples, args.sample_padding, args.magnitude_type, coordinate_encoding=args.coordinate_encoding)
         elif args.layer == "KvtAttention":
             self.attention = MultiHeadKvtAttention(dim=d_hidden, num_heads=num_heads, attn_drop=attention_dropout, topk=args.K)
         elif args.layer == "LocalAttention":
@@ -174,8 +183,8 @@ class TransformerEncoder(nn.Module):
                 "is_causal": False,  # Whether to use causal attention
             }
             
-            # self.attention = NeighborhoodAttention1D(embed_dim=d_hidden, num_heads=num_heads, kernel_size=args.K, proj_drop=attention_dropout, **neighborhood_attention_params
-            # ) 
+            self.attention = NeighborhoodAttention1D(embed_dim=d_hidden, num_heads=num_heads, kernel_size=args.K, proj_drop=attention_dropout, **neighborhood_attention_params
+            ) 
 
         self.norm1 = nn.LayerNorm(d_hidden)
         self.norm2 = nn.LayerNorm(d_hidden)
