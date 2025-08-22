@@ -42,8 +42,9 @@ def args_parser():
     
     # Additional Layer Arguments for ConvNN
     parser.add_argument("--K", type=int, default=9, help="K-nearest neighbor for ConvNN Layer")
-    parser.add_argument("--num_samples", type=int, default=-1, help="Number of samples for ConvNN Layer, -1 for all samples")
     parser.add_argument("--sampling_type", type=str, default="all", choices=["all", "random", "spatial"], help="Sampling type for ConvNN Models")
+
+    parser.add_argument("--num_samples", type=int, default=-1, help="Number of samples for ConvNN Layer, -1 for all samples")
     parser.add_argument("--sample_padding", type=int, default=0, help="Padding for spatial sampling in ConvNN Models")
     parser.add_argument("--magnitude_type", type=str, default="similarity", choices=["similarity", "distance"], help="Magnitude type for ConvNN Models")
     parser.add_argument("--coordinate_encoding", action="store_true", help="Use coordinate encoding in ConvNN Models")
@@ -55,7 +56,7 @@ def args_parser():
         
     # Training Arguments
     parser.add_argument("--batch_size", type=int, default=32, help="Batch size for training and evaluation")
-    parser.add_argument("--num_epochs", type=int, default=300, help="Number of epochs for training")
+    parser.add_argument("--num_epochs", type=int, default=100, help="Number of epochs for training")
     parser.add_argument("--use_amp", action="store_true", help="Use mixed precision training")
     parser.set_defaults(use_amp=False)
     parser.add_argument("--clip_grad_norm", type=float, default=1.0, help="Gradient clipping value")

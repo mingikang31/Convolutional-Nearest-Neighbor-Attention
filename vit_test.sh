@@ -1,91 +1,59 @@
-#!/bin/bash
+#! /bin/bash 
+#SBATCH --nodes=1 
+#SBATCH --mem=64G
+#SBATCH -p gpu --gres=gpu:a100:1
+#SBATCH --cpus-per-task=4
+#SBATCH --job-name=default-exps
+#SBATCH --time=500:00:00
+#SBATCH --output=slurm_out/%j.out
+#SBATCH --error=slurm_out/%j.err
+#SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT_80
+#SBATCH --mail-user=mkang2@bowdoin.edu
 
-# ViT-Tiny Configuration:
-# num_layers: 12
+cd /mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention
+
+source activate mingi
+
+
+# VIT-Tiny Configuration 
+# patch_size: 16
+# num_layers:12
+# num_heads: 3
 # d_hidden: 192
 # d_mlp: 768
-# num_heads: 3
 
-# ### Baseline Models ###
+# K = 9
+# Rand & Spatial: N = 32
+# No Coordinate Encoding
 
-# # Attention
-# python vit_main.py --layer Attention --patch_size 16 --num_layers 12 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/ViT-Tiny/Attention
+### CIFAR10 Experiments
 
-# # KVT Attention
-# python vit_main.py --layer KvtAttention --patch_size 16 --num_layers 12 --K 9 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny/KvtAttention
+python main.py --layer Attention --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/Attention
 
-# # ConvNN All
-# python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 9 --sampling_type all --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny/ConvNN_All
+python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/ConvNNAttention_All 
 
-# # ConvNN Random
-# python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 9 --sampling_type random --num_samples 32 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/TEST/VIT-Tiny/ConvNN_Random
+python main.py --layer ConvNNAttention --K 9 --sampling_type random --num_samples 32 --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/ConvNNAttention_Random
 
-# # ConvNN Spatial
-# python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 9 --sampling_type spatial --num_samples 32 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/ViT-Tiny/ConvNN_Spatial
+python main.py --layer ConvNNAttention --K 9 --sampling_type spatial --num_samples 32 --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/ConvNNAttention_Spatial
 
-# # ConvNNAttention All
-# python vit_main.py --layer ConvNNAttention --patch_size 16 --num_layers 12 --K 9 --sampling_type all --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/ViT-Tiny/ConvNNAttention_All
+python main.py --layer KvtAttention --K 9 --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/KvtAttention
 
-# # ConvNNAttention Random
-# python vit_main.py --layer ConvNNAttention --patch_size 16 --num_layers 12 --K 9 --sampling_type random --num_samples 32 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/ViT-Tiny/ConvNNAttention_Random
+python main.py --layer LocalAttention --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/LocalAttention
 
-# # ConvNNAttention Spatial
-# python vit_main.py --layer ConvNNAttention --patch_size 16 --num_layers 12 --K 9 --sampling_type spatial --num_samples 32 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/ViT-Tiny/ConvNNAttention_Spatial
+python main.py --layer NeighborhoodAttention --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/NeighborhoodAttention
 
-# # Local Attention
-# python vit_main.py --layer LocalAttention --patch_size 16 --num_layers 12 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/ViT-Tiny/LocalAttention
+### CIFAR100 Experiments
 
+python main.py --layer Attention --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/Attention
 
-# # NeighborhoodAttention
-# python vit_main.py --layer NeighborhoodAttention --patch_size 16 --num_layers 12 --K 9 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/ViT-Tiny/NeighborhoodAttention
+python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/ConvNNAttention_All 
 
+python main.py --layer ConvNNAttention --K 9 --sampling_type random --num_samples 32 --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/ConvNNAttention_Random
 
+python main.py --layer ConvNNAttention --K 9 --sampling_type spatial --num_samples 32 --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/ConvNNAttention_Spatial
 
-### N Test Experiments ###
-# - ConvNN Random Samples but varying N
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 9 --sampling_type random --num_samples 8 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-N-Test/ConvNN_Random_N8
+python main.py --layer KvtAttention --K 9 --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/KvtAttention
 
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 9 --sampling_type random --num_samples 16 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-N-Test/ConvNN_Random_N16
+python main.py --layer LocalAttention --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/LocalAttention
 
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 9 --sampling_type random --num_samples 32 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-N-Test/ConvNN_Random_N32
-
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 9 --sampling_type random --num_samples 64 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-N-Test/ConvNN_Random_N64
-
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 9 --sampling_type random --num_samples 128 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-N-Test/ConvNN_Random_N128
-
-# - ConvNN Spatial Samples but varying N
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 9 --sampling_type spatial --num_samples 8 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-N-Test/ConvNN_Spatial_N8
-
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 9 --sampling_type spatial --num_samples 16 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-N-Test/ConvNN_Spatial_N16
-
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 9 --sampling_type spatial --num_samples 32 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-N-Test/ConvNN_Spatial_N32
-
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 9 --sampling_type spatial --num_samples 64 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-N-Test/ConvNN_Spatial_N64
-
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 9 --sampling_type spatial --num_samples 128 --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-N-Test/ConvNN_Spatial_N128
-
-### K Test Experiments ###
-# - ConvNN All Samples but varying K
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 1 --sampling_type all --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-K-Test/ConvNN_All_K1
-
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 3 --sampling_type all --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-K-Test/ConvNN_All_K3
-
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 5 --sampling_type all --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-K-Test/ConvNN_All_K5
-
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 7 --sampling_type all --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-K-Test/ConvNN_All_K7
-
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 9 --sampling_type all --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-K-Test/ConvNN_All_K9
-
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 11 --sampling_type all --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-K-Test/ConvNN_All_K11
-
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 13 --sampling_type all --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-K-Test/ConvNN_All_K13
-
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 16 --sampling_type all --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-K-Test/ConvNN_All_K16
-
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 25 --sampling_type all --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-K-Test/ConvNN_All_K25
-
-python vit_main.py --layer ConvNN --patch_size 16 --num_layers 12 --K 36 --sampling_type all --num_heads 3 --d_hidden 192 --d_mlp 768 --dropout 0.1 --attention_dropout 0.1 --dataset cifar10 --num_epochs 10 --seed 0 --output_dir ./Output/VIT-Tiny-K-Test/ConvNN_All_K36
-
-echo "All experiments finished."
-
-
+python main.py --layer NeighborhoodAttention --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/NeighborhoodAttention
