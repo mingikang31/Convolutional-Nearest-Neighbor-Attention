@@ -28,32 +28,32 @@ source activate mingi
 
 ### CIFAR10 Experiments
 
-python main.py --layer Attention --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/Attention
+# python main.py --layer Attention --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/Attention
 
-python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/ConvNNAttention_All 
+# python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/ConvNNAttention_All 
 
 python main.py --layer ConvNNAttention --K 9 --sampling_type random --num_samples 32 --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/ConvNNAttention_Random
 
 python main.py --layer ConvNNAttention --K 9 --sampling_type spatial --num_samples 32 --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/ConvNNAttention_Spatial
 
-python main.py --layer KvtAttention --K 9 --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/KvtAttention
+# python main.py --layer KvtAttention --K 9 --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/KvtAttention
 
-python main.py --layer LocalAttention --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/LocalAttention
+# python main.py --layer LocalAttention --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/LocalAttention
 
-python main.py --layer NeighborhoodAttention --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/NeighborhoodAttention
+# python main.py --layer NeighborhoodAttention --dataset cifar10 --output_dir ./Output/VIT-Tiny/CIFAR10/NeighborhoodAttention
 
 ### CIFAR100 Experiments
 
-python main.py --layer Attention --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/Attention
+# python main.py --layer Attention --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/Attention
 
-python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/ConvNNAttention_All 
+# python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/ConvNNAttention_All 
 
 python main.py --layer ConvNNAttention --K 9 --sampling_type random --num_samples 32 --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/ConvNNAttention_Random
 
 python main.py --layer ConvNNAttention --K 9 --sampling_type spatial --num_samples 32 --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/ConvNNAttention_Spatial
 
-python main.py --layer KvtAttention --K 9 --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/KvtAttention
+# python main.py --layer KvtAttention --K 9 --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/KvtAttention
 
-python main.py --layer LocalAttention --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/LocalAttention
+# python main.py --layer LocalAttention --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/LocalAttention
 
-python main.py --layer NeighborhoodAttention --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/NeighborhoodAttention
+# python main.py --layer NeighborhoodAttention --dataset cifar100 --output_dir ./Output/VIT-Tiny/CIFAR100/NeighborhoodAttention

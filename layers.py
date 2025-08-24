@@ -225,7 +225,7 @@ class MultiHeadConvNNAttention(nn.Module):
 
         topk_values_exp = topk_values.unsqueeze(1).expand(b, c, t, K-1)
         ones = torch.ones((b, c, t, 1), device=v.device)
-        topk_values_exp = torch.cat((ones, topk_values_exp), dim=1)
+        topk_values_exp = torch.cat((ones, topk_values_exp), dim=-1)
         
         v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()
         prime = torch.gather(v_expanded, dim=2, index=indices_expanded)
