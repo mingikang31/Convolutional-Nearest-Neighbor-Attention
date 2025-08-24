@@ -1,0 +1,229 @@
+  0%|          | 0.00/170M [00:00<?, ?B/s]  0%|          | 229k/170M [00:00<01:27, 1.95MB/s]  2%|▏         | 2.79M/170M [00:00<00:11, 14.9MB/s]  6%|▋         | 11.0M/170M [00:00<00:03, 44.6MB/s] 12%|█▏        | 20.0M/170M [00:00<00:02, 62.0MB/s] 17%|█▋        | 29.0M/170M [00:00<00:01, 71.7MB/s] 22%|██▏       | 38.3M/170M [00:00<00:01, 79.0MB/s] 28%|██▊       | 47.2M/170M [00:00<00:01, 82.1MB/s] 33%|███▎      | 56.6M/170M [00:00<00:01, 85.7MB/s] 38%|███▊      | 65.3M/170M [00:00<00:01, 86.2MB/s] 43%|████▎     | 73.9M/170M [00:01<00:01, 84.9MB/s] 49%|████▉     | 83.3M/170M [00:01<00:00, 87.5MB/s] 54%|█████▍    | 92.1M/170M [00:01<00:00, 85.1MB/s] 60%|█████▉    | 101M/170M [00:01<00:00, 87.5MB/s]  65%|██████▍   | 110M/170M [00:01<00:00, 86.6MB/s] 70%|███████   | 120M/170M [00:01<00:00, 88.4MB/s] 75%|███████▌  | 128M/170M [00:01<00:00, 87.8MB/s] 81%|████████  | 137M/170M [00:01<00:00, 88.0MB/s] 86%|████████▌ | 147M/170M [00:01<00:00, 89.2MB/s] 91%|█████████ | 156M/170M [00:01<00:00, 88.1MB/s] 97%|█████████▋| 165M/170M [00:02<00:00, 89.8MB/s]100%|██████████| 170M/170M [00:02<00:00, 80.5MB/s]
+Traceback (most recent call last):
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 139, in <module>
+    main(args)
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 124, in main
+    train_eval_results = Train_Eval(args, 
+                         ^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/train_eval.py", line 91, in Train_Eval
+    outputs = model(images)
+              ^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 70, in forward
+    x = self.transformer_encoder(x)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/container.py", line 250, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 205, in forward
+    attn_output = self.attention(norm_x)  
+                  ^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/layers.py", line 149, in forward
+    prime = self._prime_N(v, matrix_magnitude, self.K, rand_idx, self.maximum)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/layers.py", line 228, in _prime_N
+    topk_values_exp = torch.cat((ones, topk_values_exp), dim=1)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Sizes of tensors must match except in dimension 1. Expected size 1 but got size 8 for tensor number 1 in the list.
+Traceback (most recent call last):
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 139, in <module>
+    main(args)
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 124, in main
+    train_eval_results = Train_Eval(args, 
+                         ^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/train_eval.py", line 91, in Train_Eval
+    outputs = model(images)
+              ^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 70, in forward
+    x = self.transformer_encoder(x)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/container.py", line 250, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 205, in forward
+    attn_output = self.attention(norm_x)  
+                  ^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/layers.py", line 162, in forward
+    prime = self._prime_N(v, matrix_magnitude, self.K, spat_idx, self.maximum)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/layers.py", line 228, in _prime_N
+    topk_values_exp = torch.cat((ones, topk_values_exp), dim=1)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Sizes of tensors must match except in dimension 1. Expected size 1 but got size 8 for tensor number 1 in the list.
+Traceback (most recent call last):
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 139, in <module>
+    main(args)
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 110, in main
+    model = ViT(args)
+            ^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 51, in __init__
+    self.transformer_encoder = nn.Sequential(*[TransformerEncoder(
+                                              ^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 51, in <listcomp>
+    self.transformer_encoder = nn.Sequential(*[TransformerEncoder(
+                                               ^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 186, in __init__
+    self.attention = NeighborhoodAttention1D(embed_dim=d_hidden, num_heads=num_heads, kernel_size=args.K, proj_drop=attention_dropout, **neighborhood_attention_params
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+NameError: name 'NeighborhoodAttention1D' is not defined. Did you mean: 'neighborhood_attention_params'?
+Traceback (most recent call last):
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 139, in <module>
+    main(args)
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 124, in main
+    train_eval_results = Train_Eval(args, 
+                         ^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/train_eval.py", line 91, in Train_Eval
+    outputs = model(images)
+              ^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 70, in forward
+    x = self.transformer_encoder(x)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/container.py", line 250, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 205, in forward
+    attn_output = self.attention(norm_x)  
+                  ^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/layers.py", line 149, in forward
+    prime = self._prime_N(v, matrix_magnitude, self.K, rand_idx, self.maximum)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/layers.py", line 228, in _prime_N
+    topk_values_exp = torch.cat((ones, topk_values_exp), dim=1)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Sizes of tensors must match except in dimension 1. Expected size 1 but got size 8 for tensor number 1 in the list.
+Traceback (most recent call last):
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 139, in <module>
+    main(args)
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 124, in main
+    train_eval_results = Train_Eval(args, 
+                         ^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/train_eval.py", line 91, in Train_Eval
+    outputs = model(images)
+              ^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 70, in forward
+    x = self.transformer_encoder(x)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/container.py", line 250, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 205, in forward
+    attn_output = self.attention(norm_x)  
+                  ^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/mingi/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/layers.py", line 162, in forward
+    prime = self._prime_N(v, matrix_magnitude, self.K, spat_idx, self.maximum)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/layers.py", line 228, in _prime_N
+    topk_values_exp = torch.cat((ones, topk_values_exp), dim=1)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Sizes of tensors must match except in dimension 1. Expected size 1 but got size 8 for tensor number 1 in the list.
+Traceback (most recent call last):
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 139, in <module>
+    main(args)
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 110, in main
+    model = ViT(args)
+            ^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 51, in __init__
+    self.transformer_encoder = nn.Sequential(*[TransformerEncoder(
+                                              ^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 51, in <listcomp>
+    self.transformer_encoder = nn.Sequential(*[TransformerEncoder(
+                                               ^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 186, in __init__
+    self.attention = NeighborhoodAttention1D(embed_dim=d_hidden, num_heads=num_heads, kernel_size=args.K, proj_drop=attention_dropout, **neighborhood_attention_params
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+NameError: name 'NeighborhoodAttention1D' is not defined. Did you mean: 'neighborhood_attention_params'?
