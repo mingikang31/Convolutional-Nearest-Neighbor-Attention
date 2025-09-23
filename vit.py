@@ -7,12 +7,10 @@ from torchsummary import summary
 import numpy as np
 
 
-# from natten import NeighborhoodAttention1D, NeighborhoodAttention2D
+from natten import NeighborhoodAttention1D, NeighborhoodAttention2D
 from layers import (
     MultiHeadAttention, 
-    MultiHeadConvNN, 
     MultiHeadConvNNAttention, 
-    MultiHeadConvNNAttention_Old, 
     MultiHeadKvtAttention, 
     MultiHeadLocalAttention
 )
@@ -134,10 +132,6 @@ class PositionalEncoding(nn.Module):
         x = x + self.pe[:, :x.size(1)].to(x.device) 
         return x
 
-""" TODO 
-Maybe add the coordinate encoding to the Transformer Encoder instead of inside MultiHeadConvNN & MultiHeadConvNNAttention 
-"""
-
 class TransformerEncoder(nn.Module): 
     def __init__(self, args, d_hidden, d_mlp, num_heads, dropout, attention_dropout):
         super(TransformerEncoder, self).__init__()
@@ -148,17 +142,29 @@ class TransformerEncoder(nn.Module):
         self.num_heads = num_heads
         self.dropout = dropout
         self.attention_dropout = attention_dropout
-        
+
+        convnn_attn_params = {
+            "K": args.K, 
+            "sampling_type": args.sampling_type,
+            "num_samples": args.num_samples,
+            "sample_padding": args.sample_padding,
+            "magnitude_type": args.magnitude_type,
+            "coordinate_encoding": args.coordinate_encoding
+        }
+
+        # 1. Multi-Head Attention Layer
         if args.layer == "Attention":
             self.attention = MultiHeadAttention(d_hidden, num_heads, attention_dropout)
-        elif args.layer == "ConvNN":
-            self.attention = MultiHeadConvNN(d_hidden, num_heads, attention_dropout, args.K, args.sampling_type, args.num_samples, args.sample_padding, args.magnitude_type, coordinate_encoding=args.coordinate_encoding)
+
+        # 2. ConvNN Attention Layer
         elif args.layer == "ConvNNAttention":
-            self.attention = MultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, args.K, args.sampling_type, args.num_samples, args.sample_padding, args.magnitude_type, coordinate_encoding=args.coordinate_encoding)
-        elif args.layer == "ConvNNAttention_Old":
-            self.attention = MultiHeadConvNNAttention_Old(d_hidden, num_heads, attention_dropout, args.K, args.sampling_type, args.num_samples, args.sample_padding, args.magnitude_type, coordinate_encoding=args.coordinate_encoding)
+            self.attention = MultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
+
+        # 3. Kvt Attention Layer
         elif args.layer == "KvtAttention":
             self.attention = MultiHeadKvtAttention(dim=d_hidden, num_heads=num_heads, attn_drop=attention_dropout, topk=args.K)
+
+        # 4. Local Attention Layer
         elif args.layer == "LocalAttention":
             local_attention_params = {
                 "window_size": 128,  # Default window size for local attention
@@ -174,6 +180,8 @@ class TransformerEncoder(nn.Module):
                 
             }
             self.attention = MultiHeadLocalAttention(dim=d_hidden, heads=num_heads, dropout=attention_dropout, **local_attention_params)
+
+        # 5. Neighborhood Attention Layer
         elif args.layer == "NeighborhoodAttention": 
             neighborhood_attention_params = {
                 "stride": 1,  # Default stride for neighborhood attention
@@ -210,137 +218,3 @@ class TransformerEncoder(nn.Module):
         mlp_output = self.mlp(norm_x)
         x = x + self.dropout2(mlp_output)  
         return x
-
-
-
-
-if __name__ == "__main__":
-    import torch
-    from types import SimpleNamespace
-    
-    # ViT-Small configuration
-    args = SimpleNamespace(
-        img_size = (3, 224, 224),       # (channels, height, width)
-        patch_size = 16,                # 16x16 patches
-        num_layers = 4,                 # 4 transformer layers
-        num_heads = 3,                  # 3 attention heads
-        d_hidden = 48,                 # Hidden dimension
-        d_mlp = 192,                  # MLP dimension
-        num_classes = 100,              # CIFAR-100 classes
-        K = 9,                          # For nearest neighbor operations
-        kernel_size = 9,                # Kernel size for ConvNN
-        dropout = 0.1,                  # Dropout rate
-        sampling_type = "all",          # Sampling type: 'all', 'random', or 'spatial'
-        sample_padding = 3,             # Padding for spatial sampling
-        num_samples = 32,               # Number of samples for random or spatial sampling; -
-        magnitude_type = "similarity",  # Or "distance"
-        shuffle_pattern = "NA",         # Default pattern
-        shuffle_scale = 1,              # Default scale
-        attention_dropout = 0.1, 
-        layer = "Attention",            # Attention or ConvNN
-        device = torch.device("cpu"),
-        coordinate_encoding = False,   # Whether to use coordinate embedding
-        model = "ViT"                   # Model type
-    )
-    
-    # Create the model
-    model = ViT(args)
-    x = torch.randn(64, 3, 224, 224).to(args.device)  
-
-    
-    print("Regular Attention")
-    # Print parameter count
-    total_params, trainable_params = model.parameter_count()
-    print(f"Total parameters: {total_params:,}")
-    print(f"Trainable parameters: {trainable_params:,}")
-    
-    
-    # Forward pass
-    with torch.no_grad():
-        output = model(x)
-    
-    print(f"Output shape: {output.shape}\n")
-    
-    # Spatial Params: 2,825,618
-    # Random Params: 2,825,618
-    # All Params: 2,939,468
-    
-    print("ConvNN")
-    args.layer = "ConvNN"
-    model = ViT(args)
-    total_params, trainable_params = model.parameter_count()
-    print(f"Total parameters: {total_params:,}")
-    print(f"Trainable parameters: {trainable_params:,}")
-    
-    with torch.no_grad():
-        output = model(x)    
-    print(f"Output shape: {output.shape}\n")
-    
-    
-    print("ConvNNAttention")
-    args.layer = "ConvNNAttention"
-    model = ViT(args)
-    total_params, trainable_params = model.parameter_count()
-    print(f"Total parameters: {total_params:,}")
-    print(f"Trainable parameters: {trainable_params:,}")
-    
-    with torch.no_grad():
-        output = model(x)    
-    print(f"Output shape: {output.shape}\n")
-    
-
-    # print("Conv1d")
-    # args.layer = "Conv1d"
-    # model = ViT(args)
-    # total_params, trainable_params = model.parameter_count()
-    # print(f"Total parameters: {total_params:,}")
-    # print(f"Trainable parameters: {trainable_params:,}")
-    
-    # with torch.no_grad():
-    #     output = model(x)    
-    # print(f"Output shape: {output.shape}\n")
-    
-    
-    # print("Conv1dAttention")
-    # args.layer = "Conv1dAttention"
-    # model = ViT(args)
-    # total_params, trainable_params = model.parameter_count()
-    # print(f"Total parameters: {total_params:,}")
-    # print(f"Trainable parameters: {trainable_params:,}")
-    
-    # with torch.no_grad():
-    #     output = model(x)        
-    # print(f"Output shape: {output.shape}\n")
-
-
-    # print("KvtAttention")
-    # args.layer = "KvtAttention"
-    # model = ViT(args)
-    # total_params, trainable_params = model.parameter_count()
-    # print(f"Total parameters: {total_params:,}")
-    # print(f"Trainable parameters: {trainable_params:,}")
-    
-    # with torch.no_grad():
-    #     output = model(x)        
-    # print(f"Output shape: {output.shape}\n")
-
-    # print("LocalAttention")
-    # args.layer = "LocalAttention"
-    # model = ViT(args)
-    # total_params, trainable_params = model.parameter_count()
-    # print(f"Total parameters: {total_params:,}")
-    # print(f"Trainable parameters: {trainable_params:,}")
-
-    # with torch.no_grad():
-    #     output = model(x)    
-    # print(f"Output shape: {output.shape}\n")
-    
-    # print("NeighborhoodAttention")
-    # args.layer = "NeighborhoodAttention"
-    # model = ViT(args)
-    # total_params, trainable_params = model.parameter_count()
-    # print(f"Total parameters: {total_params:,}")    
-    # print(f"Trainable parameters: {trainable_params:,}")
-    # with torch.no_grad():
-    #     output = model(x)    
-    # print(f"Output shape: {output.shape}\n")

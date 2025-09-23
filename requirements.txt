@@ -1,6 +1,8 @@
 torch
 torchvision
 numpy
-tqdm
 matplotlib
+Pillow
+einops
 torchsummary
+natten
