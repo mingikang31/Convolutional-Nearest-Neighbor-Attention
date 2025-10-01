@@ -216,7 +216,8 @@ class MultiHeadConvNNAttention(nn.Module):
     def forward(self, x):
         # Note: x shape: (B, seq_length, d_hidden)
         # 1. Splithead & Batch Combine
-        k = self.batch_combine(self.split_head(self.W_k(x)))
+        # k = self.batch_combine(self.split_head(self.W_k(x)))
+        k = self.batch_combine(self.split_head(x))
         v = self.batch_combine(self.split_head(self.W_v(x)))
 
         # 2. Add Coordinate Encoding 
@@ -226,7 +227,8 @@ class MultiHeadConvNNAttention(nn.Module):
 
         # 3. Sampling & Similarity Calculation
         if self.sampling_type == 'all': # All Samples
-            q = self.batch_combine(self.split_head(self.W_q(x)))
+            # q = self.batch_combine(self.split_head(self.W_q(x)))
+            q = self.batch_combine(self.split_head(x))
             q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
 
             similarity_matrix = self._calculate_cosine_matrix(k, q) if self.magnitude_type == 'cosine' else self._calculate_euclidean_matrix(k, q, sqrt=True)

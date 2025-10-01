@@ -23,15 +23,9 @@ source activate mingi
 # d_mlp: 768
 
 # K = 9
-
+# Rand & Spatial: N = 32
 
 ### CIFAR10 Experiments
-python main.py --layer Attention --dataset cifar10 --output_dir ./Output/Oct1-VIT-Tiny-Baseline/CIFAR10/Attention_NH1_s42 --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 1
+python main.py --layer Attention --dataset cifar10 --output_dir ./Output/Oct1-VIT-Tiny-Baseline/CIFAR10/Attention_s42 --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95
 
-python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct1-VIT-Tiny-Baseline/CIFAR10/ConvNNAttention_All_K9_NH1_s42 --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 1
-
-### CIFAR100 Experiments
-
-python main.py --layer Attention --dataset cifar100 --output_dir ./Output/Oct1-VIT-Tiny-Baseline/CIFAR100/Attention_NH1_s42 --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 1
-
-python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar100 --output_dir ./Output/Oct1-VIT-Tiny-Baseline/CIFAR100/ConvNNAttention_All_K9_NH1_s42 --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 1
+python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct1-VIT-Tiny-Baseline/CIFAR10/ConvNNAttention_All_K9_s42_V --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95
