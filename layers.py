@@ -218,7 +218,8 @@ class MultiHeadConvNNAttention(nn.Module):
         # 1. Splithead & Batch Combine
         # k = self.batch_combine(self.split_head(self.W_k(x)))
         k = self.batch_combine(self.split_head(x))
-        v = self.batch_combine(self.split_head(self.W_v(x)))
+        # v = self.batch_combine(self.split_head(self.W_v(x)))
+        v = self.batch_combine(self.split_head(x))
 
         # 2. Add Coordinate Encoding 
         k = self._add_coordinate_encoding(k) if self.coordinate_encoding else k
