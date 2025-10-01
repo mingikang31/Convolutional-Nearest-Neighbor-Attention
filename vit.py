@@ -7,10 +7,11 @@ from torchsummary import summary
 import numpy as np
 
 
-from natten import NeighborhoodAttention1D, NeighborhoodAttention2D
+# from natten import NeighborhoodAttention1D, NeighborhoodAttention2D
 from layers import (
     MultiHeadAttention, 
     MultiHeadConvNNAttention, 
+    MultiHeadConvNNAttention_NoBatchSplit,
     MultiHeadKvtAttention, 
     MultiHeadLocalAttention
 )
@@ -159,6 +160,7 @@ class TransformerEncoder(nn.Module):
         # 2. ConvNN Attention Layer
         elif args.layer == "ConvNNAttention":
             self.attention = MultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
+            # self.attention = MultiHeadConvNNAttention_NoBatchSplit(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
 
         # 3. Kvt Attention Layer
         elif args.layer == "KvtAttention":

@@ -4,6 +4,8 @@ import argparse
 from pathlib import Path 
 import os
 
+import torch
+
 # Datasets 
 from dataset import ImageNet, CIFAR10, CIFAR100
 from train_eval import Train_Eval
@@ -55,7 +57,7 @@ def args_parser():
     parser.add_argument("--data_path", type=str, default="./Data", help="Path to the dataset")
         
     # Training Arguments
-    parser.add_argument("--batch_size", type=int, default=32, help="Batch size for training and evaluation")
+    parser.add_argument("--batch_size", type=int, default=128, help="Batch size for training and evaluation")
     parser.add_argument("--num_epochs", type=int, default=100, help="Number of epochs for training")
     parser.add_argument("--use_amp", action="store_true", help="Use mixed precision training")
     parser.set_defaults(use_amp=False)
@@ -83,6 +85,10 @@ def args_parser():
     # Output Arguments 
     parser.add_argument("--output_dir", type=str, default="./Output/VIT/VIT_Attention", help="Directory to save the output files")
     
+    # Test Arguments
+    parser.add_argument("--test_only", action="store_true", help="Only test the model")
+    parser.set_defaults(test_only=False)
+    
     return parser
     
 def main(args):
@@ -109,28 +115,35 @@ def main(args):
     
     model = ViT(args)
     print(f"Model: {model.name}")
-    
+
     # Parameters
     total_params, trainable_params = model.parameter_count()
     print(f"Total Parameters: {total_params}")
     print(f"Trainable Parameters: {trainable_params}")
     args.total_params = total_params
     args.trainable_params = trainable_params
+
     
-    # Set the seed for reproducibility
-    set_seed(args.seed)
-    
-    # Training Modules 
-    train_eval_results = Train_Eval(args, 
-                                model, 
-                                dataset.train_loader, 
-                                dataset.test_loader
-                                )
-    
-    # Storing Results in output directory 
-    write_to_file(os.path.join(args.output_dir, "args.txt"), args)
-    write_to_file(os.path.join(args.output_dir, "model.txt"), model)
-    write_to_file(os.path.join(args.output_dir, "train_eval_results.txt"), train_eval_results)
+    if args.test_only:
+        ex = torch.Tensor(3, 3, 224, 224).to(args.device)
+        out = model(ex)
+        print(f"Output shape: {out.shape}")
+        print("Testing Complete")
+    else:
+        # Set the seed for reproducibility
+        set_seed(args.seed)
+        
+        # Training Modules 
+        train_eval_results = Train_Eval(args, 
+                                    model, 
+                                    dataset.train_loader, 
+                                    dataset.test_loader
+                                    )
+        
+        # Storing Results in output directory 
+        write_to_file(os.path.join(args.output_dir, "args.txt"), args)
+        write_to_file(os.path.join(args.output_dir, "model.txt"), model)
+        write_to_file(os.path.join(args.output_dir, "train_eval_results.txt"), train_eval_results)
 
 if __name__ == '__main__': 
     parser = argparse.ArgumentParser(description="Convolutional Nearest Neighbor training and evaluation", parents=[args_parser()])
@@ -139,3 +152,11 @@ if __name__ == '__main__':
     main(args)
 
     
+
+"""
+python main.py --layer Attention --num_heads 1 --test_only --device mps      
+python main.py --layer ConvNNAttention --num_heads 1 --test_only --device mps      
+
+
+
+"""
