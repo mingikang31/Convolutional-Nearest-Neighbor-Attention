@@ -1,0 +1,12 @@
+Files already downloaded and verified
+Files already downloaded and verified
+Model: VIT Attention
+Total Parameters: 5488522
+Trainable Parameters: 5488522
+   - Trainable Parameters: 5.48852200 M
+Model Complexity (Profiler):
+   - GFLOPs: 2.50793184
+   - Trainable Parameters: 5.48852200 M
+[Epoch 001] Time: 50.0724s | [Train] Loss: 1.98128714 Accuracy: Top1: 26.8758%, Top5: 78.8347% | [Test] Loss: 1.80670106 Accuracy: Top1: 34.9980%, Top5: 84.5530%
+[Epoch 002] Time: 49.0513s | [Train] Loss: 1.75364309 Accuracy: Top1: 36.4942%, Top5: 85.8919% | [Test] Loss: 1.59923347 Accuracy: Top1: 43.0578%, Top5: 89.2108%
+[Epoch 003] Time: 49.4397s | [Train] Loss: 1.59057919 Accuracy: Top1: 42.2646%, Top5: 89.3274% | [Test] Loss: 1.49580379 Accuracy: Top1: 46.2718%, Top5: 91.3766%
