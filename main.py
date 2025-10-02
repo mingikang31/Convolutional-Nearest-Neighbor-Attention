@@ -28,7 +28,7 @@ def args_parser():
     parser = argparse.ArgumentParser(description="Convolutional Nearest Neighbor training and evaluation", add_help=False) 
     
     # Model Arguments
-    parser.add_argument("--layer", type=str, default="Attention", choices=["Attention", "ConvNNAttention", "KvtAttention", "LocalAttention", "NeighborhoodAttention"], help="Layer to use for training and evaluation")
+    parser.add_argument("--layer", type=str, default="Attention", choices=["Attention", "ConvNNAttention", "KvtAttention", "LocalAttention", "NeighborhoodAttention", "BranchConv", "BranchAttention"], help="Layer to use for training and evaluation")
 
     parser.add_argument("--patch_size", type=int, default=16, help="Patch size for Attention Models")
     parser.add_argument("--num_layers", type=int, default=12, help="Number of layers in the model")   
@@ -51,6 +51,11 @@ def args_parser():
     parser.add_argument("--magnitude_type", type=str, default="cosine", choices=["cosine", "euclidean"], help="Magnitude type for ConvNN Models")
     parser.add_argument("--coordinate_encoding", action="store_true", help="Use coordinate encoding in ConvNN Models")
     parser.set_defaults(coordinate_encoding=False)    
+    parser.add_argument("--branch_ratio", type=float, default=0.5, help="Branch ratio for ConvNN Models")
+
+    # Additional Layer Arguments for Conv1d
+    parser.add_argument("--kernel_size", type=int, default=9, help="Kernel size for Conv1d Layer")
+
     
     # Arguments for Data 
     parser.add_argument("--dataset", type=str, default="cifar10", choices=["cifar10", "cifar100", 'imagenet'], help="Dataset to use for training and evaluation")

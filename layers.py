@@ -129,8 +129,6 @@ class MultiHeadAttention(nn.Module):
         return output
 
 
-# TODO : keep num_heads = 1 for now 
-
 class MultiHeadConvNNAttention(nn.Module):
     def __init__(self, 
                  d_hidden, 
@@ -360,6 +358,202 @@ class MultiHeadConvNNAttention(nn.Module):
 
 
 
+class MultiHeadConv1dAttention(nn.Module):
+    def __init__(self, d_hidden, num_heads, kernel_size): 
+        super(MultiHeadConv1dAttention, self).__init__()
+    
+        assert d_hidden % num_heads == 0, "d_hidden must be divisible by num_heads"
+        self.d_hidden = d_hidden
+        self.num_heads = num_heads
+        self.d_k = d_hidden // num_heads
+        
+        self.kernel_size = kernel_size
+        self.stride = 1
+        
+        self.W_x = nn.Linear(d_hidden, d_hidden)
+        self.W_o = nn.Linear(d_hidden, d_hidden)
+
+        self.in_channels = d_hidden // num_heads
+        self.out_channels = d_hidden // num_heads
+        self.conv = nn.Conv1d(
+            in_channels=self.in_channels,
+            out_channels=self.out_channels,
+            kernel_size=self.kernel_size,
+            stride=self.stride,
+            padding="same"
+        )
+        
+    def split_head(self, x): 
+        batch_size, seq_length, d_hidden = x.size()
+        self.batch_size = batch_size
+        self.seq_length = seq_length
+        return x.view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2) # (B, num_heads, seq_length, d_k)
+        
+    def combine_heads(self, x): 
+        batch_size, _, seq_length, d_k = x.size()
+        return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.d_hidden) 
+    
+    def batch_split(self, x): 
+        x = x.reshape(self.batch_size, -1, self.d_k, self.seq_length)
+        return x.permute(0, 1, 3, 2).contiguous()
+        
+    def batch_combine(self, x): 
+        batch_size, _, seq_length, d_k = x.size()
+        x = x.permute(0, 1, 3, 2).contiguous() 
+        return x.view(-1, self.d_k, seq_length)       
+    
+    def forward(self, x):
+        x = self.batch_combine(self.split_head(self.W_x(x)))
+        x = self.conv(x) 
+        x = self.W_o(self.combine_heads(self.batch_split(x.permute(0, 2, 1))))
+        return x
+
+    
+
+class MultiHeadBranchingConv1d(nn.Module):
+    def __init__(self,  
+                 d_hidden, 
+                 num_heads, 
+                 attention_dropout,
+                 kernel_size, 
+                 K, 
+                 sampling_type, 
+                 num_samples, 
+                 sample_padding, 
+                 magnitude_type, 
+                 seq_length=197, 
+                 coordinate_encoding=False, 
+                 branch_ratio=0.5
+                 ):
+        super(MultiHeadBranchingConv1d, self).__init__()
+
+        # Attention Parameters
+        self.d_hidden = d_hidden
+        self.num_heads = num_heads
+        self.attention_dropout = attention_dropout
+
+        # Conv1d Parameters 
+        self.kernel_size = kernel_size
+
+        # ConvNN Parameters
+        self.K = K
+        self.sampling_type = sampling_type
+        self.num_samples = int(num_samples)
+        self.sample_padding = int(sample_padding) if sampling_type == 'spatial' else 0
+        self.magnitude_type = magnitude_type
+        self.seq_length = seq_length
+        self.coordinate_encoding = coordinate_encoding
+
+        self.branch_ratio = branch_ratio
+
+        self.d_hidden_convnn = int(self.branch_ratio * d_hidden)
+        self.d_hidden_conv1d = d_hidden - self.d_hidden_convnn
+
+        if self.branch_ratio != 0: 
+            self.convnn = MultiHeadConvNNAttention(
+                d_hidden=self.d_hidden_convnn, 
+                num_heads=num_heads, 
+                attention_dropout=attention_dropout,
+                K=K, 
+                sampling_type=sampling_type, 
+                num_samples=num_samples, 
+                sample_padding=sample_padding, 
+                magnitude_type=magnitude_type, 
+                seq_length=seq_length, 
+                coordinate_encoding=coordinate_encoding
+            )
+        if self.branch_ratio != 1:
+            self.conv1d = MultiHeadConv1dAttention(
+                d_hidden=self.d_hidden_conv1d, 
+                num_heads=num_heads, 
+                kernel_size=kernel_size
+            )
+
+        self.pointwise_linear = nn.Linear(d_hidden, d_hidden)
+        
+        
+    def forward(self, x):
+        if self.branch_ratio == 0:
+            return self.conv1d(x)
+        elif self.branch_ratio == 1:
+            return self.convnn(x)
+        else:
+            x1 = self.convnn(x[:, :, :self.d_hidden_convnn])
+            x2 = self.conv1d(x[:, :, self.d_hidden_convnn:])
+            out = torch.cat((x1, x2), dim=2)
+            out = self.pointwise_linear(out)
+            return out
+
+class MultiHeadBranchingAttention(nn.Module):
+    def __init__(self,  
+                 d_hidden, 
+                 num_heads, 
+                 attention_dropout,
+                 K, 
+                 sampling_type, 
+                 num_samples, 
+                 sample_padding, 
+                 magnitude_type, 
+                 seq_length=197, 
+                 coordinate_encoding=False, 
+                 branch_ratio=0.5
+                 ):
+        super(MultiHeadBranchingAttention, self).__init__()
+
+        # Attention Parameters
+        self.d_hidden = d_hidden
+        self.num_heads = num_heads
+        self.attention_dropout = attention_dropout
+
+        # ConvNN Parameters 
+        self.K = K
+        self.sampling_type = sampling_type 
+        self.num_samples = int(num_samples)
+        self.sample_padding = int(sample_padding) if sampling_type == 'spatial' else 0
+        self.magnitude_type = magnitude_type
+        self.seq_length = seq_length
+        self.coordinate_encoding = coordinate_encoding
+
+        self.branch_ratio = branch_ratio
+
+        self.d_hidden_convnn = int(self.branch_ratio * d_hidden)
+        self.d_hidden_attention = d_hidden - self.d_hidden_convnn
+
+        if self.branch_ratio != 0:
+            self.convnn = MultiHeadConvNNAttention(
+                d_hidden=self.d_hidden_convnn, 
+                num_heads=num_heads, 
+                attention_dropout=attention_dropout,
+                K=K, 
+                sampling_type=sampling_type, 
+                num_samples=num_samples, 
+                sample_padding=sample_padding, 
+                magnitude_type=magnitude_type, 
+                seq_length=seq_length, 
+                coordinate_encoding=coordinate_encoding
+            )
+
+        if self.branch_ratio != 1:
+            self.attention = MultiHeadAttention(
+                d_hidden=self.d_hidden_attention, 
+                num_heads=num_heads, 
+                attention_dropout=attention_dropout
+            )
+
+        self.pointwise_linear = nn.Linear(d_hidden, d_hidden)
+
+    def forward(self, x):
+        if self.branch_ratio == 0:
+            return self.convnn(x)
+        elif self.branch_ratio == 1:
+            return self.attention(x)
+        else:
+            x1 = self.convnn(x[:, :, :self.d_hidden_convnn])
+            x2 = self.attention(x[:, :, self.d_hidden_convnn:])
+            out = torch.cat((x1, x2), dim=2)
+            out = self.pointwise_linear(out)
+            return out
+        
 
 
 ### TODO: NO BATCH SPLIT VERSION FOR DEBUGGING PURPOSES ### 

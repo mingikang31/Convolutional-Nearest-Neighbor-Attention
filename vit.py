@@ -11,7 +11,8 @@ import numpy as np
 from layers import (
     MultiHeadAttention, 
     MultiHeadConvNNAttention, 
-    MultiHeadConvNNAttention_NoBatchSplit,
+    MultiHeadBranchingConv1d, 
+    MultiHeadBranchingAttention,
     MultiHeadKvtAttention, 
     MultiHeadLocalAttention
 )
@@ -153,6 +154,27 @@ class TransformerEncoder(nn.Module):
             "coordinate_encoding": args.coordinate_encoding
         }
 
+        branching_conv_params = {
+            "kernel_size": args.kernel_size,
+            "K": args.K,
+            "sampling_type": args.sampling_type,
+            "num_samples": args.num_samples,
+            "sample_padding": args.sample_padding,
+            "magnitude_type": args.magnitude_type,
+            "coordinate_encoding": args.coordinate_encoding,
+            "branch_ratio": args.branch_ratio
+        }
+
+        branching_attn_params = {
+            "K": args.K,
+            "sampling_type": args.sampling_type,
+            "num_samples": args.num_samples,
+            "sample_padding": args.sample_padding,
+            "magnitude_type": args.magnitude_type,
+            "coordinate_encoding": args.coordinate_encoding,
+            "branch_ratio": args.branch_ratio
+        }
+
         # 1. Multi-Head Attention Layer
         if args.layer == "Attention":
             self.attention = MultiHeadAttention(d_hidden, num_heads, attention_dropout)
@@ -162,11 +184,17 @@ class TransformerEncoder(nn.Module):
             self.attention = MultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
             # self.attention = MultiHeadConvNNAttention_NoBatchSplit(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
 
-        # 3. Kvt Attention Layer
+        # 3. Branching Conv1d Layer
+        elif args.layer == "BranchConv":
+            self.attention = MultiHeadBranchingConv1d(d_hidden, num_heads, attention_dropout, **branching_conv_params)
+        # 4. Branching Attention Layer
+        elif args.layer == "BranchAttention":
+            self.attention = MultiHeadBranchingAttention(d_hidden, num_heads, attention_dropout, **branching_attn_params)
+        # 5. Kvt Attention Layer
         elif args.layer == "KvtAttention":
             self.attention = MultiHeadKvtAttention(dim=d_hidden, num_heads=num_heads, attn_drop=attention_dropout, topk=args.K)
 
-        # 4. Local Attention Layer
+        # 6. Local Attention Layer
         elif args.layer == "LocalAttention":
             local_attention_params = {
                 "window_size": 128,  # Default window size for local attention
@@ -183,7 +211,7 @@ class TransformerEncoder(nn.Module):
             }
             self.attention = MultiHeadLocalAttention(dim=d_hidden, heads=num_heads, dropout=attention_dropout, **local_attention_params)
 
-        # 5. Neighborhood Attention Layer
+        # 7. Neighborhood Attention Layer
         elif args.layer == "NeighborhoodAttention": 
             neighborhood_attention_params = {
                 "stride": 1,  # Default stride for neighborhood attention
