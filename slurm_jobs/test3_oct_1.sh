@@ -26,7 +26,7 @@ source activate mingi
 # Rand & Spatial: N = 32
 
 ### CIFAR10 Experiments
-python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct1-VIT-Tiny-Baseline/CIFAR10/ConvNNAttention_All_K9_s42_KQV --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95
+python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct1-VIT-Tiny-Baseline/CIFAR10/ConvNNAttention_All_Coord_K9_s42_KQV --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --coordinate_encoding
 
 # TODO 
 # 1. ConvNN Attention with K, Q, V Projection 
