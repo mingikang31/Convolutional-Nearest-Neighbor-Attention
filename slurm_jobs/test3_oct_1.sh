@@ -26,6 +26,17 @@ source activate mingi
 # Rand & Spatial: N = 32
 
 ### CIFAR10 Experiments
-python main.py --layer Attention --dataset cifar10 --output_dir ./Output/Oct1-VIT-Tiny-Baseline/CIFAR10/Attention_s42 --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95
+python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct1-VIT-Tiny-Baseline/CIFAR10/ConvNNAttention_All_K9_s42_KQV --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95
 
-python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct1-VIT-Tiny-Baseline/CIFAR10/ConvNNAttention_All_K9_s42_NoProj --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95
+# TODO 
+# 1. ConvNN Attention with K, Q, V Projection 
+# 2. ConvNN Attention with V Projection Only 
+# 3. ConvNN Attention with No Projections (K = Q = V = Input)
+
+# 4. Branching with Conv2d + ConvNN Attention with K, Q, V Projection
+# 5. Branching with Conv2d + ConvNN Attention with V Projection Only
+# 6. Branching with Conv2d + ConvNN Attention with No Projections (K = Q = V = Input)
+
+# 7. Branching with Attention + ConvNN Attention with K, Q, V Projection
+# 8. Branching with Attention + ConvNN Attention with V Projection Only
+# 9. Branching with Attention + ConvNN Attention with No Projections (K = Q = V = Input) 

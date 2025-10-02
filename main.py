@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
 """
 python main.py --layer Attention --num_heads 3 --test_only --device mps      
-python main.py --layer ConvNNAttention --num_heads 1 --test_only --device mps      
+python main.py --layer ConvNNAttention --num_heads 3 --test_only --device mps      
 
 
 
