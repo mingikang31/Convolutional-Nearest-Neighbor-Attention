@@ -26,6 +26,9 @@ source activate mingi
 # Rand & Spatial: N = 32
 
 ### CIFAR10 Experiments
+
+python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct1-VIT-Tiny-Baseline/CIFAR10/ConvNNAttention_All_K9_s42_KQV_Softmax --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95
+
 python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct1-VIT-Tiny-Baseline/CIFAR10/ConvNNAttention_All_Coord_K9_s42_KQV_Softmax --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --coordinate_encoding
 
 python main.py --layer BranchConv --K 9 --kernel_size 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct1-VIT-Tiny-Baseline/CIFAR10/BranchConv_ConvNNAttention_All_K9_br0500_s42_KQV_Softmax --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --branch_ratio 0.5
