@@ -176,7 +176,7 @@ class MultiHeadConvNNAttention(nn.Module):
         self.W_o = nn.Linear(d_hidden, d_hidden)   
         self.dropout = nn.Dropout(attention_dropout)
 
-        self.in_channels = (d_hidden // num_heads) + 1 if coordinate_encoding else d_hidden // num_heads
+        self.in_channels = (d_hidden // num_heads) + 1 if coordinate_encoding else (d_hidden // num_heads)
         self.out_channels = (d_hidden // num_heads) 
         
         self.conv = nn.Conv1d(
@@ -188,8 +188,8 @@ class MultiHeadConvNNAttention(nn.Module):
         )
 
         # Utility Variables 
-        self.INF = 1e5 
-        self.NEG_INF = -1e5
+        self.INF = 1.1
+        self.NEG_INF = -0.1 
         
     def split_head(self, x): 
         batch_size, seq_length, d_hidden = x.size()
@@ -214,8 +214,8 @@ class MultiHeadConvNNAttention(nn.Module):
     def forward(self, x):
         # Note: x shape: (B, seq_length, d_hidden)
         # 1. Splithead & Batch Combine
-        # k = self.batch_combine(self.split_head(self.W_k(x)))
-        k = self.batch_combine(self.split_head(x))
+        k = self.batch_combine(self.split_head(self.W_k(x)))
+        # k = self.batch_combine(self.split_head(x))
         v = self.batch_combine(self.split_head(self.W_v(x)))
         # v = self.batch_combine(self.split_head(x))
 
@@ -226,11 +226,14 @@ class MultiHeadConvNNAttention(nn.Module):
 
         # 3. Sampling & Similarity Calculation
         if self.sampling_type == 'all': # All Samples
-            # q = self.batch_combine(self.split_head(self.W_q(x)))
-            q = self.batch_combine(self.split_head(x))
+            q = self.batch_combine(self.split_head(self.W_q(x)))
+            # q = self.batch_combine(self.split_head(x))
             q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
 
             similarity_matrix = self._calculate_cosine_matrix(k, q) if self.magnitude_type == 'cosine' else self._calculate_euclidean_matrix(k, q, sqrt=True)
+
+            similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
+            
             prime = self._prime(v, similarity_matrix, self.K, self.maximum)
 
         elif self.sampling_type == 'random': # Random Samples
@@ -242,6 +245,9 @@ class MultiHeadConvNNAttention(nn.Module):
             similarity_matrix = self._calculate_cosine_matrix_N(k, q) if self.magnitude_type == 'cosine' else self._calculate_euclidean_matrix_N(k, q, sqrt=True)
             range_idx = torch.arange(len(rand_idx), device=q.device)
             similarity_matrix[:, rand_idx, range_idx] = self.INF if self.magnitude_type == 'euclidean' else self.NEG_INF
+
+            similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
+
             prime = self._prime_N(v, similarity_matrix, self.K, rand_idx, self.maximum)
 
         elif self.sampling_type == 'spatial': # Spatial Samples
@@ -253,6 +259,9 @@ class MultiHeadConvNNAttention(nn.Module):
             similarity_matrix = self._calculate_cosine_matrix_N(k, q) if self.magnitude_type == 'cosine' else self._calculate_euclidean_matrix_N(k, q, sqrt=True)
             range_idx = torch.arange(len(spat_idx), device=q.device)
             similarity_matrix[:, spat_idx, range_idx] = self.INF if self.magnitude_type == 'euclidean' else self.NEG_INF
+
+            similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
+
             prime = self._prime_N(v, similarity_matrix, self.K, spat_idx, self.maximum)
             
         else: 
@@ -277,7 +286,7 @@ class MultiHeadConvNNAttention(nn.Module):
         dist_matrix = k_norm_squared.transpose(1, 2) + q_norm_squared - 2 * dot_product
         dist_matrix = torch.clamp(dist_matrix, min=0.0)
         dist_matrix = torch.sqrt(dist_matrix) if sqrt else dist_matrix
-        torch.diagonal(dist_matrix, dim1=1, dim2=2).fill_(-0.1)  # Fill diagonal with -0.1 to avoid self-selection
+        torch.diagonal(dist_matrix, dim1=1, dim2=2).fill_(-0.1) 
         return dist_matrix 
 
     def _calculate_euclidean_matrix_N(self, K, Q, sqrt=False):
@@ -301,6 +310,7 @@ class MultiHeadConvNNAttention(nn.Module):
         norm_k = F.normalize(K, p=2, dim=1)
         norm_q = F.normalize(Q, p=2, dim=1)
         similarity_matrix = torch.matmul(norm_k.transpose(1, 2), norm_q)
+        similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
         return similarity_matrix
 
     def _prime(self, v, qk, K, maximum):
