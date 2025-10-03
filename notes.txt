@@ -1,0 +1,39 @@
+Differentiate Experiments for ConvNN Attention ViT
+
+1. ConvNN Attention KQV Projection 
+2. ConvNN Attention V Projection 
+3. Branching (Conv1d + ConvNN Attention) & (Attention + ConvNN Attention) 
+4. ConvNN Attention KQV Projection + softmax on similarity matrix 
+5. ConvNN Attention KQV Projection + No Dropout after prime convolution 
+
+
+Things to try out later??
+6. softmax with temperature inside prime function 
+
+    def _prime(self, v, qk, K, maximum, temperature=1.0):
+        b, c, t = v.shape
+        topk_values, topk_indices = torch.topk(qk, k=K, dim=2, largest=maximum)
+
+        # Normalize the topk-values to create attention weights 
+        if maximum: # Cosine
+            topk_weights = F.softmax(topk_values / temperature, dim=-1) 
+        else: # Euclidean
+            topk_weights = F.softmax(-topk_values / temperature, dim=-1)
+
+
+
+
+        topk_indices_exp = topk_indices.unsqueeze(1).expand(b, c, t, K)
+        topk_values_exp = topk_values.unsqueeze(1).expand(b, c, t, K)
+
+        v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()
+        prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
+        prime = topk_values_exp * prime 
+
+        prime = prime.view(b, c, -1)
+
+        return prime
+
+7. Normalize topk_values after selecting topk indices so that they sum up to 1. 
+- In attention, row probability sum up to 1 when softmax, but when ConvNN selects K neighbors, K similarities may not add up to 1
+- Normalize over K probabilities 
