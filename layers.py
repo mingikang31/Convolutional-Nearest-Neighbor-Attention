@@ -232,7 +232,7 @@ class MultiHeadConvNNAttention(nn.Module):
 
             similarity_matrix = self._calculate_cosine_matrix(k, q) if self.magnitude_type == 'cosine' else self._calculate_euclidean_matrix(k, q, sqrt=True)
 
-            similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
+            # similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
             
             prime = self._prime(v, similarity_matrix, self.K, self.maximum)
 
@@ -246,7 +246,7 @@ class MultiHeadConvNNAttention(nn.Module):
             range_idx = torch.arange(len(rand_idx), device=q.device)
             similarity_matrix[:, rand_idx, range_idx] = self.INF if self.magnitude_type == 'euclidean' else self.NEG_INF
 
-            similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
+            # similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
 
             prime = self._prime_N(v, similarity_matrix, self.K, rand_idx, self.maximum)
 
@@ -260,7 +260,7 @@ class MultiHeadConvNNAttention(nn.Module):
             range_idx = torch.arange(len(spat_idx), device=q.device)
             similarity_matrix[:, spat_idx, range_idx] = self.INF if self.magnitude_type == 'euclidean' else self.NEG_INF
 
-            similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
+            # similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
 
             prime = self._prime_N(v, similarity_matrix, self.K, spat_idx, self.maximum)
             
@@ -271,7 +271,7 @@ class MultiHeadConvNNAttention(nn.Module):
         x = self.conv(prime)  
 
         # 5. Dropout + Reshape (B, seq_length, d_hidden)
-        x = self.dropout(x)
+        # x = self.dropout(x)
         x = x.permute(0, 2, 1) 
 
         # 6. Final Linear Projection
