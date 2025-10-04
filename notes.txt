@@ -37,3 +37,7 @@ Things to try out later??
 7. Normalize topk_values after selecting topk indices so that they sum up to 1. 
 - In attention, row probability sum up to 1 when softmax, but when ConvNN selects K neighbors, K similarities may not add up to 1
 - Normalize over K probabilities 
+
+
+# Best Results 
+V projection with dropout is 65%

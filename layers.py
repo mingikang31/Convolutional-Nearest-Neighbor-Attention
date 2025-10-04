@@ -214,9 +214,10 @@ class MultiHeadConvNNAttention(nn.Module):
     def forward(self, x):
         # Note: x shape: (B, seq_length, d_hidden)
         # 1. Splithead & Batch Combine
-        # k = self.batch_combine(self.split_head(self.W_k(x)))
-        k = self.batch_combine(self.split_head(x))
+        k = self.batch_combine(self.split_head(self.W_k(x)))
         v = self.batch_combine(self.split_head(self.W_v(x)))
+        
+        # k = self.batch_combine(self.split_head(x))
         # v = self.batch_combine(self.split_head(x))
 
         # 2. Add Coordinate Encoding 
@@ -226,15 +227,17 @@ class MultiHeadConvNNAttention(nn.Module):
 
         # 3. Sampling & Similarity Calculation
         if self.sampling_type == 'all': # All Samples
-            # q = self.batch_combine(self.split_head(self.W_q(x)))
-            q = self.batch_combine(self.split_head(x))
+            q = self.batch_combine(self.split_head(self.W_q(x)))
+            # q = self.batch_combine(self.split_head(x))
+            
             q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
 
             similarity_matrix = self._calculate_cosine_matrix(k, q) if self.magnitude_type == 'cosine' else self._calculate_euclidean_matrix(k, q, sqrt=True)
 
             # similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
             
-            prime = self._prime(v, similarity_matrix, self.K, self.maximum)
+            # prime = self._prime(v, similarity_matrix, self.K, self.maximum)
+            prime = self._prime_temperature(v, similarity_matrix, self.K, self.maximum, temperature=1) ## New Prime with Temperature Scaling
 
         elif self.sampling_type == 'random': # Random Samples
             rand_idx = torch.randperm(x.shape[1], device=x.device)[:self.num_samples]
@@ -271,7 +274,7 @@ class MultiHeadConvNNAttention(nn.Module):
         x = self.conv(prime)  
 
         # 5. Dropout + Reshape (B, seq_length, d_hidden)
-        # x = self.dropout(x)
+        x = self.dropout(x)
         x = x.permute(0, 2, 1) 
 
         # 6. Final Linear Projection
@@ -326,6 +329,29 @@ class MultiHeadConvNNAttention(nn.Module):
         prime = prime.view(b, c, -1)
 
         return prime
+
+    def _prime_temperature(self, v, qk, K, maximum, temperature=1.0):
+        b, c, t = v.shape
+
+        # Get top-k values and indices
+        topk_values, topk_indices = torch.topk(qk, k=K, dim=2, largest=maximum)
+
+        # Normalize the top-k values to create attention weights
+        if maximum:  # Cosine similarity
+            topk_weights = F.softmax(topk_values / temperature, dim=-1)
+        else:  # Euclidean distance
+            topk_weights = F.softmax(-topk_values / temperature, dim=-1)
+
+        # Expand for gathering
+        topk_indices_exp = topk_indices.unsqueeze(1).expand(b, c, t, K)
+        topk_weights_exp = topk_weights.unsqueeze(1).expand(b, c, t, K)
+
+        # Gather and weight
+        v_expanded = v.unsqueeze(-1).expand(b, c, t, K)
+        prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
+        prime = prime * topk_weights_exp  # Now using normalized weights
+
+        return prime.view(b, c, -1)
 
     def _prime_N(self, v, qk, K, rand_idx, maximum):
         b, c, t = v.shape
