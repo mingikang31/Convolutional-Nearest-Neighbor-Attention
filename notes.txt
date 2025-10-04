@@ -33,10 +33,13 @@ Things to try out later??
         prime = prime.view(b, c, -1)
 
         return prime
+- This does not work on ConvNN Attention alone ~59% but for branching it does better ~64.5%
 
 7. Normalize topk_values after selecting topk indices so that they sum up to 1. 
 - In attention, row probability sum up to 1 when softmax, but when ConvNN selects K neighbors, K similarities may not add up to 1
 - Normalize over K probabilities 
+
+
 
 
 # Best Results 

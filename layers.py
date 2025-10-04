@@ -236,8 +236,8 @@ class MultiHeadConvNNAttention(nn.Module):
 
             # similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
             
-            # prime = self._prime(v, similarity_matrix, self.K, self.maximum)
-            prime = self._prime_temperature(v, similarity_matrix, self.K, self.maximum, temperature=1) ## New Prime with Temperature Scaling
+            prime = self._prime(v, similarity_matrix, self.K, self.maximum)
+            # prime = self._prime_temperature(v, similarity_matrix, self.K, self.maximum, temperature=1) ## New Prime with Temperature Scaling
 
         elif self.sampling_type == 'random': # Random Samples
             rand_idx = torch.randperm(x.shape[1], device=x.device)[:self.num_samples]
