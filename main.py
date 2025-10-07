@@ -97,10 +97,7 @@ def args_parser():
     return parser
     
 def main(args):
-    # Check if the output directory exists, if not create it
-    if args.output_dir:
-        Path(args.output_dir).mkdir(parents=True, exist_ok=True)
-
+    
     args.resize = True
     # Dataset 
     if args.dataset == "cifar10":
@@ -135,6 +132,10 @@ def main(args):
         print(f"Output shape: {out.shape}")
         print("Testing Complete")
     else:
+        # Check if the output directory exists, if not create it
+        if args.output_dir:
+            Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+
         # Set the seed for reproducibility
         set_seed(args.seed)
         

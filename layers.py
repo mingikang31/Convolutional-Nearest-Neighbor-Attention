@@ -322,6 +322,11 @@ class MultiHeadConvNNAttention(nn.Module):
         topk_indices_exp = topk_indices.unsqueeze(1).expand(b, c, t, K)
         topk_values_exp = topk_values.unsqueeze(1).expand(b, c, t, K)
 
+        #### SOFTMAX ON TOP-K VALUES ####
+        topk_values_exp = torch.softmax(topk_values_exp, dim=-1)        
+        # print(topk_values_exp.shape, topk_indices_exp.shape)
+
+
         v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()
         prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
         prime = topk_values_exp * prime 
