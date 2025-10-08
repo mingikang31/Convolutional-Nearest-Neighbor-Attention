@@ -634,7 +634,7 @@ class MultiHeadConvNNAttention_Modified(nn.Module):
         self.coordinate_cache = {}
 
         # Change out_features of V projection 
-        self.v_out_features = self.d_hidden // (self.num_heads**2)
+        self.v_out_features = self.num_heads # self.d_hidden // (self.num_heads**2)
         # print(self.v_out_features)
         
         # Linear projections for query, key, value
