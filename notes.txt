@@ -39,8 +39,22 @@ Things to try out later??
 - In attention, row probability sum up to 1 when softmax, but when ConvNN selects K neighbors, K similarities may not add up to 1
 - Normalize over K probabilities 
 
+8. Softmax topk_values after selecting topk_indices based on topk_values 
+    b, c, t = v.shape
+    topk_values, topk_indices = torch.topk(qk, k=K, dim=2, largest=maximum)
+    topk_indices_exp = topk_indices.unsqueeze(1).expand(b, c, t, K)
+    topk_values_exp = topk_values.unsqueeze(1).expand(b, c, t, K)
+
+    # #### SOFTMAX ON TOP-K VALUES ####
+    topk_values_exp = torch.softmax(topk_values_exp, dim=-1)        
+    print(topk_values_exp.shape, topk_indices_exp.shape)
+
+- ~3% decrease in accuracy when softmax on the topk_values 
 
 
 
 # Best Results 
-V projection with dropout is 65%
+- V projection with dropout is 65%, 
+- when num_heads = 1 and K > 36, ConvNN-Attention beats attention
+
+
