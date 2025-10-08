@@ -34,6 +34,8 @@ python main.py --layer ConvNNAttention --K 4 --sampling_type all --dataset cifar
 
 python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/ConvNNAttention_All_K9_s42_NH1_topksoftmax --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 1
 
+python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/ConvNNAttention_All_K9_s42_NH3_topksoftmax --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 3
+
 python main.py --layer ConvNNAttention --K 16 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/ConvNNAttention_All_K16_s42_NH1_topksoftmax --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 1
 
 python main.py --layer BranchConv --K 9 --kernel_size 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/BranchConv_ConvNNAttention_All_K9_br0500_s42_NH1_topksoftmax --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --branch_ratio 0.5 --num_heads 1
