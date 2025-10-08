@@ -1,0 +1,54 @@
+Model Complexity (Profiler): GFLOPs: 2.17565746, Trainable Parameters: 6.83661400 M
+[Epoch 001] Time: 66.7742s | [Train] Loss: 2.03031978 Accuracy: Top1: 24.6959%, Top5: 74.7351% | [Test] Loss: 1.78671152 Accuracy: Top1: 35.6606%, Top5: 84.7706%
+[Epoch 002] Time: 66.6840s | [Train] Loss: 1.71414475 Accuracy: Top1: 37.5883%, Top5: 86.5353% | [Test] Loss: 1.56853851 Accuracy: Top1: 42.8797%, Top5: 89.8240%
+[Epoch 003] Time: 66.8946s | [Train] Loss: 1.56998982 Accuracy: Top1: 42.7809%, Top5: 89.9437% | [Test] Loss: 1.49922245 Accuracy: Top1: 45.2828%, Top5: 91.4359%
+[Epoch 004] Time: 66.5566s | [Train] Loss: 1.50396392 Accuracy: Top1: 44.8989%, Top5: 91.0462% | [Test] Loss: 1.43561326 Accuracy: Top1: 47.5376%, Top5: 92.1084%
+[Epoch 005] Time: 66.6215s | [Train] Loss: 1.44895456 Accuracy: Top1: 47.3505%, Top5: 92.2183% | [Test] Loss: 1.41631699 Accuracy: Top1: 49.2385%, Top5: 92.6028%
+[Epoch 006] Time: 66.9109s | [Train] Loss: 1.40746327 Accuracy: Top1: 48.6945%, Top5: 92.5739% | [Test] Loss: 1.34685950 Accuracy: Top1: 51.2263%, Top5: 93.5918%
+[Epoch 007] Time: 66.7002s | [Train] Loss: 1.37096160 Accuracy: Top1: 50.0759%, Top5: 93.1626% | [Test] Loss: 1.32859807 Accuracy: Top1: 51.2856%, Top5: 93.8884%
+[Epoch 008] Time: 66.5817s | [Train] Loss: 1.33969515 Accuracy: Top1: 51.2668%, Top5: 93.6461% | [Test] Loss: 1.33011922 Accuracy: Top1: 51.9877%, Top5: 93.7401%
+[Epoch 009] Time: 66.6990s | [Train] Loss: 1.30929071 Accuracy: Top1: 52.2115%, Top5: 94.0289% | [Test] Loss: 1.27249980 Accuracy: Top1: 53.7678%, Top5: 94.5016%
+[Epoch 010] Time: 66.5653s | [Train] Loss: 1.29014331 Accuracy: Top1: 53.0551%, Top5: 94.3063% | [Test] Loss: 1.26145042 Accuracy: Top1: 54.1337%, Top5: 94.5411%
+[Epoch 011] Time: 66.7429s | [Train] Loss: 1.26532944 Accuracy: Top1: 53.8467%, Top5: 94.6228% | [Test] Loss: 1.23697305 Accuracy: Top1: 55.0831%, Top5: 94.8576%
+[Epoch 012] Time: 66.7078s | [Train] Loss: 1.24492159 Accuracy: Top1: 54.6020%, Top5: 94.8022% | [Test] Loss: 1.21887162 Accuracy: Top1: 55.7951%, Top5: 95.2828%
+[Epoch 013] Time: 66.8636s | [Train] Loss: 1.22411651 Accuracy: Top1: 55.5371%, Top5: 95.0559% | [Test] Loss: 1.20365164 Accuracy: Top1: 56.1017%, Top5: 95.4213%
+[Epoch 014] Time: 66.7282s | [Train] Loss: 1.20930057 Accuracy: Top1: 56.0330%, Top5: 95.1798% | [Test] Loss: 1.18309356 Accuracy: Top1: 56.9620%, Top5: 95.3817%
+[Epoch 015] Time: 66.6505s | [Train] Loss: 1.18908262 Accuracy: Top1: 56.8918%, Top5: 95.4168% | [Test] Loss: 1.22745183 Accuracy: Top1: 55.9138%, Top5: 94.9862%
+[Epoch 016] Time: 66.6639s | [Train] Loss: 1.17397110 Accuracy: Top1: 57.2782%, Top5: 95.4496% | [Test] Loss: 1.16866664 Accuracy: Top1: 57.5653%, Top5: 95.5993%
+[Epoch 017] Time: 66.6701s | [Train] Loss: 1.16007246 Accuracy: Top1: 57.9779%, Top5: 95.6614% | [Test] Loss: 1.14186476 Accuracy: Top1: 58.3366%, Top5: 95.8465%
+[Epoch 018] Time: 66.7173s | [Train] Loss: 1.14708725 Accuracy: Top1: 58.3512%, Top5: 95.7505% | [Test] Loss: 1.14327878 Accuracy: Top1: 58.5740%, Top5: 95.8465%
+[Epoch 019] Time: 66.6761s | [Train] Loss: 1.13182997 Accuracy: Top1: 58.9062%, Top5: 95.8696% | [Test] Loss: 1.16253570 Accuracy: Top1: 58.0894%, Top5: 95.7971%
+[Epoch 020] Time: 66.8492s | [Train] Loss: 1.11701954 Accuracy: Top1: 59.5600%, Top5: 96.0374% | [Test] Loss: 1.12782626 Accuracy: Top1: 59.1080%, Top5: 96.1036%
+[Epoch 021] Time: 66.6912s | [Train] Loss: 1.10539094 Accuracy: Top1: 60.0396%, Top5: 96.1293% | [Test] Loss: 1.11144867 Accuracy: Top1: 60.0277%, Top5: 96.2421%
+[Epoch 022] Time: 66.5879s | [Train] Loss: 1.09558059 Accuracy: Top1: 60.2286%, Top5: 96.2144% | [Test] Loss: 1.09554848 Accuracy: Top1: 60.1661%, Top5: 96.3904%
+[Epoch 023] Time: 66.7196s | [Train] Loss: 1.08468396 Accuracy: Top1: 60.5902%, Top5: 96.2452% | [Test] Loss: 1.09015347 Accuracy: Top1: 60.8287%, Top5: 96.2520%
+[Epoch 024] Time: 66.4581s | [Train] Loss: 1.07407655 Accuracy: Top1: 60.9475%, Top5: 96.3579% | [Test] Loss: 1.08598772 Accuracy: Top1: 60.4331%, Top5: 96.2223%
+[Epoch 025] Time: 66.8109s | [Train] Loss: 1.06309373 Accuracy: Top1: 61.5761%, Top5: 96.5221% | [Test] Loss: 1.06694817 Accuracy: Top1: 61.0364%, Top5: 96.6970%
+[Epoch 026] Time: 66.7826s | [Train] Loss: 1.05513928 Accuracy: Top1: 61.9238%, Top5: 96.5541% | [Test] Loss: 1.07429781 Accuracy: Top1: 60.9276%, Top5: 96.4992%
+[Epoch 027] Time: 66.5129s | [Train] Loss: 1.04960963 Accuracy: Top1: 62.0376%, Top5: 96.6252% | [Test] Loss: 1.06188333 Accuracy: Top1: 61.6297%, Top5: 96.5091%
+[Epoch 028] Time: 66.7031s | [Train] Loss: 1.03727723 Accuracy: Top1: 62.6223%, Top5: 96.7475% | [Test] Loss: 1.04876774 Accuracy: Top1: 61.7484%, Top5: 96.6179%
+[Epoch 029] Time: 66.6793s | [Train] Loss: 1.03191026 Accuracy: Top1: 62.8005%, Top5: 96.7451% | [Test] Loss: 1.04854497 Accuracy: Top1: 62.0154%, Top5: 96.6871%
+[Epoch 030] Time: 66.6789s | [Train] Loss: 1.02687174 Accuracy: Top1: 62.9919%, Top5: 96.7915% | [Test] Loss: 1.04533328 Accuracy: Top1: 62.6582%, Top5: 96.7366%
+[Epoch 031] Time: 66.5778s | [Train] Loss: 1.02236125 Accuracy: Top1: 62.9943%, Top5: 96.8135% | [Test] Loss: 1.04719057 Accuracy: Top1: 62.3714%, Top5: 96.8256%
+[Epoch 032] Time: 66.7495s | [Train] Loss: 1.01323762 Accuracy: Top1: 63.4755%, Top5: 96.8570% | [Test] Loss: 1.03418728 Accuracy: Top1: 62.8165%, Top5: 96.7366%
+[Epoch 033] Time: 66.7812s | [Train] Loss: 1.01331075 Accuracy: Top1: 63.4719%, Top5: 96.9377% | [Test] Loss: 1.04470907 Accuracy: Top1: 62.1638%, Top5: 96.7860%
+[Epoch 034] Time: 66.9807s | [Train] Loss: 1.00522816 Accuracy: Top1: 63.6877%, Top5: 96.9006% | [Test] Loss: 1.02489498 Accuracy: Top1: 62.7769%, Top5: 96.6970%
+[Epoch 035] Time: 66.8586s | [Train] Loss: 0.99781948 Accuracy: Top1: 64.0721%, Top5: 97.0312% | [Test] Loss: 1.03941882 Accuracy: Top1: 62.3319%, Top5: 96.8354%
+[Epoch 036] Time: 66.8723s | [Train] Loss: 0.99498993 Accuracy: Top1: 64.2088%, Top5: 97.0189% | [Test] Loss: 1.02138767 Accuracy: Top1: 63.0736%, Top5: 96.9244%
+[Epoch 037] Time: 66.8211s | [Train] Loss: 0.99173041 Accuracy: Top1: 64.4086%, Top5: 97.0876% | [Test] Loss: 1.02485794 Accuracy: Top1: 63.0340%, Top5: 96.8058%
+[Epoch 038] Time: 66.9415s | [Train] Loss: 0.98838736 Accuracy: Top1: 64.4477%, Top5: 97.1559% | [Test] Loss: 1.02232250 Accuracy: Top1: 63.1329%, Top5: 96.8453%
+[Epoch 039] Time: 66.7913s | [Train] Loss: 0.98900955 Accuracy: Top1: 64.4361%, Top5: 97.0856% | [Test] Loss: 1.02330409 Accuracy: Top1: 63.1329%, Top5: 96.9146%
+[Epoch 040] Time: 66.6886s | [Train] Loss: 0.98317146 Accuracy: Top1: 64.6603%, Top5: 97.1064% | [Test] Loss: 1.01648797 Accuracy: Top1: 63.4197%, Top5: 96.8651%
+[Epoch 041] Time: 66.6761s | [Train] Loss: 0.98409485 Accuracy: Top1: 64.6547%, Top5: 97.0852% | [Test] Loss: 1.01652617 Accuracy: Top1: 63.4691%, Top5: 96.8948%
+[Epoch 042] Time: 66.7040s | [Train] Loss: 0.97830849 Accuracy: Top1: 64.9097%, Top5: 97.1395% | [Test] Loss: 1.01603820 Accuracy: Top1: 63.5483%, Top5: 96.9640%
+[Epoch 043] Time: 66.5791s | [Train] Loss: 0.97796617 Accuracy: Top1: 64.7670%, Top5: 97.1967% | [Test] Loss: 1.01199929 Accuracy: Top1: 63.7658%, Top5: 96.8849%
+[Epoch 044] Time: 66.9051s | [Train] Loss: 0.97834366 Accuracy: Top1: 64.9133%, Top5: 97.1156% | [Test] Loss: 1.02257085 Accuracy: Top1: 63.4197%, Top5: 96.7959%
+[Epoch 045] Time: 66.7304s | [Train] Loss: 0.97646386 Accuracy: Top1: 64.7810%, Top5: 97.2063% | [Test] Loss: 1.01631286 Accuracy: Top1: 63.1626%, Top5: 97.0134%
+[Epoch 046] Time: 66.5331s | [Train] Loss: 0.97458999 Accuracy: Top1: 64.8901%, Top5: 97.2167% | [Test] Loss: 1.01480229 Accuracy: Top1: 63.6373%, Top5: 96.9146%
+[Epoch 047] Time: 66.6356s | [Train] Loss: 0.97469118 Accuracy: Top1: 65.0412%, Top5: 97.1627% | [Test] Loss: 1.01022552 Accuracy: Top1: 63.7164%, Top5: 96.9739%
+[Epoch 048] Time: 66.5763s | [Train] Loss: 0.97513829 Accuracy: Top1: 64.7187%, Top5: 97.2039% | [Test] Loss: 1.01316803 Accuracy: Top1: 63.5977%, Top5: 97.0431%
+[Epoch 049] Time: 66.8348s | [Train] Loss: 0.97266737 Accuracy: Top1: 64.9101%, Top5: 97.1196% | [Test] Loss: 1.01577044 Accuracy: Top1: 63.4593%, Top5: 96.8157%
+[Epoch 050] Time: 66.6323s | [Train] Loss: 0.97420106 Accuracy: Top1: 65.0651%, Top5: 97.1443% | [Test] Loss: 1.01271498 Accuracy: Top1: 63.6669%, Top5: 96.9739%
+
+Average Epoch Time: 66.7150s
+Max Accuracy: 63.7658% at Epoch 43
