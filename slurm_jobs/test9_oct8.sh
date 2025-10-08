@@ -27,12 +27,23 @@ source activate mingi
 
 ### CIFAR10 Experiments
 
-python main.py --layer ConvNNAttention_Modified --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/ConvNNAttention_All_K9_s42_NH3_NewSplitHead --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 3
+python main.py --layer ConvNNAttention_Modified --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/ConvNNAttention_All_K9_s42_NH3_NoSplitHead --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 3
 
-python main.py --layer ConvNNAttention_Modified --K 16 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/ConvNNAttention_All_K16_s42_NH3_NewSplitHead --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 3
+python main.py --layer ConvNNAttention_Modified --K 16 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/ConvNNAttention_All_K16_s42_NH3_NoSplitHead --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 3
 
-python main.py --layer ConvNNAttention_Modified --K 25 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/ConvNNAttention_All_K25_s42_NH3_NewSplitHead --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 3
+python main.py --layer ConvNNAttention_Modified --K 25 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/ConvNNAttention_All_K25_s42_NH3_NoSplitHead --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 3
 
-python main.py --layer ConvNNAttention_Modified --K 36 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/ConvNNAttention_All_K36_s42_NH3_NewSplitHead --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 3
+python main.py --layer ConvNNAttention_Modified --K 36 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/ConvNNAttention_All_K36_s42_NH3_NoSplitHead --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 3
+
+#### 
+python main.py --layer ConvNNAttention --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/ConvNNAttention_All_K9_s42_NH3 --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 3
+
+python main.py --layer ConvNNAttention --K 16 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/ConvNNAttention_All_K16_s42_NH3 --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 3
+
+python main.py --layer ConvNNAttention --K 25 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/ConvNNAttention_All_K25_s42_NH3 --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 3
+
+python main.py --layer ConvNNAttention --K 36 --sampling_type all --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/ConvNNAttention_All_K36_s42_NH3 --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 3
+
+
 
 python main.py --layer Attention --dataset cifar10 --output_dir ./Output/Oct6-VIT-Tiny-Sanity/CIFAR10/Attention_s42_NH3 --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 3
