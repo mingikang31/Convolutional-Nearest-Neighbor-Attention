@@ -868,6 +868,288 @@ class MultiHeadConvNNAttention_Modified(nn.Module):
         return x_with_coords 
 
 
+class MultiHeadConvNNAttention_Depthwise(nn.Module):
+    def __init__(self, 
+                 d_hidden, 
+                 num_heads, 
+                 attention_dropout,
+                 K, 
+                 sampling_type, 
+                 num_samples, 
+                 sample_padding, 
+                 magnitude_type, 
+                 seq_length=197, 
+                 coordinate_encoding=False
+                 ):
+        
+        super(MultiHeadConvNNAttention_Depthwise, self).__init__()
+        assert d_hidden % num_heads == 0, "d_hidden must be divisible by num_heads"
+
+        # Core Parameters
+        self.d_hidden = d_hidden
+        self.num_heads = num_heads
+        self.attention_dropout = attention_dropout
+        self.d_k = d_hidden // num_heads
+
+        # ConvNN Parameters
+        self.K = K
+        self.seq_length = seq_length
+
+        # 3 types of sampling: all, random, spatial
+        self.sampling_type = sampling_type
+        self.num_samples = int(num_samples) 
+        self.sample_padding = int(sample_padding) if sampling_type == 'spatial' else 0    
+
+        # Similarity Metric 
+        self.magnitude_type = magnitude_type
+        self.maximum = True if self.magnitude_type == 'cosine' else False
+
+        # Coordinate Encoding (optional) 
+        self.coordinate_encoding = coordinate_encoding
+        self.coordinate_cache = {}
+
+        
+        # Linear projections for query, key, value
+        self.W_q = nn.Linear(d_hidden, d_hidden)
+        self.W_k = nn.Linear(d_hidden, d_hidden)
+        self.W_v = nn.Linear(d_hidden, d_hidden)
+        self.W_o = nn.Linear(d_hidden, d_hidden)   
+        self.dropout = nn.Dropout(attention_dropout)
+
+        self.in_channels = (d_hidden) # Cannot have coordinate encoding for depthwise conv
+        self.out_channels = (d_hidden)
+        
+        self.depthwise_conv = nn.Conv1d(
+            in_channels=self.in_channels,
+            out_channels=self.out_channels,
+            kernel_size=self.K,
+            stride=self.K,
+            padding=0,
+            groups=self.in_channels  # Depthwise convolution
+        )
+
+        self.pointwise_conv = nn.Conv1d(
+            in_channels=self.in_channels,
+            out_channels=self.out_channels,
+            kernel_size=1, 
+            stride=1
+        )
+
+
+        # Utility Variables 
+        self.INF = 1.1
+        self.NEG_INF = -0.1 
+        
+    def forward(self, x):
+        # Note: x shape: (B, seq_length, d_hidden)
+        # 1. Splithead & Batch Combine
+        k = self.W_k(x)
+        v = self.W_v(x)
+
+        # print("k shape after W_k:", k.shape)
+        # print("v shape after W_v:", v.shape)
+
+        k = k.transpose(1, 2)
+        v = v.transpose(1, 2)
+        # print("k shape after transpose:", k.shape)
+        # print("v shape after transpose:", v.shape)
+
+
+        # 2. Add Coordinate Encoding 
+        k = self._add_coordinate_encoding(k) if self.coordinate_encoding else k
+        v = self._add_coordinate_encoding(v) if self.coordinate_encoding else v
+
+
+        # 3. Sampling & Similarity Calculation
+        if self.sampling_type == 'all': # All Samples
+            q = self.W_q(x)
+            # print("q shape after W_q:", q.shape)
+            q = q.transpose(1, 2)
+            # print("q shape after transpose:", q.shape)
+
+            q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
+
+            similarity_matrix = self._calculate_cosine_matrix(k, q) if self.magnitude_type == 'cosine' else self._calculate_euclidean_matrix(k, q, sqrt=True)
+            # print()
+            # print("similarity_matrix shape:", similarity_matrix.shape)
+
+            # similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
+            
+            prime = self._prime(v, similarity_matrix, self.K, self.maximum)
+            # print("prime shape after _prime:", prime.shape)
+            # prime = self._prime_temperature(v, similarity_matrix, self.K, self.maximum, temperature=1) ## New Prime with Temperature Scaling
+
+        # elif self.sampling_type == 'random': # Random Samples
+        #     rand_idx = torch.randperm(x.shape[1], device=x.device)[:self.num_samples]
+        #     x_sample = x[:, rand_idx, :]            
+        #     q = self.batch_combine(self.split_head(self.W_q(x_sample)))
+        #     q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
+
+        #     similarity_matrix = self._calculate_cosine_matrix_N(k, q) if self.magnitude_type == 'cosine' else self._calculate_euclidean_matrix_N(k, q, sqrt=True)
+        #     range_idx = torch.arange(len(rand_idx), device=q.device)
+        #     similarity_matrix[:, rand_idx, range_idx] = self.INF if self.magnitude_type == 'euclidean' else self.NEG_INF
+
+        #     # similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
+
+        #     prime = self._prime_N(v, similarity_matrix, self.K, rand_idx, self.maximum)
+
+        # elif self.sampling_type == 'spatial': # Spatial Samples
+        #     spat_idx = torch.linspace(0 + self.sample_padding, x.shape[1] - self.sample_padding - 1, self.num_samples, device=x.device).long()
+        #     x_sample = x[:, spat_idx, :]
+        #     q = self.batch_combine(self.split_head(self.W_q(x_sample)))
+        #     q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
+
+        #     similarity_matrix = self._calculate_cosine_matrix_N(k, q) if self.magnitude_type == 'cosine' else self._calculate_euclidean_matrix_N(k, q, sqrt=True)
+        #     range_idx = torch.arange(len(spat_idx), device=q.device)
+        #     similarity_matrix[:, spat_idx, range_idx] = self.INF if self.magnitude_type == 'euclidean' else self.NEG_INF
+
+        #     # similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
+
+        #     prime = self._prime_N(v, similarity_matrix, self.K, spat_idx, self.maximum)
+            
+        else: 
+            raise ValueError("Invalid sampling_type. Must be one of ['all', 'random', 'spatial']")
+        # print()
+        # 4. Conv1d Layer
+        x = self.depthwise_conv(prime)  
+        x = self.pointwise_conv(x)
+
+        # print("x shape after conv:", x.shape)
+
+        # 5. Dropout + Reshape (B, seq_length, d_hidden)
+        x = self.dropout(x)
+        x = x.permute(0, 2, 1) 
+        # print("x shape after permute:", x.shape)
+
+        # 6. Final Linear Projection
+        
+        x = self.W_o(x)
+        # print("x shape after W_o:", x.shape)
+        # print()
+        return x       
+
+    def _calculate_euclidean_matrix(self, K, Q, sqrt=False):
+        k_norm_squared = torch.sum(K**2, dim=1, keepdim=True)
+        q_norm_squared = torch.sum(Q**2, dim=1, keepdim=True)
+        dot_product = torch.bmm(K.transpose(1, 2), Q)
+
+        dist_matrix = k_norm_squared.transpose(1, 2) + q_norm_squared - 2 * dot_product
+        dist_matrix = torch.clamp(dist_matrix, min=0.0)
+        dist_matrix = torch.sqrt(dist_matrix) if sqrt else dist_matrix
+        torch.diagonal(dist_matrix, dim1=1, dim2=2).fill_(-0.1) 
+        return dist_matrix 
+
+    def _calculate_euclidean_matrix_N(self, K, Q, sqrt=False):
+        k_norm_squared = torch.sum(K**2, dim=1, keepdim=True)
+        q_norm_squared = torch.sum(Q**2, dim=1, keepdim=True)
+        dot_product = torch.bmm(K.transpose(1, 2), Q)
+
+        dist_matrix = k_norm_squared.transpose(1, 2) + q_norm_squared - 2 * dot_product
+        dist_matrix = torch.clamp(dist_matrix, min=0.0)
+        dist_matrix = torch.sqrt(dist_matrix) if sqrt else dist_matrix
+        return dist_matrix 
+
+    def _calculate_cosine_matrix(self, K, Q):
+        k_norm = F.normalize(K, p=2, dim=1)
+        q_norm = F.normalize(Q, p=2, dim=1)
+        similarity_matrix = torch.matmul(k_norm.transpose(1, 2), q_norm)
+        torch.diagonal(similarity_matrix, dim1=1, dim2=2).fill_(1.1)  # Fill diagonal with 1.1 to self-select
+        return similarity_matrix
+
+    def _calculate_cosine_matrix_N(self, K, Q):
+        norm_k = F.normalize(K, p=2, dim=1)
+        norm_q = F.normalize(Q, p=2, dim=1)
+        similarity_matrix = torch.matmul(norm_k.transpose(1, 2), norm_q)
+        similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
+        return similarity_matrix
+
+    def _prime(self, v, qk, K, maximum):
+        # print("[Inside _prime]")
+        b, c, t = v.shape
+    
+        # print("v shape:", v.shape)
+
+        topk_values, topk_indices = torch.topk(qk, k=K, dim=2, largest=maximum)
+        # print("topk_values shape:", topk_values.shape)
+        # print("topk_indices shape:", topk_indices.shape)
+        topk_indices_exp = topk_indices.unsqueeze(1).expand(b, c, t, K)
+        topk_values_exp = topk_values.unsqueeze(1).expand(b, c, t, K)
+
+        # print("topk_indices_exp shape:", topk_indices_exp.shape)
+        # print("topk_values_exp shape:", topk_values_exp.shape)
+
+        v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()
+        # print("v_expanded shape:", v_expanded.shape)
+        prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
+        # print("prime shape after gather:", prime.shape)
+        prime = topk_values_exp * prime
+
+        prime = prime.view(b, c, -1)
+
+        return prime
+
+    def _prime_temperature(self, v, qk, K, maximum, temperature=1.0):
+        b, c, t = v.shape
+
+        # Get top-k values and indices
+        topk_values, topk_indices = torch.topk(qk, k=K, dim=2, largest=maximum)
+
+        # Normalize the top-k values to create attention weights
+        if maximum:  # Cosine similarity
+            topk_weights = F.softmax(topk_values / temperature, dim=-1)
+        else:  # Euclidean distance
+            topk_weights = F.softmax(-topk_values / temperature, dim=-1)
+
+        # Expand for gathering
+        topk_indices_exp = topk_indices.unsqueeze(1).expand(b, c, t, K)
+        topk_weights_exp = topk_weights.unsqueeze(1).expand(b, c, t, K)
+
+        # Gather and weight
+        v_expanded = v.unsqueeze(-1).expand(b, c, t, K)
+        prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
+        prime = prime * topk_weights_exp  # Now using normalized weights
+
+        return prime.view(b, c, -1)
+
+    def _prime_N(self, v, qk, K, rand_idx, maximum):
+        b, c, t = v.shape
+        topk_values, topk_indices = torch.topk(qk, k=K-1, dim=2, largest=maximum)
+        tk = topk_indices.shape[-1]
+        assert K == tk + 1, "Error: K must be same as tk + 1. K == tk + 1."
+
+        # Map sample indicies back to original matrix positions 
+        mapped_tensor = rand_idx[topk_indices]
+        token_indices = torch.arange(t, device=v.device).view(1, t, 1).expand(b, t, 1)
+        final_indices = torch.cat([token_indices, mapped_tensor], dim=-1)
+        topk_indices_exp = final_indices.unsqueeze(1).expand(b, c, t, K)
+
+        # Expand topk values to match the shape of indices
+        topk_values_exp = topk_values.unsqueeze(1).expand(b, c, t, K-1)
+        ones = torch.ones((b, c, t, 1), device=v.device)
+        topk_values_exp = torch.cat((ones, topk_values_exp), dim=-1)
+
+        # Gather matrix values and apply similarity weighting 
+        v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()    
+        prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
+        prime = topk_values_exp * prime
+
+        prime = prime.view(b, c, -1)
+        return prime
+    
+    def _add_coordinate_encoding(self, x):
+        b, c, t = x.shape 
+        cache_key = f"{b}_{t}_{x.device}"
+        if cache_key in self.coordinate_cache: 
+            expanded_coords = self.coordinate_cache[cache_key]
+        else: 
+            coords_vec = torch.linspace(start=-1, end=1, steps=t, device=x.device).unsqueeze(0).expand(b, -1) 
+            expanded_coords = coords_vec.unsqueeze(1).expand(b, -1, -1) 
+            self.coordinate_cache[cache_key] = expanded_coords
+
+        x_with_coords = torch.cat([x, expanded_coords], dim=1) 
+        return x_with_coords 
+
+
 """
 No Batch Split Version has 50% increase in parameter count vs. Batch Split Version.
 """

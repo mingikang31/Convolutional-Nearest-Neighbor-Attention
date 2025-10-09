@@ -15,7 +15,8 @@ from layers import (
     MultiHeadBranchingAttention,
     MultiHeadKvtAttention, 
     MultiHeadLocalAttention, 
-    MultiHeadConvNNAttention_Modified
+    MultiHeadConvNNAttention_Modified, 
+    MultiHeadConvNNAttention_Depthwise
 )
 
 
@@ -226,6 +227,8 @@ class TransformerEncoder(nn.Module):
             ) 
         elif args.layer == "ConvNNAttention_Modified":
             self.attention = MultiHeadConvNNAttention_Modified(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
+        elif args.layer == "ConvNNAttention_Depthwise":
+            self.attention = MultiHeadConvNNAttention_Depthwise(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
         else: 
             raise ValueError("Invalid layer type. Must be one of ['Attention', 'ConvNNAttention', 'KvtAttention', 'LocalAttention', 'NeighborhoodAttention', 'BranchConv', 'BranchAttention', 'ConvNNAttention_Modified']")
 
