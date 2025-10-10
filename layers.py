@@ -171,7 +171,7 @@ class MultiHeadConvNNAttention(nn.Module):
         # Linear projections for query, key, value
         self.W_q = nn.Linear(d_hidden, d_hidden)
         self.W_k = nn.Linear(d_hidden, d_hidden)
-        self.W_v = nn.Linear(d_hidden, d_hidden)
+        # self.W_v = nn.Linear(d_hidden, d_hidden)
         self.W_o = nn.Linear(d_hidden, d_hidden)   
         self.dropout = nn.Dropout(attention_dropout)
 
@@ -214,7 +214,8 @@ class MultiHeadConvNNAttention(nn.Module):
         # Note: x shape: (B, seq_length, d_hidden)
         # 1. Splithead & Batch Combine
         k = self.batch_combine(self.split_head(self.W_k(x)))
-        v = self.batch_combine(self.split_head(self.W_v(x)))
+        # v = self.batch_combine(self.split_head(self.W_v(x)))
+        v = self.batch_combine(self.split_head(x))
         
         # k = self.batch_combine(self.split_head(x))
         # v = self.batch_combine(self.split_head(x))
