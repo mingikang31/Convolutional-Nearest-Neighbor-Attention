@@ -13,6 +13,7 @@ from train_eval import Train_Eval
 # Models
 from vit import ViT
 
+# Utils
 from utils import write_to_file, set_seed
 
 """
@@ -156,13 +157,3 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     main(args)
-
-    
-
-"""
-python main.py --layer Attention --num_heads 3 --test_only --device mps      
-python main.py --layer ConvNNAttention --num_heads 3 --test_only --device mps      
-
-
-
-"""
