@@ -698,7 +698,9 @@ class MultiHeadConvNN_Same_KVT_Attention(nn.Module):
 
         
 
-        similarity_matrix = self._calculate_attention_matrix(k, q)
+        # similarity_matrix = self._calculate_attention_matrix(k, q)
+        similarity_matrix = self._calculate_cosine_matrix(k, q)
+
         # print(f"[Attention Score]: {similarity_matrix.shape} \n {similarity_matrix} \n")
 
         # similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
@@ -723,11 +725,43 @@ class MultiHeadConvNN_Same_KVT_Attention(nn.Module):
         # print(f"[After projection]: {x.shape} \n {x} \n")
         
         return x       
+
+    ### ConvNN-Attention ./Output/Sanity_Oct16/ConvNNKvt_K9_s42_cosine_nosoftmax # cosine similarity matrix & no softmax on topk_values ###
+    def _calculate_cosine_matrix(self, K, Q):
+        k_norm = F.normalize(K, p=2, dim=1)
+        q_norm = F.normalize(Q, p=2, dim=1)
+        similarity_matrix = torch.matmul(k_norm.transpose(1, 2), q_norm)
+        torch.diagonal(similarity_matrix, dim1=1, dim2=2).fill_(1.1)  # Fill diagonal with 1.1 to self-select
+        return similarity_matrix
+
+    def _prime(self, v, qk, K, maximum):
+        b, c, t = v.shape
+        topk_values, topk_indices = torch.topk(qk, k=K, dim=2, largest=True)
+        # print(f"[Top-{K} Indices]: {topk_indices.shape} \n {topk_indices} \n")
+        # print(f"[Top-{K} Values]: {topk_values.shape} \n {topk_values} \n")
+
+        # topk_values = torch.softmax(topk_values, dim=-1)
+        # print(f"[After Softmax Top-K Values]: {topk_values.shape} \n {topk_values} \n")
+        
+        topk_indices_exp = topk_indices.unsqueeze(1).expand(b, c, t, K)
+        topk_values_exp = topk_values.unsqueeze(1).expand(b, c, t, K)
+
+        v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()
+        prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
+        
+        prime = topk_values_exp * prime 
+        
+        prime = prime.view(b, c, -1)
+        # print(f"[Prime]: {prime.shape} \n {prime} \n")
+
+        return prime
+
+    ### Sanity Check Code: Exactly same as Attention & KvT when K = seq_length but with depthwise convolution with weight=1.0 ###
     def _calculate_attention_matrix(self, K, Q):
         attn_score = torch.matmul(K.transpose(1, 2), Q) / self.d_k**0.5
         return attn_score
-
-    def _prime(self, v, qk, K, maximum):
+    
+    def _prime_softmax(self, v, qk, K, maximum):
         b, c, t = v.shape
         topk_values, topk_indices = torch.topk(qk, k=K, dim=2, largest=True)
         # print(f"[Top-{K} Indices]: {topk_indices.shape} \n {topk_indices} \n")
@@ -748,12 +782,6 @@ class MultiHeadConvNN_Same_KVT_Attention(nn.Module):
         # print(f"[Prime]: {prime.shape} \n {prime} \n")
 
         return prime
-
-
-
-
-
-
 
 
 
@@ -1560,10 +1588,6 @@ class MultiHeadConvNNAttention_NoBatchSplit(nn.Module):
 
 
 ##########
-
-
-
-
 
 class MultiHeadKvtAttention(nn.Module):
     def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.,topk=100):
