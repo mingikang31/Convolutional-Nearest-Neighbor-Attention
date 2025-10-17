@@ -593,6 +593,169 @@ class MultiHeadBranchingAttention(nn.Module):
 
 
 ### TODO: NO BATCH SPLIT VERSION FOR DEBUGGING PURPOSES ### 
+
+
+class MultiHeadConvNN_Same_KVT_Attention(nn.Module):
+    """This ConvNN-Attention produces exactly the same output as KvT attention and Attention (when K = seq_length)"""
+    def __init__(self, 
+                 d_hidden, 
+                 num_heads, 
+                 attention_dropout,
+                 K, 
+                 sampling_type, 
+                 num_samples, 
+                 sample_padding, 
+                 magnitude_type, 
+                 seq_length=197, 
+                 coordinate_encoding=False
+                 ):
+        
+        super(MultiHeadConvNN_Same_KVT_Attention, self).__init__()
+        assert d_hidden % num_heads == 0, "d_hidden must be divisible by num_heads"
+
+        # Core Parameters
+        self.d_hidden = d_hidden
+        self.num_heads = num_heads
+        self.attention_dropout = attention_dropout
+        self.d_k = d_hidden // num_heads
+
+        # ConvNN Parameters
+        self.K = K
+        self.seq_length = seq_length
+
+        # 3 types of sampling: all, random, spatial
+        self.sampling_type = sampling_type
+        self.num_samples = int(num_samples) 
+        self.sample_padding = int(sample_padding) if sampling_type == 'spatial' else 0    
+
+        # Similarity Metric 
+        self.magnitude_type = magnitude_type
+        self.maximum = True if self.magnitude_type == 'cosine' else False
+
+        # Coordinate Encoding (optional) 
+        self.coordinate_encoding = coordinate_encoding
+        self.coordinate_cache = {}
+        
+        # Linear projections for query, key, value
+        self.W_q = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_k = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_v = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_o = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.dropout = nn.Dropout(attention_dropout)
+
+        self.in_channels = (d_hidden // num_heads) + 1 if coordinate_encoding else (d_hidden // num_heads)
+        self.out_channels = (d_hidden // num_heads) 
+        
+        self.conv = nn.Conv1d(
+            in_channels=self.in_channels,
+            out_channels=self.out_channels,
+            kernel_size=self.K,
+            stride=self.K,
+            padding=0,
+            bias = False, 
+            groups=self.in_channels
+        )
+
+        # Utility Variables 
+        self.INF = 1.1
+        self.NEG_INF = -0.1 
+
+    """K, Q, V projection functions"""
+    def split_head(self, x): ## K, Q, V
+        batch_size, seq_length, d_hidden = x.size()
+        self.batch_size = batch_size
+        # self.seq_length = seq_length
+        return x.contiguous().view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2) # (B, num_heads, seq_length, d_k)
+    def batch_combine(self, x):  ## K, Q, V
+        batch_size, _, seq_length, d_k = x.size()
+        x = x.permute(0, 1, 3, 2).contiguous() 
+        return x.view(-1, self.d_k, seq_length)
+
+    """Output projection function"""
+    def batch_split(self, x):
+        if self.num_heads == 1:
+            return x.unsqueeze(1)  # Just add head dimension [B, 1, seq_len, dim]
+        else:
+            x = x.reshape(self.batch_size, -1, self.d_k, self.seq_length)
+            return x.permute(0, 1, 3, 2).contiguous()
+
+    def combine_heads(self, x):
+        if self.num_heads == 1:
+            return x.squeeze(1)  # Just remove head dimension
+        else:
+            batch_size, _, seq_length, d_k = x.size()
+            return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.d_hidden)
+        
+    def forward(self, x):
+        k = self.batch_combine(self.split_head(self.W_k(x)))
+        v = self.batch_combine(self.split_head(self.W_v(x)))
+        q = self.batch_combine(self.split_head(self.W_q(x)))
+        # print(f"[q shape]: {q.shape} \n {q} \n")
+        # print(f"[q transpose shape]: {q.transpose(1, 2).shape} \n {q.transpose(1, 2)} \n")
+        # print(f"[k shape]: {k.shape} \n {k} \n")
+        # print(f"[v shape]: {v.shape} \n {v} \n")
+
+        
+
+        similarity_matrix = self._calculate_attention_matrix(k, q)
+        # print(f"[Attention Score]: {similarity_matrix.shape} \n {similarity_matrix} \n")
+
+        # similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
+
+        prime = self._prime(v, similarity_matrix, self.K, self.maximum)
+
+        # 4. Conv1d Layer
+        x = self.conv(prime)  
+
+        # print(f"[After Conv1d]: {x.shape} \n {x} \n")
+
+        # 5. Dropout + Reshape (B, seq_length, d_hidden)
+        x = self.dropout(x)
+        x = x.permute(0, 2, 1) 
+        # print(f"[After Dropout + Permute]: {x.shape} \n {x} \n")
+
+        # # 6. Final Linear Projection
+        x = self.W_o(self.combine_heads(self.batch_split(x)))
+        # x = self.W_o(x)
+        # print(f"[After projection]: {x.shape} \n {x} \n")
+
+        # print(f"[After projection]: {x.shape} \n {x} \n")
+        
+        return x       
+    def _calculate_attention_matrix(self, K, Q):
+        attn_score = torch.matmul(K.transpose(1, 2), Q) / self.d_k**0.5
+        return attn_score
+
+    def _prime(self, v, qk, K, maximum):
+        b, c, t = v.shape
+        topk_values, topk_indices = torch.topk(qk, k=K, dim=2, largest=True)
+        # print(f"[Top-{K} Indices]: {topk_indices.shape} \n {topk_indices} \n")
+        # print(f"[Top-{K} Values]: {topk_values.shape} \n {topk_values} \n")
+
+        topk_values = torch.softmax(topk_values, dim=-1)
+        # print(f"[After Softmax Top-K Values]: {topk_values.shape} \n {topk_values} \n")
+        
+        topk_indices_exp = topk_indices.unsqueeze(1).expand(b, c, t, K)
+        topk_values_exp = topk_values.unsqueeze(1).expand(b, c, t, K)
+
+        v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()
+        prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
+        
+        prime = topk_values_exp * prime 
+        
+        prime = prime.view(b, c, -1)
+        # print(f"[Prime]: {prime.shape} \n {prime} \n")
+
+        return prime
+
+
+
+
+
+
+
+
+
 # Working implementation 
 class MultiHeadConvNNAttention_Modified(nn.Module):
     def __init__(self, 
@@ -1411,7 +1574,7 @@ class MultiHeadKvtAttention(nn.Module):
 
         self.qkv = nn.Linear(dim, dim * 3, bias=qkv_bias)
         self.attn_drop = nn.Dropout(attn_drop)
-        self.proj = nn.Linear(dim, dim)
+        self.proj = nn.Linear(dim, dim, bias=False)
         self.proj_drop = nn.Dropout(proj_drop)
         self.topk = topk
 

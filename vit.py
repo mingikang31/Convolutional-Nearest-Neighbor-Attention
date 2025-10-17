@@ -16,7 +16,8 @@ from layers import (
     MultiHeadKvtAttention, 
     MultiHeadLocalAttention, 
     MultiHeadConvNNAttention_Modified, 
-    MultiHeadConvNNAttention_Depthwise
+    MultiHeadConvNNAttention_Depthwise, 
+    MultiHeadConvNN_Same_KVT_Attention
 )
 
 
@@ -184,7 +185,6 @@ class TransformerEncoder(nn.Module):
         # 2. ConvNN Attention Layer
         elif args.layer == "ConvNNAttention":
             self.attention = MultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
-            # self.attention = MultiHeadConvNNAttention_NoBatchSplit(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
 
         # 3. Branching Conv1d Layer
         elif args.layer == "BranchConv":
@@ -229,6 +229,8 @@ class TransformerEncoder(nn.Module):
             self.attention = MultiHeadConvNNAttention_Modified(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
         elif args.layer == "ConvNNAttention_Depthwise":
             self.attention = MultiHeadConvNNAttention_Depthwise(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
+        elif args.layer == "ConvNNAttention_Same_KVT":
+            self.attention = MultiHeadConvNN_Same_KVT_Attention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
         else: 
             raise ValueError("Invalid layer type. Must be one of ['Attention', 'ConvNNAttention', 'KvtAttention', 'LocalAttention', 'NeighborhoodAttention', 'BranchConv', 'BranchAttention', 'ConvNNAttention_Modified']")
 

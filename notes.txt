@@ -86,6 +86,18 @@ ConvNNAttention_All_K9_s42_NH3_NoSplitHead
     - K = 36 ->  6,018,442
     - K = 49 ->  6,048,394
 
+- depthwise reduces parameter size by a big factor, however it does not reach above 61% no matter the K value (speed is just as slow as doing regular convolution) 
+
+
+13. KQ Projections vs. KQV Projections 
+- KQ # params < KQV # params (~400,000 difference)
+- KQ Accuracy < KQV Accuracy (~0.5-1.0% difference)
+
+14. 
+
+
+
+
 *** Best Results & Notes ***
 - V projection with dropout is 65%, 
 - when num_heads = 1 and K > 36, ConvNN-Attention beats attention (Original MultiHeadConvNNAttention)
