@@ -655,6 +655,7 @@ class MultiHeadConvNN_Same_KVT_Attention(nn.Module):
             bias = False, 
             groups=self.in_channels
         )
+        self.conv.weight.data.fill_(1.0)
 
         # Utility Variables 
         self.INF = 1.1
