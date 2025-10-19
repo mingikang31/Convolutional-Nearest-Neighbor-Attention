@@ -740,7 +740,7 @@ class MultiHeadConvNN_Same_KVT_Attention(nn.Module):
         # print(f"[Top-{K} Indices]: {topk_indices.shape} \n {topk_indices} \n")
         # print(f"[Top-{K} Values]: {topk_values.shape} \n {topk_values} \n")
 
-        # topk_values = torch.softmax(topk_values, dim=-1)
+        topk_values = torch.softmax(topk_values, dim=-1)
         # print(f"[After Softmax Top-K Values]: {topk_values.shape} \n {topk_values} \n")
         
         topk_indices_exp = topk_indices.unsqueeze(1).expand(b, c, t, K)
