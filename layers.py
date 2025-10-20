@@ -639,7 +639,7 @@ class MultiHeadConvNN_Same_KVT_Attention(nn.Module):
         # Linear projections for query, key, value
         self.W_q = nn.Linear(d_hidden, d_hidden, bias=False)
         self.W_k = nn.Linear(d_hidden, d_hidden, bias=False)
-        self.W_v = nn.Linear(d_hidden, d_hidden, bias=False)
+        # self.W_v = nn.Linear(d_hidden, d_hidden, bias=False)
         self.W_o = nn.Linear(d_hidden, d_hidden, bias=False)
         self.dropout = nn.Dropout(attention_dropout)
 
@@ -689,7 +689,8 @@ class MultiHeadConvNN_Same_KVT_Attention(nn.Module):
         
     def forward(self, x):
         k = self.batch_combine(self.split_head(self.W_k(x)))
-        v = self.batch_combine(self.split_head(self.W_v(x)))
+        # v = self.batch_combine(self.split_head(self.W_v(x)))
+        v = self.batch_combine(self.split_head(x))
         q = self.batch_combine(self.split_head(self.W_q(x)))
         # print(f"[q shape]: {q.shape} \n {q} \n")
         # print(f"[q transpose shape]: {q.transpose(1, 2).shape} \n {q.transpose(1, 2)} \n")
@@ -698,14 +699,14 @@ class MultiHeadConvNN_Same_KVT_Attention(nn.Module):
 
         
 
-        # similarity_matrix = self._calculate_attention_matrix(k, q)
-        similarity_matrix = self._calculate_cosine_matrix(k, q)
+        similarity_matrix = self._calculate_attention_matrix(k, q)
+        # similarity_matrix = self._calculate_cosine_matrix(k, q)
 
         # print(f"[Attention Score]: {similarity_matrix.shape} \n {similarity_matrix} \n")
 
         # similarity_matrix = torch.softmax(similarity_matrix, dim=-1)
 
-        prime = self._prime(v, similarity_matrix, self.K, self.maximum)
+        prime = self._prime_softmax(v, similarity_matrix, self.K, self.maximum)
 
         # 4. Conv1d Layer
         x = self.conv(prime)  
@@ -740,7 +741,7 @@ class MultiHeadConvNN_Same_KVT_Attention(nn.Module):
         # print(f"[Top-{K} Indices]: {topk_indices.shape} \n {topk_indices} \n")
         # print(f"[Top-{K} Values]: {topk_values.shape} \n {topk_values} \n")
 
-        topk_values = torch.softmax(topk_values, dim=-1)
+        # topk_values = torch.softmax(topk_values, dim=-1)
         # print(f"[After Softmax Top-K Values]: {topk_values.shape} \n {topk_values} \n")
         
         topk_indices_exp = topk_indices.unsqueeze(1).expand(b, c, t, K)
