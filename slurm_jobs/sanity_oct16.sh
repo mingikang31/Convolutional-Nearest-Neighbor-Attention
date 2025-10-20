@@ -29,7 +29,7 @@ source activate mingi
 # python main.py --layer Attention --dataset cifar10 --output_dir ./Output/Sanity_Oct16/Attention_K9_s42 --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 1 
 
 # ConvNN-Attention (Same as KvTAttention)
-python main.py --layer ConvNNAttention_Same_KVT --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Sanity_Oct16/ConvNNKvt_K9_s42_KQ_proj --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 1
+python main.py --layer ConvNNAttention_Same_KVT --K 9 --sampling_type all --dataset cifar10 --output_dir ./Output/Sanity_Oct16/ConvNNKvt_K9_s42_V_proj --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 1
 
 # python main.py --layer ConvNNAttention_Same_KVT --K 16 --sampling_type all --dataset cifar10 --output_dir ./Output/Sanity_Oct16/ConvNNKvt_K16_s42_cosine_softmax --num_epochs 50 --seed 42 --lr 1e-5 --lr_step 2 --lr_gamma 0.95 --num_heads 1
 

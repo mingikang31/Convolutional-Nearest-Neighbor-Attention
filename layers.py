@@ -637,9 +637,9 @@ class MultiHeadConvNN_Same_KVT_Attention(nn.Module):
         self.coordinate_cache = {}
         
         # Linear projections for query, key, value
-        self.W_q = nn.Linear(d_hidden, d_hidden, bias=False)
-        self.W_k = nn.Linear(d_hidden, d_hidden, bias=False)
-        # self.W_v = nn.Linear(d_hidden, d_hidden, bias=False)
+        # self.W_q = nn.Linear(d_hidden, d_hidden, bias=False)
+        # self.W_k = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_v = nn.Linear(d_hidden, d_hidden, bias=False)
         self.W_o = nn.Linear(d_hidden, d_hidden, bias=False)
         self.dropout = nn.Dropout(attention_dropout)
 
@@ -688,10 +688,12 @@ class MultiHeadConvNN_Same_KVT_Attention(nn.Module):
             return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.d_hidden)
         
     def forward(self, x):
-        k = self.batch_combine(self.split_head(self.W_k(x)))
-        # v = self.batch_combine(self.split_head(self.W_v(x)))
-        v = self.batch_combine(self.split_head(x))
-        q = self.batch_combine(self.split_head(self.W_q(x)))
+        #k = self.batch_combine(self.split_head(self.W_k(x)))
+        k = self.batch_combine(self.split_head(x))
+    	q = self.batch_combine(self.split_head(x))
+    	v = self.batch_combine(self.split_head(self.W_v(x)))
+        # v = self.batch_combine(self.split_head(x))
+        # q = self.batch_combine(self.split_head(self.W_q(x)))
         # print(f"[q shape]: {q.shape} \n {q} \n")
         # print(f"[q transpose shape]: {q.transpose(1, 2).shape} \n {q.transpose(1, 2)} \n")
         # print(f"[k shape]: {k.shape} \n {k} \n")

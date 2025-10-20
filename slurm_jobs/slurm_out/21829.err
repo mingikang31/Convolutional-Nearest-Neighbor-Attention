@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 14, in <module>
+    from vit import ViT
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 11, in <module>
+    from layers import (
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/layers.py", line 693
+    q = self.batch_combine(self.split_head(x))
+TabError: inconsistent use of tabs and spaces in indentation
