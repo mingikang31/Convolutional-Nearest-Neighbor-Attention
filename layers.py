@@ -690,8 +690,8 @@ class MultiHeadConvNN_Same_KVT_Attention(nn.Module):
     def forward(self, x):
         #k = self.batch_combine(self.split_head(self.W_k(x)))
         k = self.batch_combine(self.split_head(x))
-    	q = self.batch_combine(self.split_head(x))
-    	v = self.batch_combine(self.split_head(self.W_v(x)))
+        q = self.batch_combine(self.split_head(x))
+        v = self.batch_combine(self.split_head(self.W_v(x)))
         # v = self.batch_combine(self.split_head(x))
         # q = self.batch_combine(self.split_head(self.W_q(x)))
         # print(f"[q shape]: {q.shape} \n {q} \n")
