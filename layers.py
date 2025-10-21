@@ -697,9 +697,9 @@ class MultiHeadConvNN_Same_KVT_Attention(nn.Module):
         # print(f"[v shape]: {v.shape} \n {v} \n")
 
         
-
-        # similarity_matrix = self._calculate_attention_matrix(k, q)
-        similarity_matrix = self._calculate_cosine_matrix(k, q)
+        # TODO: Sanity Check, use attention_matrix with cosine scheduler for num_epochs = 100
+        similarity_matrix = self._calculate_attention_matrix(k, q)
+        # similarity_matrix = self._calculate_cosine_matrix(k, q)
 
         # print(f"[Attention Score]: {similarity_matrix.shape} \n {similarity_matrix} \n")
 
