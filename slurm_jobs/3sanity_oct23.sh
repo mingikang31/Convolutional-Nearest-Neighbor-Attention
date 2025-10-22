@@ -14,11 +14,32 @@ cd /mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention
 
 source activate mingi
 
-python main.py --layer ConvNNAttention_Same_KVT --K 6 --sampling_type all --output_dir ./Output/Sanity_Oct19/CIFAR10-Cosine/ConvNNKvt_K6_s42_mult_softmax --num_epochs 200 --seed 42 --optimizer adamw --weight_decay 1e-2 --lr 1e-4 --num_heads 1 --dataset cifar10 --scheduler cosine
-
-python main.py --layer ConvNNAttention_Same_KVT --K 12 --sampling_type all --output_dir ./Output/Sanity_Oct19/CIFAR10-Cosine/ConvNNKvt_K12_s42_mult_softmax --num_epochs 200 --seed 42 --optimizer adamw --weight_decay 1e-2 --lr 1e-4 --num_heads 1 --dataset cifar10 --scheduler cosine
 
 
-python main.py --layer ConvNNAttention_Same_KVT --K 6 --sampling_type all --output_dir ./Output/Final_Oct21/CIFAR100-Cosine/ConvNNKvt_K6_s42_mult_softmax --num_epochs 200 --seed 42 --optimizer adamw --weight_decay 1e-2 --lr 1e-4 --num_heads 1 --dataset cifar100 --scheduler cosine
+# CIFAR10
+python main.py --layer Attention --output_dir ./Output/Sanity_Oct23/CIFAR10-Cosine/Attention_s42 --num_epochs 200 --seed 42 --optimizer adamw --weight_decay 1e-2 --lr 1e-3 --num_heads 1 --dataset cifar10 --scheduler cosine
 
-python main.py --layer ConvNNAttention_Same_KVT --K 12 --sampling_type all --output_dir ./Output/Final_Oct21/CIFAR100-Cosine/ConvNNKvt_K12_s42_mult_softmax --num_epochs 200 --seed 42 --optimizer adamw --weight_decay 1e-2 --lr 1e-4 --num_heads 1 --dataset cifar100 --scheduler cosine
+python main.py --layer Attention --output_dir ./Output/Sanity_Oct23/CIFAR100-Cosine/Attention_s42 --num_epochs 200 --seed 42 --optimizer adamw --weight_decay 1e-2 --lr 1e-3 --num_heads 1 --dataset cifar100 --scheduler cosine
+
+
+# ConvNN-KVT with K=6 and K=12 for CIFAR10 
+
+python main.py --layer ConvNNAttention_Same_KVT --K 6 --sampling_type all --output_dir ./Output/Sanity_Oct23/CIFAR10-Cosine/ConvNNKvt_K6_s42_mult_softmax --num_epochs 200 --seed 42 --optimizer adamw --weight_decay 1e-2 --lr 1e-3 --num_heads 1 --dataset cifar10 --scheduler cosine
+
+
+python main.py --layer ConvNNAttention_Same_KVT --K 9 --sampling_type all --output_dir ./Output/Sanity_Oct23/CIFAR10-Cosine/ConvNNKvt_K9_s42_mult_softmax --num_epochs 200 --seed 42 --optimizer adamw --weight_decay 1e-2 --lr 1e-3 --num_heads 1 --dataset cifar10 --scheduler cosine
+
+
+python main.py --layer ConvNNAttention_Same_KVT --K 12 --sampling_type all --output_dir ./Output/Sanity_Oct23/CIFAR10-Cosine/ConvNNKvt_K12_s42_mult_softmax --num_epochs 200 --seed 42 --optimizer adamw --weight_decay 1e-2 --lr 1e-3 --num_heads 1 --dataset cifar10 --scheduler cosine
+
+
+
+# ConvNN-KVT with K=6 and K=12 for CIFAR100
+python main.py --layer ConvNNAttention_Same_KVT --K 6 --sampling_type all --output_dir ./Output/Sanity_Oct23/CIFAR100-Cosine/ConvNNKvt_K6_s42_mult_softmax --num_epochs 200 --seed 42 --optimizer adamw --weight_decay 1e-2 --lr 1e-3 --num_heads 1 --dataset cifar100 --scheduler cosine
+
+python main.py --layer ConvNNAttention_Same_KVT --K 9 --sampling_type all --output_dir ./Output/Sanity_Oct23/CIFAR100-Cosine/ConvNNKvt_K9_s42_mult_softmax --num_epochs 200 --seed 42 --optimizer adamw --weight_decay 1e-2 --lr 1e-3 --num_heads 1 --dataset cifar100 --scheduler cosine
+
+python main.py --layer ConvNNAttention_Same_KVT --K 12 --sampling_type all --output_dir ./Output/Sanity_Oct23/CIFAR100-Cosine/ConvNNKvt_K12_s42_mult_softmax --num_epochs 200 --seed 42 --optimizer adamw --weight_decay 1e-2 --lr 1e-3 --num_heads 1 --dataset cifar100 --scheduler cosine
+
+
+
