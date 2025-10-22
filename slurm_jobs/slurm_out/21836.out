@@ -1084,3 +1084,4 @@ Model Complexity (Profiler):
 [Epoch 094] Time: 50.1773s | [Train] Loss: 0.65492649 Accuracy: Top1: 76.7251%, Top5: 98.8211% | [Test] Loss: 0.77964143 Accuracy: Top1: 73.0222%, Top5: 98.1606%
 [Epoch 095] Time: 50.2689s | [Train] Loss: 0.65662949 Accuracy: Top1: 76.7307%, Top5: 98.8939% | [Test] Loss: 0.77967777 Accuracy: Top1: 73.0419%, Top5: 98.1606%
 [Epoch 096] Time: 50.3964s | [Train] Loss: 0.65302265 Accuracy: Top1: 76.8035%, Top5: 98.9270% | [Test] Loss: 0.77934729 Accuracy: Top1: 73.0320%, Top5: 98.1408%
+[Epoch 097] Time: 50.1923s | [Train] Loss: 0.65682904 Accuracy: Top1: 76.6404%, Top5: 98.8659% | [Test] Loss: 0.77910458 Accuracy: Top1: 73.0716%, Top5: 98.1309%
