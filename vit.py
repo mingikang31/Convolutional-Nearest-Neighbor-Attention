@@ -6,18 +6,14 @@ import torch.nn.functional as F
 from torchsummary import summary 
 import numpy as np
 
-
 # from natten import NeighborhoodAttention1D, NeighborhoodAttention2D
 from layers import (
     MultiHeadAttention, 
     MultiHeadConvNNAttention, 
-    MultiHeadBranchingConv1d, 
+    MultiHeadBranchingConv, 
     MultiHeadBranchingAttention,
     MultiHeadKvtAttention, 
     MultiHeadLocalAttention, 
-    MultiHeadConvNNAttention_Modified, 
-    MultiHeadConvNNAttention_Depthwise, 
-    MultiHeadConvNN_Same_KVT_Attention
 )
 
 
@@ -154,7 +150,9 @@ class TransformerEncoder(nn.Module):
             "num_samples": args.num_samples,
             "sample_padding": args.sample_padding,
             "magnitude_type": args.magnitude_type,
-            "coordinate_encoding": args.coordinate_encoding
+            "coordinate_encoding": args.coordinate_encoding, 
+            "convolution_type": args.convolution_type, 
+            "softmax_topk_val": args.softmax_topk_val
         }
 
         branching_conv_params = {
@@ -165,6 +163,8 @@ class TransformerEncoder(nn.Module):
             "sample_padding": args.sample_padding,
             "magnitude_type": args.magnitude_type,
             "coordinate_encoding": args.coordinate_encoding,
+            "convolution_type": args.convolution_type,
+            "softmax_topk_val": args.softmax_topk_val,
             "branch_ratio": args.branch_ratio
         }
 
@@ -175,6 +175,8 @@ class TransformerEncoder(nn.Module):
             "sample_padding": args.sample_padding,
             "magnitude_type": args.magnitude_type,
             "coordinate_encoding": args.coordinate_encoding,
+            "convolution_type": args.convolution_type,
+            "softmax_topk_val": args.softmax_topk_val, 
             "branch_ratio": args.branch_ratio
         }
 
@@ -188,7 +190,7 @@ class TransformerEncoder(nn.Module):
 
         # 3. Branching Conv1d Layer
         elif args.layer == "BranchConv":
-            self.attention = MultiHeadBranchingConv1d(d_hidden, num_heads, attention_dropout, **branching_conv_params)
+            self.attention = MultiHeadBranchingConv(d_hidden, num_heads, attention_dropout, **branching_conv_params)
         # 4. Branching Attention Layer
         elif args.layer == "BranchAttention":
             self.attention = MultiHeadBranchingAttention(d_hidden, num_heads, attention_dropout, **branching_attn_params)

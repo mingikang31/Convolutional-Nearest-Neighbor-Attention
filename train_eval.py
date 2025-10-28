@@ -1,13 +1,14 @@
-'''Training & Evaluation Module for Convolutional Neural Networks'''
+'''Training & Evaluation Module for Vision Transformers'''
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
+from tqdm import tqdm
 import time 
 
 from utils import set_seed
-
+from thop import profile
 
 
 def Train_Eval(args, 
@@ -20,16 +21,11 @@ def Train_Eval(args,
         set_seed(args.seed)
     
     if args.criterion == 'CrossEntropy':
-        if args.layer == "ConvNNAttention" or args.layer == "ConvNN":
-            # criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
-            criterion = nn.CrossEntropyLoss()
-        else: 
-            criterion = nn.CrossEntropyLoss()
+        criterion = nn.CrossEntropyLoss()
     elif args.criterion == 'MSE':
         criterion = nn.MSELoss()
 
-    
-    # Optimizer 
+    # Optimizer
     if args.optimizer == 'adam':
         optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     elif args.optimizer == 'sgd':
@@ -39,14 +35,14 @@ def Train_Eval(args,
         
 
     # Learning Rate Scheduler
-    scheduler = None
     if args.scheduler == 'step':
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=args.lr_step, gamma=args.lr_gamma)
     elif args.scheduler == 'cosine':
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.num_epochs)
     elif args.scheduler == 'plateau':
-        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5)
-
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5)
+    else: 
+        scheduler = None
         
     # Device
     device = args.device
@@ -54,9 +50,30 @@ def Train_Eval(args,
     criterion.to(device)
     
     if args.use_amp:
-        scaler = torch.amp.GradScaler("cuda")
+        scaler = torch.amp.GradScaler(device)
         
-    epoch_results = []
+    epoch_results = [] 
+
+    # ==================== COMPILE MODEL =====================
+    if args.use_compiled:
+        print(f"Compiling the model with mode: {args.compile_mode} ...")
+        model = torch.compile(
+            model, 
+            mode=args.compile_mode, 
+            fullgraph=False, 
+            dynamic=False
+            )
+        print(f"Model compiled successfully with {args.compile_mode} mode.")
+
+        # Warm-up run to ensure compilation
+        try: 
+            input_tensor, _ = next(iter(train_loader))
+            input_tensor = input_tensor.to(device)
+            with torch.no_grad():
+                _ = model(input_tensor[0:1])
+            print("Warm-up run successful.")
+        except Exception as e:
+            print(f"Warm-up run failed: {e}")
 
     # ==================== ROBUST GFLOPs Calculation with PyTorch Profiler ====================
     try:
@@ -104,7 +121,7 @@ def Train_Eval(args,
     
     for epoch in range(args.num_epochs):
         # Model Training
-        model.train() 
+        model.train()
         train_running_loss = 0.0
         test_running_loss = 0.0
         epoch_result = ""
@@ -114,7 +131,7 @@ def Train_Eval(args,
         train_top1_5 = [0, 0]
         for images, labels in train_loader: 
             images, labels = images.to(device), labels.to(device)
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
             
             # use mixed precision training
             if args.use_amp:
@@ -158,12 +175,12 @@ def Train_Eval(args,
                 else: 
                     outputs = model(images)
                 loss = criterion(outputs, labels)
-                test_running_loss += loss.item()
 
-                    
                 top1, top5 = accuracy(outputs, labels, topk=(1, 5))
                 test_top1_5[0] += top1.item()
                 test_top1_5[1] += top5.item()
+                test_running_loss += loss.item()
+
         
         test_top1_5[0] /= len(test_loader)
         test_top1_5[1] /= len(test_loader)

@@ -44,12 +44,15 @@ def args_parser():
     parser.add_argument("--attention_dropout", type=float, default=0.1, help="Attention dropout rate for the model")    
     
     # Additional Layer Arguments for ConvNN
+    parser.add_argument("--convolution_type", type=str, default="standard", choices=["standard", "depthwise", "depthwise-separable"], help="Convolution type for ConvNN Layers")
+    parser.add_argument("--softmax_topk_val", action="store_true", help="Use top-k values for softmax computation in Attention Models")
+    parser.set_defaults(softmax_topk_val=True)
     parser.add_argument("--K", type=int, default=9, help="K-nearest neighbor for ConvNN Layer")
     parser.add_argument("--sampling_type", type=str, default="all", choices=["all", "random", "spatial"], help="Sampling type for ConvNN Models")
 
     parser.add_argument("--num_samples", type=int, default=-1, help="Number of samples for ConvNN Layer, -1 for all samples")
     parser.add_argument("--sample_padding", type=int, default=0, help="Padding for spatial sampling in ConvNN Models")
-    parser.add_argument("--magnitude_type", type=str, default="cosine", choices=["cosine", "euclidean"], help="Magnitude type for ConvNN Models")
+    parser.add_argument("--magnitude_type", type=str, default="matmul", choices=["cosine", "euclidean", "matmul"], help="Magnitude type for ConvNN Models")
     parser.add_argument("--coordinate_encoding", action="store_true", help="Use coordinate encoding in ConvNN Models")
     parser.set_defaults(coordinate_encoding=False)    
     parser.add_argument("--branch_ratio", type=float, default=0.5, help="Branch ratio for ConvNN Models")
@@ -58,13 +61,21 @@ def args_parser():
     parser.add_argument("--kernel_size", type=int, default=9, help="Kernel size for Conv1d Layer")
 
     
-    # Arguments for Data 
+    # Data Arguments
     parser.add_argument("--dataset", type=str, default="cifar10", choices=["cifar10", "cifar100", 'imagenet'], help="Dataset to use for training and evaluation")
+    parser.add_argument("--resize", type=int, default=224, help="Resize images to 224x224 for Attention Models")
+    parser.add_argument("--augment", action="store_true", help="Use data augmentation")
+    parser.set_defaults(augment=False)
+    parser.add_argument("--noise", type=float, default=0.0, help="Standard deviation of Gaussian noise to add to the data")
     parser.add_argument("--data_path", type=str, default="./Data", help="Path to the dataset")
         
     # Training Arguments
-    parser.add_argument("--batch_size", type=int, default=128, help="Batch size for training and evaluation")
-    parser.add_argument("--num_epochs", type=int, default=100, help="Number of epochs for training")
+    parser.add_argument("--use_compiled", action="store_true", help="Use compiled model for training and evaluation")
+    parser.set_defaults(use_compiled=False)
+    parser.add_argument("--compile_mode", type=str, default="default", choices=["default", "reduce-overhead", "reduce-memory", "reduce-overhead", "max-autotune"], help="Compilation mode for torch.compile")
+
+    parser.add_argument("--batch_size", type=int, default=256, help="Batch size for training and evaluation")
+    parser.add_argument("--num_epochs", type=int, default=150, help="Number of epochs for training")
     parser.add_argument("--use_amp", action="store_true", help="Use mixed precision training")
     parser.set_defaults(use_amp=False)
     parser.add_argument("--clip_grad_norm", type=float, default=1.0, help="Gradient clipping value")
@@ -82,7 +93,7 @@ def args_parser():
     parser.add_argument("--lr", type=float, default=5e-4, help="Learning rate for the optimizer")
     parser.add_argument('--lr_step', type=int, default=20, help='Step size for learning rate scheduler') # Only for StepLR
     parser.add_argument('--lr_gamma', type=float, default=0.1, help='Gamma for learning rate scheduler') # Only for StepLR
-    parser.add_argument('--scheduler', type=str, default='cosine', choices=['step', 'cosine', 'plateau'], help='Learning rate scheduler')
+    parser.add_argument('--scheduler', type=str, default='cosine', choices=['step', 'cosine', 'plateau', 'none'], help='Learning rate scheduler')
     
     # Device Arguments
     parser.add_argument("--device", type=str, default="cuda", choices=["cpu", "cuda", "mps"], help="Device to use for training and evaluation")
@@ -99,7 +110,6 @@ def args_parser():
     
 def main(args):
     
-    args.resize = True
     # Dataset 
     if args.dataset == "cifar10":
         dataset = CIFAR10(args)

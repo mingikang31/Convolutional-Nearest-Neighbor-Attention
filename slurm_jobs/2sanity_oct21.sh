@@ -22,7 +22,6 @@ source activate mingi
 # d_hidden: 192
 # d_mlp: 768
 
-
 # CIFAR10
 python main.py --layer Attention --output_dir ./Output/Sanity_Oct19/CIFAR10-Cosine/Attention_s42 --num_epochs 200 --seed 42 --optimizer adamw --weight_decay 1e-2 --lr 1e-3 --num_heads 1 --dataset cifar10 --scheduler cosine
 

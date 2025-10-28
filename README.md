@@ -1,44 +1,42 @@
-# Convolutional Nearest Neighbor Attention (ConvNNAttention) with Vision Transformer Architecture
+# Convolutional Nearest Neighbor Attention (ConvNN-Attention) for Transformers
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Grants & Funding
+- **Fall Research Grant**, Bowdoin College
+- **Allen B. Tucker Computer Science Research Prize**, Bowdoin College
 - **Christenfeld Summer Research Fellowship**, Bowdoin College
 - **Google AI 2024 Funding**, Last Mile Fund
 - **NYC Stem Funding**, Last Mile Fund
 
-**Project periods:** Summer 2024, Spring 2025, Summer 2025
+**Project periods:** Summer 2024, Spring 2025, Summer 2025, Fall 2026, Spring 2026
 
 ## Overview
-Traditional convolutions aggregate features from a fixed grid of adjacent pixels. This project introduces **Convolutional Nearest Neighbor (ConvNN)**, a novel layer that operates on a more flexible, data-driven neighborhood.
+Convolutional Nearest Neighbor Attention (ConvNN-Attention) is a novel attention mechanism featuring hard selection of nearest neighbors for Vision Transformers (ViTs). Traditional attention compute similarities across all token with soft selection, while ConvNN-Attention focuses on the k most relevant neighbors, enhancing efficiency and potentially improving performance.
 
-**How ConvNN Works:**
-- For each token (a pixel or feature vector), it finds the *K*-nearest neighbors from a global or sampled pool of candidates.
-- It aggregates the values of these neighbors, often using distance or similarity metrics for weighting.
-- This approach allows the model to capture long-range dependencies and non-local relationships that standard convolutions might miss.
-- ConvNN is designed to be a drop-in replacement for standard layers in both fully convolutional networks and Vision Transformers.
 
 ### Key Concepts
-- **Vision Transformer (ViT)**: A standard ViT architecture where the multi-head self-attention block can be replaced with our custom `MultiHeadConvNN` or `MultiHeadConvNNAttention` layers.
-- **Layer Flexibility**: The project supports single-layer types (e.g., `ConvNN` only) and powerful branching architectures (e.g., `Conv2d/ConvNN`, `Attention/ConvNN_Attn`) to combine the strengths of different operations.
-- **Sampling Strategies**: To manage computational complexity, `ConvNN` layers support multiple sampling strategies: `all` (dense), `random`, and `spatial`.
+- **Vision Transformer (ViT)**: A standard ViT architecture where the multi-head self-attention block can be replaced with our custom `MultiHeadConvNNAttention` and branching blocks.
+- **Layer Flexibility**: The project supports single-block types (e.g., `ConvNNAttention` only) and branching architectures (e.g., `BranchingAttention`, `BranchingConv`) to combine the strengths of different operations.
+- **Sampling Strategies**: To manage computational complexity, `ConvNN` layers support sampling strategies: `all` (dense), `random`, and `spatial`.
 
 ### Implementation
 
 **ViT Layers (`vit_main.py`)**: These are 1D layers operating on sequences of patch embeddings.
-- **`MultiHeadAttention`**: Standard Transformer multi-head self-attention.
-- **`MultiHeadConvNN`**: A 1D ConvNN using linear projections on sequences.
-- **`MultiHeadConvNNAttention`**: A 1D ConvNN using linear projections on features (Q,K,V).
-- **`MultiHeadConv1d` / `MultiHeadConv1dAttention`**: Traditional 1D convolutions integrated into the attention block structure.
-- **`MultiHeadKvtAttention`**: An implementation of k-NN Attention for boosting Vision Transformers.
-- **`MultiHeadLocalAttention`**: Local Attention implementation from lucidrains
-- **`NeighborhoodAttention1D`**: NeighborhoodAttention1D from NATTEN
+- **`MultiHeadAttention`**: Standard Transformer multi-head self-attention
+- **`MultiHeadConvNNAttention`**: Convolutional Nearest Neighbor Attention layer with k-NN selection
+- **`MultiHeadKvtAttention`**: An implementation of **k-NN Attention for boosting Vision Transformers**
+- **`MultiHeadLocalAttention`**: Local Attention implementation from **lucidrains**
+- **`NeighborhoodAttention1D`**: NeighborhoodAttention1D from **NATTEN**
+- **`MultiHeadBranchingConv`**: Branching attention layer combining convolution and ConvNN-Attention.
+- **`MultiHeadBranchingAttention`**: Branching attention layer combining standard attention and ConvNN-Attention.
+
 
 ## Installation
 ```shell
 git clone [https://github.com/mingikang31/Convolutional-Nearest-Neighbor-Attention.git](https://github.com/mingikang31/Convolutional-Nearest-Neighbor-Attention.git)
 cd Convolutional-Nearest-Neighbor-Attention
-````
+```
 
 Then, install the required dependencies:
 
@@ -73,43 +71,15 @@ python main.py \
     --num_heads 8 \
     --d_model 512 \
     --K 9 \
-    --num_samples 32 \
-    --sampling_type random \
+    --num_samples 4 \
+    --sampling_type spatial \
     --dataset cifar10 \
     --output_dir ./Output/ViT/ConvNNAttention
 ```
 
 ## Command-Line Interface
 
-### AllConvNet (`allconvnet_main.py`)
-
-Run `python allconvnet_main.py --help` to see all available options.
-
-#### Model & Layer Configuration
-
-| Flag                | Default                 | Choices                                                                                               | Description                                         |
-| ------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `--layer`           | `ConvNN`                | `Conv2d`, `ConvNN`, `ConvNN_Attn`, `Attention`, `Conv2d/ConvNN`, `Conv2d/Attention`, etc.             | Which convolution/attention/branching layer to use. |
-| `--num_layers`      | `5`                     | *integer*                                                                                             | Number of sequential layers in the network.         |
-| `--channels`        | `8 16 32 64 128`        | *string of integers with space between*                                                               | Output channel sizes for each respective layer.     |
-| `--kernel_size`     | `3`                     | *integer*                                                                                             | Kernel size for standard `Conv2d` layers.           |
-| `--num_heads`       | `4`                     | *integer*                                                                                             | Number of heads for `Attention2d` layers.           |
-| `--shuffle_pattern` | `BA`                    | `BA`, `NA`                                                                                            | `unshuffle` Before & `shuffle` After, or `None`.    |
-| `--shuffle_scale`   | `2`                     | *integer*                                                                                             | Scale factor for pixel shuffle/unshuffle.           |
-
-#### ConvNN-Specific Parameters (for AllConvNet)
-
-| Flag               | Default        | Choices                    | Description                                         |
-| ------------------ | -------------- | -------------------------- | --------------------------------------------------- |
-| `--K`              | `9`            | *integer*                  | Number of nearest neighbors to find.                |
-| `--sampling_type`  | `all`          | `all`, `random`, `spatial` | How to select the pool of neighbor candidates.      |
-| `--num_samples`    | `-1`           | *integer*                  | Number of samples for `random` or `spatial` mode. Set to -1 for `all` sampling. |
-| `--sample_padding` | `0`            | *integer*                  | Padding for `spatial` sampling.                     |
-| `--magnitude_type` | `similarity`   | `similarity`, `distance`   | Metric for finding nearest neighbors.               |
-| `--coordinate_encoding` | `true`    | `flag to use`              | Add `Coordinate Encoding layers to the data`        |
-
-
-### Vision Transformer (`vit_main.py`)
+### Vision Transformer (`main.py`)
 
 Run `python main.py --help` to see all available options.
 
@@ -117,42 +87,101 @@ Run `python main.py --help` to see all available options.
 
 | Flag                  | Default     | Choices                                                                    | Description                                     |
 | --------------------- | ----------- | -------------------------------------------------------------------------- | ----------------------------------------------- |
-| `--layer`             | `Attention` | `Attention`, `ConvNN`, `ConvNNAttention`, `Conv1d`, `Conv1dAttention`, `KvtAttention`, `LocalAttention`, `NeighborhoodAttention` | Layer type for ViT transformer blocks.          |
-| `--patch_size`        | `16`        | *integer*                                                                  | Side length of square image patches.            |
-| `--num_layers`        | `8`         | *integer*                                                                  | Number of transformer encoder layers.           |
-| `--num_heads`         | `8`         | *integer*                                                                  | Number of attention heads.                      |
-| `--d_model`           | `512`       | *integer*                                                                  | The main embedding dimension of the model.      |
-| `--d_mlp`             | `2048`      | *integer*                                                                  | Dimension of the inner MLP feed-forward layer.  |
-| `--dropout`           | `0.1`       | *float*                                                                    | General dropout rate for linear layers.         |
-| `--attention_dropout` | `0.1`       | *float*                                                                    | Dropout rate applied to attention probabilities. |
+| `--layer`             | `Attention` | `Attention`, `ConvNNAttention`, `KvtAttention`, `LocalAttention`, `NeighborhoodAttention`, `BranchConv`, `BranchAttention` | Layer type for ViT transformer blocks.          |
+| `--patch_size`        | `16`        | *integer*                                                                  | Patch size for attention models.                |
+| `--num_layers`        | `12`        | *integer*                                                                  | Number of transformer encoder layers.           |
+| `--num_heads`         | `3`         | *integer*                                                                  | Number of attention heads.                      |
+| `--d_hidden`          | `192`       | *integer*                                                                  | Hidden dimension for the model.                 |
+| `--d_mlp`             | `768`       | *integer*                                                                  | MLP dimension for the model.                    |
+| `--dropout`           | `0.1`       | *float*                                                                    | Dropout rate for linear layers.                 |
+| `--attention_dropout` | `0.1`       | *float*                                                                    | Dropout rate for attention layers.              |
 
-*(Note: To change other parameters for `LocalAttention` and `NeighborhoodAttention`, change them in `TransformerEncoder` class in vit.py`.)*
-#### ConvNN-Specific Parameters (for ViT)
+#### ConvNN-Attention Specific Parameters
 
-| Flag               | Default        | Choices                    | Description                                         |
-| ------------------ | -------------- | -------------------------- | --------------------------------------------------- |
-| `--K`              | `9`            | *integer*                  | Number of nearest neighbors to find or kernel size. |
-| `--sampling_type`  | `all`          | `all`, `random`, `spatial` | How to select the pool of neighbor candidates.      |
-| `--num_samples`    | `-1`           | *integer*                  | Number of samples for `random` or `spatial` mode. Set to -1 for `all` sampling. |
-| `--sample_padding` | `0`            | *integer*                  | Padding for `spatial` sampling.                     |
-| `--magnitude_type` | `similarity`   | `similarity`, `distance`   | Metric for finding nearest neighbors.               |
+| Flag                  | Default        | Choices                           | Description                                         |
+| --------------------- | -------------- | --------------------------------- | --------------------------------------------------- |
+| `--convolution_type`  | `standard`     | `standard`, `depthwise`, `depthwise-separable` | Convolution type for ConvNN-Attention layers.       |
+| `--softmax_topk_val`  | `True`         | `True`, `False`                   | Use softmax on top-k values.           |
+| `--K`                 | `9`            | *integer*                         | Number of nearest neighbors (k-NN) or kernel size.  |
+| `--sampling_type`     | `all`          | `all`, `random`, `spatial`        | Sampling strategy for neighbor candidates.          |
+| `--num_samples`       | `-1`           | *integer*                         | Number of samples for `random`/`spatial` modes. `-1` for all. |
+| `--sample_padding`    | `0`            | *integer*                         | Padding for spatial sampling.                       |
+| `--magnitude_type`    | `matmul`       | `cosine`, `euclidean`, `matmul`   | Similarity metric for nearest neighbors.            |
+| `--coordinate_encoding` | `False`      | `True`, `False`                   | Enable coordinate encoding in ConvNN-Attention layers.        |
+| `--branch_ratio`      | `0.5`          | *float (0-1)*                     | Branch ratio for branching ConvNN-Attention layers.           |
 
-*(Note: Data, Training, and Optimization arguments are shared between both scripts. Run `--help` for details.)*
+- (note) For `random` sampling type, set `--num_samples` to the desired number of neighbors to sample (e.g., `4`). For `spatial` sampling type, set `--num_samples` to the spatially separated grid (e.g., `3` for 3x3). For dense attention, set `--sampling_type` to `all` and `--num_samples` to `-1`.
+
+#### Convolution Parameters (only for BranchConv block)
+
+| Flag                  | Default        | Choices                           | Description                                         |
+| --------------------- | -------------- | --------------------------------- | --------------------------------------------------- |
+| `--kernel_size`       | `9`            | *integer*                         | Kernel size for Conv1d layers.                      |
+
+#### Data Arguments
+
+| Flag                  | Default        | Choices                           | Description                                         |
+| --------------------- | -------------- | --------------------------------- | --------------------------------------------------- |
+| `--dataset`           | `cifar10`      | `cifar10`, `cifar100`, `imagenet` | Dataset for training and evaluation.                |
+| `--resize`            | `224`          | *integer*                         | Image resize dimension.                             |
+| `--augment`           | `False`        | `True`, `False`                   | Enable data augmentation (random crop and flip).                           |
+| `--noise`             | `0.0`          | *float*                           | Standard deviation of Gaussian noise to add.        |
+| `--data_path`         | `./Data`       | *string*                          | Path to the dataset directory.                      |
+
+#### Training Arguments
+
+| Flag                  | Default        | Choices                                                    | Description                                    |
+| --------------------- | -------------- | ---------------------------------------------------------- | ---------------------------------------------- |
+| `--use_compiled`      | `False`        | `True`, `False`                                            | Use torch.compile for model optimization.      |
+| `--compile_mode`      | `default`      | `default`, `reduce-overhead`, `reduce-memory`, `max-autotune` | Compilation mode for torch.compile.      |
+| `--batch_size`        | `256`          | *integer*                                                  | Batch size for training and evaluation.        |
+| `--num_epochs`        | `150`          | *integer*                                                  | Number of training epochs.                     |
+| `--use_amp`           | `False`        | `True`, `False`                                            | Enable mixed precision training.               |
+| `--clip_grad_norm`    | `1.0`          | *float*                                                    | Gradient clipping value.                       |
+
+#### Loss & Optimizer Arguments
+
+| Flag                  | Default        | Choices                           | Description                                         |
+| --------------------- | -------------- | --------------------------------- | --------------------------------------------------- |
+| `--criterion`         | `CrossEntropy` | `CrossEntropy`, `MSE`             | Loss function for training.                         |
+| `--optimizer`         | `adamw`        | `adam`, `sgd`, `adamw`            | Optimizer for training.                             |
+| `--momentum`          | `0.9`          | *float*                           | Momentum for SGD optimizer.                         |
+| `--weight_decay`      | `0.05`         | *float*                           | Weight decay for Adam/AdamW optimizers.              |
+
+#### Learning Rate Arguments
+
+| Flag                  | Default        | Choices                           | Description                                         |
+| --------------------- | -------------- | --------------------------------- | --------------------------------------------------- |
+| `--lr`                | `0.0003`       | *float*                           | Learning rate for optimizer.                        |
+| `--scheduler`         | `cosine`       | `step`, `cosine`, `plateau`, `none` | Learning rate scheduler type.                     |
+| `--lr_step`           | `20`           | *integer*                         | Step size for StepLR scheduler.                     |
+| `--lr_gamma`          | `0.1`          | *float*                           | Decay factor for StepLR scheduler.                  |
+
+#### System & Output Arguments
+
+| Flag                  | Default                    | Choices              | Description                                    |
+| --------------------- | -------------------------- | -------------------- | ---------------------------------------------- |
+| `--device`            | `cuda`                     | `cpu`, `cuda`, `mps` | Compute device for training/evaluation.        |
+| `--seed`              | `0`                        | *integer*            | Random seed for reproducibility.               |
+| `--output_dir`        | `./Output/VIT/`            | *string*             | Directory for output files and checkpoints.    |
+| `--test_only`         | `False`                    | `True`, `False`      | Run model inference test only (no training).   |
+
+
 
 ## Project Structure
 
 ```
 .
-├── layers1d.py          # 1D layers for ViT and AllConvNet
-├── layers2d.py          # 2D layers for AllConvNet
+├── layers.py            # Attention modules for ViT
 ├── dataset.py           # CIFAR-10/100 & ImageNet wrappers
 ├── train_eval.py        # Training & evaluation loop
-├── allconvnet.py        # AllConvNet architecture implementation
-├── allconvnet_main.py   # CLI entrypoint for AllConvNet
 ├── vit.py               # Vision Transformer implementation
-├── vit_main.py          # CLI entrypoint for ViT
+├── main.py              # CLI entrypoint for ViT Experiments
 ├── utils.py             # I/O, logging, seed setup
+├── requirements.txt     # Python dependencies
 ├── README.md            # ← you are here
+├── Data/                # Datasets (CIFAR-10/100, ImageNet)
+├── Output/              # Training outputs and checkpoints
 └── LICENSE              # MIT License
 ```
 
