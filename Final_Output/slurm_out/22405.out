@@ -1,0 +1,28 @@
+==========================================
+K-Test Configuration
+==========================================
+Total experiments: 2
+Datasets: cifar10 cifar100
+Blocks: ConvNNAttention
+K values: 9
+Learning rate: 1e-4
+==========================================
+
+[1/2] Dataset=cifar10 | K=9 | Block=ConvNNAttention
+Output: ./Final_Output/Conv_test/ViT-Tiny-CIFAR10/ConvNNAttention_standard_K9_s42
+Files already downloaded and verified
+Files already downloaded and verified
+Model: VIT ConvNNAttention
+Total Parameters: 5931658
+Trainable Parameters: 5931658
+   - Trainable Parameters: 5.93165800 M
+Model Complexity (Profiler):
+   - GFLOPs: 2.33458918
+   - Trainable Parameters: 5.93165800 M
+[Epoch 001] Time: 79.3959s | [Train] Loss: 2.29588258 Accuracy: Top1: 14.5831%, Top5: 58.4917% | [Test] Loss: 2.18070053 Accuracy: Top1: 20.8496%, Top5: 67.0898%
+[Epoch 002] Time: 110.1842s | [Train] Loss: 2.21201950 Accuracy: Top1: 19.2144%, Top5: 66.8941% | [Test] Loss: 2.14508331 Accuracy: Top1: 20.7812%, Top5: 69.9707%
+[Epoch 003] Time: 136.5237s | [Train] Loss: 2.20598795 Accuracy: Top1: 20.4317%, Top5: 69.8625% | [Test] Loss: 2.09585328 Accuracy: Top1: 21.2305%, Top5: 74.0234%
+[Epoch 004] Time: 111.7645s | [Train] Loss: 2.26637175 Accuracy: Top1: 18.1485%, Top5: 68.4801% | [Test] Loss: 2.15959922 Accuracy: Top1: 18.6523%, Top5: 70.7422%
+[Epoch 005] Time: 71.0028s | [Train] Loss: 2.13203748 Accuracy: Top1: 21.9085%, Top5: 73.7341% | [Test] Loss: 2.02177434 Accuracy: Top1: 25.3223%, Top5: 76.5723%
+[Epoch 006] Time: 70.9950s | [Train] Loss: 2.07473762 Accuracy: Top1: 23.1800%, Top5: 76.3477% | [Test] Loss: 1.97885138 Accuracy: Top1: 26.0938%, Top5: 79.0625%
+[Epoch 007] Time: 70.8994s | [Train] Loss: 2.04674060 Accuracy: Top1: 23.9537%, Top5: 76.8706% | [Test] Loss: 2.00878390 Accuracy: Top1: 25.3320%, Top5: 78.0078%

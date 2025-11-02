@@ -1,0 +1,24 @@
+==========================================
+K-Test Configuration
+==========================================
+Total experiments: 48
+Datasets: cifar10 cifar100
+Blocks: ConvNNAttention KvtAttention
+K values: 1 2 3 4 5 6 7 8 9 10 11 12
+Learning rate: 1e-4
+==========================================
+
+[1/48] Dataset=cifar10 | K=1 | Block=ConvNNAttention
+Output: ./Final_Output/K_test/ViT-Tiny-CIFAR10/ConvNNAttention_K1_s42
+Files already downloaded and verified
+Files already downloaded and verified
+Model: VIT ConvNNAttention
+Total Parameters: 5490058
+Trainable Parameters: 5490058
+   - Trainable Parameters: 5.49005800 M
+Model Complexity (Profiler):
+   - GFLOPs: 2.33095807
+   - Trainable Parameters: 5.49005800 M
+[Epoch 001] Time: 77.3302s | [Train] Loss: 1.99095446 Accuracy: Top1: 28.2856%, Top5: 78.9824% | [Test] Loss: 1.71383359 Accuracy: Top1: 38.2715%, Top5: 86.0742%
+[Epoch 002] Time: 77.1326s | [Train] Loss: 1.73714213 Accuracy: Top1: 36.9296%, Top5: 86.0320% | [Test] Loss: 1.59605764 Accuracy: Top1: 42.1289%, Top5: 89.3359%
+[Epoch 003] Time: 101.1641s | [Train] Loss: 1.62550836 Accuracy: Top1: 40.9742%, Top5: 88.5487% | [Test] Loss: 1.51503475 Accuracy: Top1: 44.6875%, Top5: 91.2891%

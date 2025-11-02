@@ -4,7 +4,7 @@
 #SBATCH -p arm --gres=shard:4
 #SBATCH --cpus-per-task=12
 #SBATCH --job-name=VIT-GH-Baseline
-#SBATCH --time=500:00:00
+#SBATCH --time=96:00:00
 #SBATCH --output=slurm_out/%j.out
 #SBATCH --error=slurm_out/%j.err
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT_80

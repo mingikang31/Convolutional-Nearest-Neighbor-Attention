@@ -4,7 +4,7 @@
 #SBATCH -p arm --gres=shard:4
 #SBATCH --cpus-per-task=12
 #SBATCH --job-name=VIT-GH-NTEST
-#SBATCH --time=500:00:00
+#SBATCH --time=96:00:00
 #SBATCH --output=slurm_out/%j.out
 #SBATCH --error=slurm_out/%j.err
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT_80
@@ -62,9 +62,9 @@ for dataset in "${DATASETS[@]}"; do
                     # Single python call with padding set conditionally
                     python main.py \
                         --layer $block \
-                        --patch_size 16 \ 
-                        --num_layers 12 \ 
-                        --num_heads 3 \ 
+                        --patch_size 16 \
+                        --num_layers 12 \
+                        --num_heads 3 \
                         --d_hidden 192 \
                         --d_mlp 768 \
                         --dropout 0.1 \
@@ -73,8 +73,8 @@ for dataset in "${DATASETS[@]}"; do
                         --softmax_topk_val \
                         --K $k \
                         --sampling_type $sampling_type \
-                        --num_samples $n_samples \ 
-                        --magnitude_type matmul \ 
+                        --num_samples $n_samples \
+                        --magnitude_type matmul \
                         --dataset $dataset \
                         --resize 224 \
                         --batch_size 256 \
@@ -84,9 +84,9 @@ for dataset in "${DATASETS[@]}"; do
                         --weight_decay 1e-2 \
                         --lr $LR \
                         --clip_grad_norm 1.0 \
-                        --scheduler none \ 
+                        --scheduler none \
                         --seed 42 \
-                        --device cuda \ 
+                        --device cuda \
                         --output_dir $output_dir
                     
                     # Check if experiment succeeded
