@@ -2,6 +2,8 @@
 
 ### Conv-Test for CVPR paper 
 
+cd /home/exouser/Convolutional-Nearest-Neighbor-Attention/
+
 # Configuration
 DATASETS=("cifar10" "cifar100")
 K_VALUES=("9")  

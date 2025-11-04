@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from torchsummary import summary 
 import numpy as np
 
-from natten import NeighborhoodAttention1D, NeighborhoodAttention2D
+# from natten import NeighborhoodAttention1D, NeighborhoodAttention2D
 from layers import (
     MultiHeadAttention, 
     MultiHeadConvNNAttention, 
