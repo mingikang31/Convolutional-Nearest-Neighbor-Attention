@@ -1,20 +1,4 @@
 #!/bin/bash 
-#SBATCH --nodes=1 
-#SBATCH --mem=64G
-#SBATCH -p arm --gres=shard:4
-#SBATCH --cpus-per-task=12
-#SBATCH --job-name=VIT-GH-ConvTEST
-#SBATCH --time=96:00:00
-#SBATCH --output=slurm_out/%j.out
-#SBATCH --error=slurm_out/%j.err
-#SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT_80
-#SBATCH --mail-user=mkang2@bowdoin.edu
-
-cd /mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention
-
-# Setup conda
-source ~/.bashrc
-conda activate mingi-arm
 
 ### Conv-Test for CVPR paper 
 
@@ -31,7 +15,7 @@ COUNT=0
 FAILED=0
 
 echo "=========================================="
-echo "K-Test Configuration"
+echo "Conv-Test Configuration"
 echo "=========================================="
 echo "Total experiments: $TOTAL"
 echo "Datasets: ${DATASETS[@]}"
@@ -101,58 +85,8 @@ done
 
 
 
-python main.py \
-    --layer KvtAttention \
-    --patch_size 16 \ 
-    --num_layers 12 \ 
-    --num_heads 3 \ 
-    --d_hidden 192 \
-    --d_mlp 768 \
-    --dropout 0.1 \
-    --attention_dropout 0.1 \
-    --K 100 \
-    --dataset cifar10 \
-    --resize 224 \
-    --batch_size 256 \
-    --num_epochs 150 \
-    --criterion CrossEntropy \
-    --optimizer adamw \
-    --weight_decay 1e-2 \
-    --lr $LR \
-    --clip_grad_norm 1.0 \
-    --scheduler none \ 
-    --seed 42 \
-    --device cuda \ 
-    --output_dir "./Final_Output/K_test/ViT-Tiny-CIFAR10/KvtAttention_K100_s42"
-
-
-python main.py \
-    --layer KvtAttention \
-    --patch_size 16 \ 
-    --num_layers 12 \ 
-    --num_heads 3 \ 
-    --d_hidden 192 \
-    --d_mlp 768 \
-    --dropout 0.1 \
-    --attention_dropout 0.1 \
-    --K 100 \
-    --dataset cifar100 \
-    --resize 224 \
-    --batch_size 256 \
-    --num_epochs 150 \
-    --criterion CrossEntropy \
-    --optimizer adamw \
-    --weight_decay 1e-2 \
-    --lr $LR \
-    --clip_grad_norm 1.0 \
-    --scheduler none \ 
-    --seed 42 \
-    --device cuda \ 
-    --output_dir "./Final_Output/K_test/ViT-Tiny-CIFAR100/KvtAttention_K100_s42"
-
-
 echo "=========================================="
-echo "K-Test Complete!"
+echo "Conv-Test Complete!"
 echo "=========================================="
 echo "Total experiments: $TOTAL"
 echo "Successful: $((TOTAL - FAILED))"

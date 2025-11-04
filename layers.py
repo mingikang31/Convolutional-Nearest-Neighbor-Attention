@@ -171,10 +171,10 @@ class MultiHeadConvNNAttention(nn.Module):
         self.coordinate_cache = {}
         
         # Linear projections for query, key, value
-        self.W_q = nn.Linear(d_hidden, d_hidden)
-        self.W_k = nn.Linear(d_hidden, d_hidden)
-        self.W_v = nn.Linear(d_hidden, d_hidden)
-        self.W_o = nn.Linear(d_hidden, d_hidden)   
+        self.W_q = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_k = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_v = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_o = nn.Linear(d_hidden, d_hidden, bias=False)   
         self.dropout = nn.Dropout(attention_dropout)
 
         self.in_channels = (d_hidden // num_heads) + 1 if coordinate_encoding else (d_hidden // num_heads)
@@ -190,6 +190,7 @@ class MultiHeadConvNNAttention(nn.Module):
                 kernel_size=self.K,
                 stride=self.K,
                 padding=0,
+                bias=False
             )
         elif convolution_type == 'depthwise':
             self.conv = nn.Conv1d(
@@ -198,7 +199,8 @@ class MultiHeadConvNNAttention(nn.Module):
                 kernel_size=self.K,
                 stride=self.K,
                 padding=0,
-                groups=self.in_channels
+                groups=self.in_channels, 
+                bias=False
             )
             self.conv.weight.data.fill_(1.0)
         elif convolution_type == 'depthwise-separable':
@@ -210,7 +212,8 @@ class MultiHeadConvNNAttention(nn.Module):
                     kernel_size=self.K,
                     stride=self.K,
                     padding=0,
-                    groups=self.in_channels
+                    groups=self.in_channels,
+                    bias=False
                 ), 
                 # Pointwise Convolution
                 nn.Conv1d(
@@ -218,7 +221,8 @@ class MultiHeadConvNNAttention(nn.Module):
                     out_channels=self.out_channels,
                     kernel_size=1,
                     stride=1,
-                    padding=0
+                    padding=0, 
+                    bias=False
                 )
             )
 
@@ -270,7 +274,7 @@ class MultiHeadConvNNAttention(nn.Module):
             
             q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
 
-            similarity_matrix = self._calculate_cosine_matrix(k, q) if self.magnitude_type == 'cosine' else self._calculate_euclidean_matrix(k, q, sqrt=True)
+            similarity_matrix = self._calculate_matmul_matrix(k, q) if self.magnitude_type == 'matmul' else self._calculate_cosine_matrix(k, q) if self.magnitude_type == 'cosine' else self._calculate_euclidean_matrix(k, q, sqrt=True)
 
             
             prime = self._prime(v, similarity_matrix, self.K, self.maximum) if not self.softmax_topk_val else self._prime_softmax(v, similarity_matrix, self.K, self.maximum)
@@ -342,7 +346,12 @@ class MultiHeadConvNNAttention(nn.Module):
 
         v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()
         prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
-        prime = topk_values_exp * prime 
+
+        # Normalize by K for distance metrics 
+        if not maximum: 
+            prime = prime / (topk_values_exp + 1e-8)
+        else:
+            prime = topk_values_exp * prime 
 
         prime = prime.view(b, c, -1)
 
@@ -368,15 +377,23 @@ class MultiHeadConvNNAttention(nn.Module):
         # Gather matrix values and apply similarity weighting 
         v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()    
         prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
-        prime = topk_values_exp * prime
-
+        
+        if not maximum:  # euclidean distance
+            prime = prime / (topk_values_exp + 1e-8)
+        else:
+            prime = topk_values_exp * prime
         prime = prime.view(b, c, -1)
         return prime
 
     def _prime_softmax(self, v, qk, K, maximum):
         b, c, t = v.shape
         topk_values, topk_indices = torch.topk(qk, k=K, dim=2, largest=maximum)
-        topk_values = torch.softmax(topk_values, dim=-1)
+        
+        # Apply softmax
+        if maximum:  # cosine/matmul (maximize)
+            topk_values = torch.softmax(topk_values, dim=-1)
+        else:  # euclidean (minimize) - negate before softmax
+            topk_values = torch.softmax(-topk_values, dim=-1)
 
         topk_indices_exp = topk_indices.unsqueeze(1).expand(b, c, t, K)
         topk_values_exp = topk_values.unsqueeze(1).expand(b, c, t, K)
@@ -403,10 +420,13 @@ class MultiHeadConvNNAttention(nn.Module):
         topk_values_exp = topk_values.unsqueeze(1).expand(b, c, t, K-1)
         ones = torch.ones((b, c, t, 1), device=v.device)
         topk_values_exp = torch.cat((ones, topk_values_exp), dim=-1)
-
-        # Apply softmax over all K values (self-token + K-1 neighbors)
-        topk_values_exp = torch.softmax(topk_values_exp, dim=-1)
         
+        # Apply softmax
+        if maximum:
+            topk_values_exp = torch.softmax(topk_values_exp, dim=-1)
+        else:
+            topk_values_exp = torch.softmax(-topk_values_exp, dim=-1)
+                
         # Gather matrix values and apply similarity weighting 
         v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()    
         prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
