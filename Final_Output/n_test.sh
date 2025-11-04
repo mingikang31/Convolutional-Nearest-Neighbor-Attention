@@ -49,7 +49,7 @@ for dataset in "${DATASETS[@]}"; do
                         --layer $block \
                         --patch_size 16 \
                         --num_layers 12 \
-                        --num_heads 3 \
+                        --num_heads 1 \
                         --d_hidden 192 \
                         --d_mlp 768 \
                         --dropout 0.1 \

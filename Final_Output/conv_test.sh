@@ -9,7 +9,7 @@ DATASETS=("cifar10" "cifar100")
 K_VALUES=("9")  
 BLOCKS=("ConvNNAttention")
 CONV_TYPES=("standard" "depthwise" "depthwise-separable")
-LR="1e-3"                                         
+LR="1e-4"                                         
 
 # Counter for progress
 TOTAL=$((${#DATASETS[@]} * ${#BLOCKS[@]} * ${#K_VALUES[@]}))
@@ -46,7 +46,7 @@ for dataset in "${DATASETS[@]}"; do
                     --layer $block \
                     --patch_size 16 \
                     --num_layers 12 \
-                    --num_heads 3 \
+                    --num_heads 1 \
                     --d_hidden 192 \
                     --d_mlp 768 \
                     --dropout 0.1 \
