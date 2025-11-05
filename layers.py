@@ -160,11 +160,11 @@ class MultiHeadConvNNAttention(nn.Module):
         # 3 types of sampling: all, random, spatial
         self.sampling_type = sampling_type
         self.num_samples = int(num_samples) 
-        self.sample_padding = int(sample_padding) if sampling_type == 'spatial' else 0    
+        self.sample_padding = int(sample_padding) if sampling_type == 'spatial' else 0
 
         # Similarity Metric 
         self.magnitude_type = magnitude_type
-        self.maximum = True if self.magnitude_type == 'cosine' else False
+        self.maximum = True if self.magnitude_type in ('cosine', 'matmul') else False
 
         # Coordinate Encoding (optional) 
         self.coordinate_encoding = coordinate_encoding
