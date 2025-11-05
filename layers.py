@@ -96,10 +96,10 @@ class MultiHeadAttention(nn.Module):
         self.d_k = d_hidden // num_heads # dimension of each head
         self.dropout = nn.Dropout(attention_dropout)
         
-        self.W_q = nn.Linear(d_hidden, d_hidden)
-        self.W_k = nn.Linear(d_hidden, d_hidden)
-        self.W_v = nn.Linear(d_hidden, d_hidden)
-        self.W_o = nn.Linear(d_hidden, d_hidden)        
+        self.W_q = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_k = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_v = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_o = nn.Linear(d_hidden, d_hidden, bias=False)        
     
     def scaled_dot_product_attention(self, Q, K, V, mask=None):
         attn_scores = torch.matmul(Q, K.transpose(-2, -1)) / np.sqrt(self.d_k)
