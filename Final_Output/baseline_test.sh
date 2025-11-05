@@ -1,21 +1,8 @@
 #!/bin/bash 
-#SBATCH --nodes=1 
-#SBATCH --mem=64G
-#SBATCH -p arm --gres=shard:4
-#SBATCH --cpus-per-task=12
-#SBATCH --job-name=VIT-GH-Baseline
-#SBATCH --time=96:00:00
-#SBATCH --output=slurm_out/%j.out
-#SBATCH --error=slurm_out/%j.err
-#SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT_80
-#SBATCH --mail-user=mkang2@bowdoin.edu
 
-cd /mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention
+### Conv-Test for CVPR paper 
 
-# Setup conda
-source ~/.bashrc
-conda activate mingi-arm
-
+cd /home/exouser/Convolutional-Nearest-Neighbor-Attention/
 
 # VIT-Tiny Configuration 
 # patch_size: 16
@@ -65,4 +52,3 @@ for dataset in "${DATASETS[@]}"; do
    #     --clip_grad_norm 1.0 --scheduler none --seed 42 --device cuda --output_dir $output_dir3
 
 done
-
