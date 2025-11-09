@@ -6,7 +6,7 @@ cd /home/exouser/Convolutional-Nearest-Neighbor-Attention/
 
 # Configuration
 DATASETS=("cifar10" "cifar100")
-K_VALUES=("9")  
+K_VALUES=("16" "25" "36") # K_VALUES("9" "16" "25" "36")
 BLOCKS=("ConvNNAttention")
 CONV_TYPES=("standard" "depthwise" "depthwise-separable")
 LR="1e-4"                                         
