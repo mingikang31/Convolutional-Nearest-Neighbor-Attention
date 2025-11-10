@@ -1,13 +1,24 @@
-#!/bin/bash 
+#! /bin/bash 
+#SBATCH --nodes=1 
+#SBATCH --mem=64G
+#SBATCH -p gpu --gres=gpu:a100:1
+#SBATCH --cpus-per-task=4
+#SBATCH --job-name=a100
+#SBATCH --time=500:00:00
+#SBATCH --output=slurm_out/%j.out
+#SBATCH --error=slurm_out/%j.err
+#SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT_80
+#SBATCH --mail-user=mkang2@bowdoin.edu
 
-### N-Test for CVPR paper 
-cd /home/exouser/Convolutional-Nearest-Neighbor-Attention/
+source ~/.bashrc
+conda activate mingi
+cd /mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention
 
 # Configuration
 DATASETS=("cifar10" "cifar100")
 K_VALUES=("9")  
 BLOCKS=("ConvNNAttention")
-SAMPLING_TYPE=("random" "spatial")
+SAMPLING_TYPE=("spatial")
 N_SAMPLES=("16" "32" "48" "64" "80" "96" "112" "128" "144" "160" "176" "192")
 LR="1e-4"                                         
 
@@ -39,7 +50,7 @@ for dataset in "${DATASETS[@]}"; do
                     COUNT=$((COUNT + 1))
                 
                     # Create output directory
-                    output_dir="./Final_Output/N_test/ViT-Tiny-$(echo $dataset | awk '{print toupper($0)}')/${block}_K${k}_N${n_samples}_${sampling_type}_s42"
+                    output_dir="./Final_Output/N_test_correct/ViT-Tiny-$(echo $dataset | awk '{print toupper($0)}')/${block}_K${k}_N${n_samples}_${sampling_type}_s42"
                     
                     echo "[$COUNT/$TOTAL] Dataset=$dataset | K=$k | Block=$block | N_Samples=$n_samples | Sampling_Type=$sampling_type"
                     echo "Output: $output_dir"
