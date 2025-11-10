@@ -96,10 +96,10 @@ class MultiHeadAttention(nn.Module):
         self.d_k = d_hidden // num_heads # dimension of each head
         self.dropout = nn.Dropout(attention_dropout)
         
-        self.W_q = nn.Linear(d_hidden, d_hidden)
-        self.W_k = nn.Linear(d_hidden, d_hidden)
-        self.W_v = nn.Linear(d_hidden, d_hidden)
-        self.W_o = nn.Linear(d_hidden, d_hidden)        
+        self.W_q = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_k = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_v = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_o = nn.Linear(d_hidden, d_hidden, bias=False)        
     
     def scaled_dot_product_attention(self, Q, K, V, mask=None):
         attn_scores = torch.matmul(Q, K.transpose(-2, -1)) / np.sqrt(self.d_k)
@@ -160,11 +160,11 @@ class MultiHeadConvNNAttention(nn.Module):
         # 3 types of sampling: all, random, spatial
         self.sampling_type = sampling_type
         self.num_samples = int(num_samples) 
-        self.sample_padding = int(sample_padding) if sampling_type == 'spatial' else 0    
+        self.sample_padding = int(sample_padding) if sampling_type == 'spatial' else 0
 
         # Similarity Metric 
         self.magnitude_type = magnitude_type
-        self.maximum = True if self.magnitude_type == 'cosine' else False
+        self.maximum = True if self.magnitude_type in ('cosine', 'matmul') else False
 
         # Coordinate Encoding (optional) 
         self.coordinate_encoding = coordinate_encoding

@@ -1,0 +1,2 @@
+/var/spool/slurmd/job22785/slurm_script: line 21: syntax error near unexpected token `)'
+/var/spool/slurmd/job22785/slurm_script: line 21: `SAMPLING_TYPE=("random")# "spatial")'

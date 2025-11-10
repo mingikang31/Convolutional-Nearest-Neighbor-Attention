@@ -1,12 +1,24 @@
 #!/bin/bash 
+#SBATCH --nodes=1 
+#SBATCH --mem=64G
+#SBATCH -p arm --gres=shard:4
+#SBATCH --cpus-per-task=12
+#SBATCH --job-name=ARM
+#SBATCH --time=72:00:00
+#SBATCH --output=slurm_out/%j.out
+#SBATCH --error=slurm_out/%j.err
+#SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT_80
+#SBATCH --mail-user=mkang2@bowdoin.edu
 
-### K-Test for CVPR paper 
-cd /home/exouser/Convolutional-Nearest-Neighbor-Attention/
+source ~/.bashrc
+conda activate mingi-arm
+
+cd /mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention
 
 # Configuration
 DATASETS=("cifar10" "cifar100")
-K_VALUES=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12")  
-BLOCKS=("ConvNNAttention" "KvtAttention")
+K_VALUES=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "16" "25" "36")  
+BLOCKS=("ConvNNAttention") #"KvtAttention")
 LR="1e-4"                                         
 
 # Counter for progress
@@ -33,7 +45,7 @@ for dataset in "${DATASETS[@]}"; do
             COUNT=$((COUNT + 1))
         
             # Create output directory
-            output_dir="./Final_Output/K_test/ViT-Tiny-$(echo $dataset | awk '{print toupper($0)}')/${block}_K${k}_s42"
+            output_dir="./Final_Output/K_test_correct/ViT-Tiny-$(echo $dataset | awk '{print toupper($0)}')/${block}_K${k}_s42"
             
             echo "[$COUNT/$TOTAL] Dataset=$dataset | K=$k | Block=$block"
             echo "Output: $output_dir"
@@ -84,54 +96,54 @@ done
 
 
 
-python main.py \
-    --layer KvtAttention \
-    --patch_size 16 \ 
-    --num_layers 12 \ 
-    --num_heads 3 \ 
-    --d_hidden 192 \
-    --d_mlp 768 \
-    --dropout 0.1 \
-    --attention_dropout 0.1 \
-    --K 100 \
-    --dataset cifar10 \
-    --resize 224 \
-    --batch_size 256 \
-    --num_epochs 150 \
-    --criterion CrossEntropy \
-    --optimizer adamw \
-    --weight_decay 1e-2 \
-    --lr $LR \
-    --clip_grad_norm 1.0 \
-    --scheduler none \ 
-    --seed 42 \
-    --device cuda \ 
-    --output_dir "./Final_Output/K_test/ViT-Tiny-CIFAR10/KvtAttention_K100_s42"
+# python main.py \
+#     --layer KvtAttention \
+#     --patch_size 16 \ 
+#     --num_layers 12 \ 
+#     --num_heads 3 \ 
+#     --d_hidden 192 \
+#     --d_mlp 768 \
+#     --dropout 0.1 \
+#     --attention_dropout 0.1 \
+#     --K 100 \
+#     --dataset cifar10 \
+#     --resize 224 \
+#     --batch_size 256 \
+#     --num_epochs 150 \
+#     --criterion CrossEntropy \
+#     --optimizer adamw \
+#     --weight_decay 1e-2 \
+#     --lr $LR \
+#     --clip_grad_norm 1.0 \
+#     --scheduler none \ 
+#     --seed 42 \
+#     --device cuda \ 
+#     --output_dir "./Final_Output/K_test/ViT-Tiny-CIFAR10/KvtAttention_K100_s42"
 
 
-python main.py \
-    --layer KvtAttention \
-    --patch_size 16 \ 
-    --num_layers 12 \ 
-    --num_heads 3 \ 
-    --d_hidden 192 \
-    --d_mlp 768 \
-    --dropout 0.1 \
-    --attention_dropout 0.1 \
-    --K 100 \
-    --dataset cifar100 \
-    --resize 224 \
-    --batch_size 256 \
-    --num_epochs 150 \
-    --criterion CrossEntropy \
-    --optimizer adamw \
-    --weight_decay 1e-2 \
-    --lr $LR \
-    --clip_grad_norm 1.0 \
-    --scheduler none \ 
-    --seed 42 \
-    --device cuda \ 
-    --output_dir "./Final_Output/K_test/ViT-Tiny-CIFAR100/KvtAttention_K100_s42"
+# python main.py \
+#     --layer KvtAttention \
+#     --patch_size 16 \ 
+#     --num_layers 12 \ 
+#     --num_heads 3 \ 
+#     --d_hidden 192 \
+#     --d_mlp 768 \
+#     --dropout 0.1 \
+#     --attention_dropout 0.1 \
+#     --K 100 \
+#     --dataset cifar100 \
+#     --resize 224 \
+#     --batch_size 256 \
+#     --num_epochs 150 \
+#     --criterion CrossEntropy \
+#     --optimizer adamw \
+#     --weight_decay 1e-2 \
+#     --lr $LR \
+#     --clip_grad_norm 1.0 \
+#     --scheduler none \ 
+#     --seed 42 \
+#     --device cuda \ 
+#     --output_dir "./Final_Output/K_test/ViT-Tiny-CIFAR100/KvtAttention_K100_s42"
 
 
 echo "=========================================="
