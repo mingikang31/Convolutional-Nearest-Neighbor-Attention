@@ -1,41 +1,28 @@
-#! /bin/bash 
-#SBATCH --nodes=1 
-#SBATCH --mem=64G
-#SBATCH -p gpu --gres=gpu:a100:1
-#SBATCH --cpus-per-task=4
-#SBATCH --job-name=a100
-#SBATCH --time=500:00:00
-#SBATCH --output=slurm_out/%j.out
-#SBATCH --error=slurm_out/%j.err
-#SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT_80
-#SBATCH --mail-user=mkang2@bowdoin.edu
+#!/bin/bash 
 
-source ~/.bashrc
-conda activate mingi
-cd /mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention
+### LR-Test for CVPR paper 
+
+cd /home/exouser/Convolutional-Nearest-Neighbor-Attention/
 
 # Configuration
 DATASETS=("cifar10" "cifar100")
 K_VALUES=("9")  
 BLOCKS=("ConvNNAttention")
-SAMPLING_TYPE=("spatial")
-N_SAMPLES=("16" "32" "48" "64" "80" "96" "112" "128" "144" "160" "176" "192")
-LR="1e-4"                                         
+CONV_TYPES=("depthwise")
+LR=("1e-5" "1e-4" "1e-3")                                
 
 # Counter for progress
-TOTAL=$((${#DATASETS[@]} * ${#BLOCKS[@]} * ${#K_VALUES[@]} * ${#N_SAMPLES[@]} * ${#SAMPLING_TYPE[@]}))
+TOTAL=$((${#DATASETS[@]} * ${#BLOCKS[@]} * ${#K_VALUES[@]} * ${#LR[@]}))
 COUNT=0
 FAILED=0
 
 echo "=========================================="
-echo "N-Test Configuration"
+echo "LR-Test Configuration"
 echo "=========================================="
 echo "Total experiments: $TOTAL"
 echo "Datasets: ${DATASETS[@]}"
 echo "Blocks: ${BLOCKS[@]}"
 echo "K values: ${K_VALUES[@]}"
-echo "N samples: ${N_SAMPLES[@]}"
-echo "Sampling types: ${SAMPLING_TYPE[@]}"
 echo "Learning rate: $LR"
 echo "=========================================="
 echo ""
@@ -44,15 +31,15 @@ echo ""
 for dataset in "${DATASETS[@]}"; do
     for block in "${BLOCKS[@]}"; do
         for k in "${K_VALUES[@]}"; do
-            for n_samples in "${N_SAMPLES[@]}"; do
-                for sampling_type in "${SAMPLING_TYPE[@]}"; do
+            for lr in "${LR[@]}"; do
+                for conv_type in "${CONV_TYPES[@]}"; do
 
                     COUNT=$((COUNT + 1))
                 
                     # Create output directory
-                    output_dir="./Final_Output/N_test_correct/ViT-Tiny-$(echo $dataset | awk '{print toupper($0)}')/${block}_K${k}_N${n_samples}_${sampling_type}_s42"
+                    output_dir="./Final_Output/lr_test/ViT-Tiny-$(echo $dataset | awk '{print toupper($0)}')_${lr}/${block}_${conv_type}_K${k}_s42"
                     
-                    echo "[$COUNT/$TOTAL] Dataset=$dataset | K=$k | Block=$block | N_Samples=$n_samples | Sampling_Type=$sampling_type"
+                    echo "[$COUNT/$TOTAL] Dataset=$dataset | K=$k | Block=$block"
                     echo "Output: $output_dir"
                     
                     # Single python call with padding set conditionally
@@ -65,11 +52,11 @@ for dataset in "${DATASETS[@]}"; do
                         --d_mlp 768 \
                         --dropout 0.1 \
                         --attention_dropout 0.1 \
-                        --convolution_type depthwise \
+                        --convolution_type $conv_type \
                         --softmax_topk_val \
                         --K $k \
-                        --sampling_type $sampling_type \
-                        --num_samples $n_samples \
+                        --sampling_type all \
+                        --num_samples -1 \
                         --magnitude_type matmul \
                         --dataset $dataset \
                         --resize 224 \
@@ -78,7 +65,7 @@ for dataset in "${DATASETS[@]}"; do
                         --criterion CrossEntropy \
                         --optimizer adamw \
                         --weight_decay 1e-2 \
-                        --lr $LR \
+                        --lr $lr \
                         --clip_grad_norm 1.0 \
                         --scheduler none \
                         --seed 42 \
@@ -93,8 +80,6 @@ for dataset in "${DATASETS[@]}"; do
                         FAILED=$((FAILED + 1))
                     fi
                     echo ""
-                    
-                
                 done
             done
         done
@@ -103,9 +88,8 @@ done
 
 
 
-
 echo "=========================================="
-echo "N-Test Complete!"
+echo "lr-Test Complete!"
 echo "=========================================="
 echo "Total experiments: $TOTAL"
 echo "Successful: $((TOTAL - FAILED))"

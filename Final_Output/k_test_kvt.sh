@@ -1,24 +1,23 @@
-#!/bin/bash 
+#! /bin/bash 
 #SBATCH --nodes=1 
 #SBATCH --mem=64G
-#SBATCH -p arm --gres=shard:4
-#SBATCH --cpus-per-task=12
-#SBATCH --job-name=ARM
-#SBATCH --time=72:00:00
+#SBATCH -p gpu --gres=gpu:a100:1
+#SBATCH --cpus-per-task=4
+#SBATCH --job-name=a100
+#SBATCH --time=500:00:00
 #SBATCH --output=slurm_out/%j.out
 #SBATCH --error=slurm_out/%j.err
 #SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT_80
 #SBATCH --mail-user=mkang2@bowdoin.edu
 
 source ~/.bashrc
-conda activate mingi-arm
-
+conda activate mingi
 cd /mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention
 
 # Configuration
 DATASETS=("cifar10" "cifar100")
-K_VALUES=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "16" "25" "36")  
-BLOCKS=("ConvNNAttention") #"KvtAttention")
+K_VALUES=("16" "25" "36")  
+BLOCKS=("KvtAttention")
 LR="1e-4"                                         
 
 # Counter for progress
@@ -45,7 +44,7 @@ for dataset in "${DATASETS[@]}"; do
             COUNT=$((COUNT + 1))
         
             # Create output directory
-            output_dir="./Final_Output/K_test_correct/ViT-Tiny-$(echo $dataset | awk '{print toupper($0)}')/${block}_K${k}_s42"
+            output_dir="./Final_Output/K_test/ViT-Tiny-$(echo $dataset | awk '{print toupper($0)}')/${block}_K${k}_s42"
             
             echo "[$COUNT/$TOTAL] Dataset=$dataset | K=$k | Block=$block"
             echo "Output: $output_dir"
