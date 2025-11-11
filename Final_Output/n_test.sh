@@ -7,7 +7,7 @@ cd /home/exouser/Convolutional-Nearest-Neighbor-Attention/
 DATASETS=("cifar10" "cifar100")
 K_VALUES=("9")  
 BLOCKS=("ConvNNAttention")
-SAMPLING_TYPE=("random" "spatial")
+SAMPLING_TYPE=("spatial")
 N_SAMPLES=("16" "32" "48" "64" "80" "96" "112" "128" "144" "160" "176" "192")
 LR="1e-4"                                         
 
@@ -39,7 +39,7 @@ for dataset in "${DATASETS[@]}"; do
                     COUNT=$((COUNT + 1))
                 
                     # Create output directory
-                    output_dir="./Final_Output/N_test/ViT-Tiny-$(echo $dataset | awk '{print toupper($0)}')/${block}_K${k}_N${n_samples}_${sampling_type}_s42"
+                    output_dir="./Final_Output/N_test_correct/ViT-Tiny-$(echo $dataset | awk '{print toupper($0)}')/${block}_K${k}_N${n_samples}_${sampling_type}_s42"
                     
                     echo "[$COUNT/$TOTAL] Dataset=$dataset | K=$k | Block=$block | N_Samples=$n_samples | Sampling_Type=$sampling_type"
                     echo "Output: $output_dir"
