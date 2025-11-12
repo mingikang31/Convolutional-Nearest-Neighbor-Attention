@@ -7,7 +7,7 @@ cd /home/exouser/Convolutional-Nearest-Neighbor-Attention/
 # Configuration
 DATASETS=("cifar10" "cifar100")
 K_VALUES=("9")  
-BLOCKS=("ConvNNAttention")
+BLOCKS=("BranchAttention")
 CONV_TYPES=("depthwise")
 LR=("1e-5" "1e-4" "1e-3")                                
 
@@ -37,7 +37,7 @@ for dataset in "${DATASETS[@]}"; do
                     COUNT=$((COUNT + 1))
                 
                     # Create output directory
-                    output_dir="./Final_Output/lr_test/ViT-Tiny-$(echo $dataset | awk '{print toupper($0)}')_${lr}/${block}_${conv_type}_K${k}_s42"
+                    output_dir="./Final_Output/lr_test/ViT-Tiny-$(echo $dataset | awk '{print toupper($0)}')_${lr}/${block}_${conv_type}_K${k}_cosine_s42"
                     
                     echo "[$COUNT/$TOTAL] Dataset=$dataset | K=$k | Block=$block"
                     echo "Output: $output_dir"
@@ -57,7 +57,7 @@ for dataset in "${DATASETS[@]}"; do
                         --K $k \
                         --sampling_type all \
                         --num_samples -1 \
-                        --magnitude_type matmul \
+                        --magnitude_type cosine \
                         --dataset $dataset \
                         --resize 224 \
                         --batch_size 256 \
