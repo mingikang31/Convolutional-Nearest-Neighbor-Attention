@@ -14,6 +14,7 @@ from layers import (
     MultiHeadBranchingAttention,
     MultiHeadKvtAttention, 
     MultiHeadLocalAttention, 
+    MultiHeadSparseAttention
 )
 
 
@@ -230,9 +231,19 @@ class TransformerEncoder(nn.Module):
             
             self.attention = NeighborhoodAttention1D(embed_dim=d_hidden, num_heads=num_heads, kernel_size=args.K, proj_drop=attention_dropout, **neighborhood_attention_params
             ) 
-    
+        elif args.layer == "SparseAttention":
+            sparse_attention_params = {
+                "d_hidden": d_hidden,
+                "num_heads": num_heads,
+                "attention_dropout": attention_dropout,
+                "attn_mode": args.sparse_mode,
+                "local_attn_ctx": args.sparse_context_window,
+                "blocksize": args.sparse_block_size
+            }
+            self.attention = MultiHeadSparseAttention(**sparse_attention_params)
+
         else: 
-            raise ValueError("Invalid layer type. Must be one of ['Attention', 'ConvNNAttention', 'KvtAttention', 'LocalAttention', 'NeighborhoodAttention', 'BranchConv', 'BranchAttention']")
+            raise ValueError("Invalid layer type. Must be one of ['Attention', 'ConvNNAttention', 'KvtAttention', 'LocalAttention', 'NeighborhoodAttention', 'SparseAttention', 'BranchConv', 'BranchAttention']")
 
         self.norm1 = nn.LayerNorm(d_hidden)
         self.norm2 = nn.LayerNorm(d_hidden)

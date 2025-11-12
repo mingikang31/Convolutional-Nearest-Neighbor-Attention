@@ -1,8 +1,8 @@
 #!/bin/bash 
 #SBATCH --nodes=1 
 #SBATCH --mem=64G
-#SBATCH -p arm --gres=shard:4
-#SBATCH --cpus-per-task=12
+#SBATCH -p arm --gres=shard:8
+#SBATCH --cpus-per-task=16
 #SBATCH --job-name=ARM
 #SBATCH --time=72:00:00
 #SBATCH --output=slurm_out/%j.out
@@ -17,7 +17,7 @@ cd /mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention
 
 # Configuration
 DATASETS=("cifar10" "cifar100")
-K_VALUES=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "16" "25" "36")  
+K_VALUES=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "16" "25")  
 BLOCKS=("ConvNNAttention") #"KvtAttention")
 LR="1e-4"                                         
 
@@ -27,7 +27,7 @@ COUNT=0
 FAILED=0
 
 echo "=========================================="
-echo "K-Test Configuration"
+echo "K-Test for Random Sampling Configuration"
 echo "=========================================="
 echo "Total experiments: $TOTAL"
 echo "Datasets: ${DATASETS[@]}"
@@ -45,7 +45,7 @@ for dataset in "${DATASETS[@]}"; do
             COUNT=$((COUNT + 1))
         
             # Create output directory
-            output_dir="./Final_Output/K_test_correct/ViT-Tiny-$(echo $dataset | awk '{print toupper($0)}')/${block}_K${k}_s42"
+            output_dir="./Final_Output/K_test_correct_random/ViT-Tiny-$(echo $dataset | awk '{print toupper($0)}')/${block}_Random_K${k}_NS32_s42"
             
             echo "[$COUNT/$TOTAL] Dataset=$dataset | K=$k | Block=$block"
             echo "Output: $output_dir"
@@ -96,58 +96,58 @@ done
 
 
 
-# python main.py \
-#     --layer KvtAttention \
-#     --patch_size 16 \ 
-#     --num_layers 12 \ 
-#     --num_heads 3 \ 
-#     --d_hidden 192 \
-#     --d_mlp 768 \
-#     --dropout 0.1 \
-#     --attention_dropout 0.1 \
-#     --K 100 \
-#     --dataset cifar10 \
-#     --resize 224 \
-#     --batch_size 256 \
-#     --num_epochs 150 \
-#     --criterion CrossEntropy \
-#     --optimizer adamw \
-#     --weight_decay 1e-2 \
-#     --lr $LR \
-#     --clip_grad_norm 1.0 \
-#     --scheduler none \ 
-#     --seed 42 \
-#     --device cuda \ 
-#     --output_dir "./Final_Output/K_test/ViT-Tiny-CIFAR10/KvtAttention_K100_s42"
+python main.py \
+    --layer KvtAttention \
+    --patch_size 16 \
+    --num_layers 12 \
+    --num_heads 1 \
+    --d_hidden 192 \
+    --d_mlp 768 \
+    --dropout 0.1 \
+    --attention_dropout 0.1 \
+    --K 100 \
+    --dataset cifar10 \
+    --resize 224 \
+    --batch_size 256 \
+    --num_epochs 150 \
+    --criterion CrossEntropy \
+    --optimizer adamw \
+    --weight_decay 1e-2 \
+    --lr $LR \
+    --clip_grad_norm 1.0 \
+    --scheduler none \
+    --seed 42 \
+    --device cuda \
+    --output_dir "./Final_Output/K_test/ViT-Tiny-CIFAR10/KvtAttention_K100_s42"
 
 
-# python main.py \
-#     --layer KvtAttention \
-#     --patch_size 16 \ 
-#     --num_layers 12 \ 
-#     --num_heads 3 \ 
-#     --d_hidden 192 \
-#     --d_mlp 768 \
-#     --dropout 0.1 \
-#     --attention_dropout 0.1 \
-#     --K 100 \
-#     --dataset cifar100 \
-#     --resize 224 \
-#     --batch_size 256 \
-#     --num_epochs 150 \
-#     --criterion CrossEntropy \
-#     --optimizer adamw \
-#     --weight_decay 1e-2 \
-#     --lr $LR \
-#     --clip_grad_norm 1.0 \
-#     --scheduler none \ 
-#     --seed 42 \
-#     --device cuda \ 
-#     --output_dir "./Final_Output/K_test/ViT-Tiny-CIFAR100/KvtAttention_K100_s42"
+python main.py \
+    --layer KvtAttention \
+    --patch_size 16 \
+    --num_layers 12 \
+    --num_heads 1 \
+    --d_hidden 192 \
+    --d_mlp 768 \
+    --dropout 0.1 \
+    --attention_dropout 0.1 \
+    --K 100 \
+    --dataset cifar100 \
+    --resize 224 \
+    --batch_size 256 \
+    --num_epochs 150 \
+    --criterion CrossEntropy \
+    --optimizer adamw \
+    --weight_decay 1e-2 \
+    --lr $LR \
+    --clip_grad_norm 1.0 \
+    --scheduler none \
+    --seed 42 \
+    --device cuda \
+    --output_dir "./Final_Output/K_test/ViT-Tiny-CIFAR100/KvtAttention_K100_s42"
 
 
 echo "=========================================="
-echo "K-Test Complete!"
+echo "K-Test for Random Sampling Complete!"
 echo "=========================================="
 echo "Total experiments: $TOTAL"
 echo "Successful: $((TOTAL - FAILED))"

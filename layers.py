@@ -819,3 +819,191 @@ class MultiHeadLocalAttention(nn.Module):
         return out, kv
 
 
+
+# Sparse Attention Implementation
+# https://github.com/kyegomez/SparseAttention/blob/main/sparse_attention.py
+
+import numpy as np
+import torch
+import torch.nn.functional as F
+from torch import nn
+
+def get_attn_mask(n, attn_mode, local_attn_ctx=None):
+    if attn_mode == 'all':
+        b = torch.tril(torch.ones([n, n]))
+    elif attn_mode == 'local':
+        bandwidth = local_attn_ctx
+        ctx = min(n - 1, bandwidth - 1)
+        b = torch.tril(torch.ones([n, n]), ctx)
+    elif attn_mode == 'strided':
+        stride = local_attn_ctx
+        x = torch.reshape(torch.arange(n, dtype=torch.int32), [n, 1])
+        y = torch.transpose(x, 0, 1)
+        z = torch.zeros([n, n], dtype=torch.int32)
+        q = z + x
+        k = z + y
+        c1 = q >= k
+        c2 = torch.eq(torch.fmod(q - k, stride), 0)
+        c3 = torch.logical_and(c1, c2)
+        b = c3.float()
+    else:
+        raise ValueError('Not yet implemented')
+    b = torch.reshape(b, [1, 1, n, n])
+    return b
+
+def strided_transpose(x, n_ctx, local_attn_ctx, blocksize):
+    bT_ctx = n_ctx // local_attn_ctx
+    assert bT_ctx % blocksize == 0, f'{bT_ctx}, {blocksize}'
+    n, t, embd = x.size()
+    x = torch.reshape(x, [n, bT_ctx, local_attn_ctx, embd])
+    x = torch.transpose(x, 0, 2, 1, 3)
+    x = torch.reshape(x, [n, t, embd])
+    return x
+
+def split_heads(x, n):
+    return torch.transpose(split_states(x, n), 0, 2, 1, 3)
+
+def merge_heads(x):
+    return merge_states(torch.transpose(x, 0, 2, 1, 3))
+
+def split_states(x, n):
+    """
+    reshape (batch, pixel, state) -> (batch, pixel, head, head_state)
+    """
+    x_shape = x.size()
+    m = x_shape[-1]
+    new_x_shape = x_shape[:-1] + [n, m // n]
+    return torch.reshape(x, new_x_shape)
+
+def merge_states(x):
+    """
+    reshape (batch, pixel, head, head_state) -> (batch, pixel, state)
+    """
+    x_shape = x.size()
+    new_x_shape = x_shape[:-2] + [np.prod(x_shape[-2:])]
+    return torch.reshape(x, new_x_shape)
+
+def attention_impl(q, k, v, heads, attn_mode, local_attn_ctx=None):
+    q = split_heads(q, heads)
+    k = split_heads(k, heads)
+    v = split_heads(v, heads)
+    n_timesteps = k.size()[2]
+    mask = get_attn_mask(n_timesteps, attn_mode, local_attn_ctx).float()
+    w = torch.matmul(q, k.transpose(-2, -1))
+    scale_amount = 1.0 / np.sqrt(q.size()[-1])
+    w = w * scale_amount
+    w = w * mask + -1e9 * (1 - mask)
+    w = F.softmax(w, dim=-1)
+    a = torch.matmul(w, v)
+    a = merge_heads(a)
+    return a
+
+def blocksparse_attention_impl(q, k, v, heads, attn_mode, local_attn_ctx=None, blocksize=32, num_verts=None, vertsize=None):
+    n_ctx = q.size()[1]
+    if attn_mode == 'strided':
+        q = strided_transpose(q, n_ctx, local_attn_ctx, blocksize)
+        k = strided_transpose(k, n_ctx, local_attn_ctx, blocksize)
+        v = strided_transpose(v, n_ctx, local_attn_ctx, blocksize)
+    n_state = q.size()[-1] // heads
+    scale_amount = 1.0 / np.sqrt(n_state)
+    w = torch.matmul(q, k.transpose(-2, -1))
+    w = F.softmax(w * scale_amount, dim=-1)
+    a = torch.matmul(w, v)
+    if attn_mode == 'strided':
+        n, t, embd = a.size()
+        bT_ctx = n_ctx // local_attn_ctx
+        a = torch.reshape(a, [n, local_attn_ctx, bT_ctx, embd])
+        a = torch.transpose(a, 0, 2, 1, 3)
+        a = torch.reshape(a, [n, t, embd])
+    return a
+
+class SparseAttention(nn.Module):
+    def __init__(self, heads, attn_mode, local_attn_ctx=None, blocksize=32):
+        super(SparseAttention, self).__init__()
+        self.heads = heads
+        self.attn_mode = attn_mode
+        self.local_attn_ctx = local_attn_ctx
+        self.blocksize = blocksize
+
+    def forward(self, q, k, v):
+        return blocksparse_attention_impl(q, k, v, self.heads, self.attn_mode, self.local_attn_ctx)
+
+
+class MultiHeadSparseAttention(nn.Module):
+    def __init__(self, d_hidden, num_heads, attention_dropout, attn_mode='all', local_attn_ctx=None, blocksize=32):
+        super(MultiHeadSparseAttention, self).__init__()
+        assert d_hidden % num_heads == 0, "d_hidden must be divisible by num_heads"
+        
+        self.d_hidden = d_hidden
+        self.num_heads = num_heads
+        self.d_k = d_hidden // num_heads
+        self.dropout = nn.Dropout(attention_dropout)
+        
+        # Linear projections
+        self.W_q = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_k = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_v = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_o = nn.Linear(d_hidden, d_hidden, bias=False)
+        
+        # Sparse attention parameters
+        self.attn_mode = attn_mode
+        self.local_attn_ctx = local_attn_ctx
+        self.blocksize = blocksize
+        
+    def split_head(self, x):
+        batch_size, seq_length, d_hidden = x.size()
+        return x.view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2)
+    
+    def combine_heads(self, x):
+        batch_size, _, seq_length, d_k = x.size()
+        return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.d_hidden)
+    
+    def forward(self, x, mask=None):
+        batch_size, seq_length, _ = x.size()
+        
+        # Project and split heads
+        q = self.split_head(self.W_q(x))  # (B, num_heads, seq_length, d_k)
+        k = self.split_head(self.W_k(x))
+        v = self.split_head(self.W_v(x))
+        
+        # Reshape for sparse attention: (B*num_heads, seq_length, d_k)
+        q = q.contiguous().view(batch_size * self.num_heads, seq_length, self.d_k)
+        k = k.contiguous().view(batch_size * self.num_heads, seq_length, self.d_k)
+        v = v.contiguous().view(batch_size * self.num_heads, seq_length, self.d_k)
+        
+        # Apply sparse attention
+        attn_output = blocksparse_attention_impl(
+            q, k, v, 
+            heads=self.num_heads, 
+            attn_mode=self.attn_mode, 
+            local_attn_ctx=self.local_attn_ctx,
+            blocksize=self.blocksize
+        )
+        
+        # Reshape back: (B, num_heads, seq_length, d_k)
+        attn_output = attn_output.view(batch_size, self.num_heads, seq_length, self.d_k)
+        
+        # Combine heads and project
+        output = self.W_o(self.combine_heads(attn_output))
+        output = self.dropout(output)
+        
+        return output
+
+
+# # Example usage:
+# if __name__ == "__main__":
+#     n_batch = 4
+#     n_ctx = 1024
+#     n_embd = 256
+#     heads = 4
+#     attn_mode = "all"
+#     local_attn_ctx = 32
+#     blocksize = 32
+
+#     q = torch.randn(n_batch, n_ctx, n_embd)
+#     k = torch.randn(n_batch, n_ctx, n_embd)
+#     v = torch.randn(n_batch, n_ctx, n_embd)
+
+#     model = SparseAttention(heads, attn_mode, local_attn_ctx, blocksize)
+#     output = model(q, k, v)
+#     print(output[0])

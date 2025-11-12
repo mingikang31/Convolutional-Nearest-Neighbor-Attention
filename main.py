@@ -29,7 +29,7 @@ def args_parser():
     parser = argparse.ArgumentParser(description="Convolutional Nearest Neighbor Attention training and evaluation", add_help=False) 
     
     # Model Arguments
-    parser.add_argument("--layer", type=str, default="Attention", choices=["Attention", "ConvNNAttention", "KvtAttention", "LocalAttention", "NeighborhoodAttention", "BranchConv", "BranchAttention"], help="Layer to use for training and evaluation")
+    parser.add_argument("--layer", type=str, default="Attention", choices=["Attention", "ConvNNAttention", "KvtAttention", "LocalAttention", "NeighborhoodAttention", "SparseAttention", "BranchConv", "BranchAttention"], help="Layer to use for training and evaluation")
 
     parser.add_argument("--patch_size", type=int, default=16, help="Patch size for Attention Models")
     parser.add_argument("--num_layers", type=int, default=12, help="Number of layers in the model")   
@@ -59,6 +59,11 @@ def args_parser():
 
     # Additional Layer Arguments for Conv1d
     parser.add_argument("--kernel_size", type=int, default=9, help="Kernel size for Conv1d Layer")
+
+    # Additional Layer Arguments for Sparse Attention
+    parser.add_argument("--sparse_mode", type=str, default="all", choices=["all", "local", "strided"], help="Sparsity mode for Sparse Attention Models")
+    parser.add_argument("--sparse_block_size", type=int, default=32, help="Block size for Sparse Attention Models")
+    parser.add_argument("--sparse_context_window", type=int, default=128, help="Context window for Sparse Attention Models")
 
     
     # Data Arguments
