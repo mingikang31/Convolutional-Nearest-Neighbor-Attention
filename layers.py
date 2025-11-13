@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import einsum
 import numpy as np 
+from typing import Optional
 
 from utils import default, LocalAttention, l2norm, exists, rearrange, apply_rotary_pos_emb
 
@@ -820,190 +821,212 @@ class MultiHeadLocalAttention(nn.Module):
 
 
 
-# Sparse Attention Implementation
-# https://github.com/kyegomez/SparseAttention/blob/main/sparse_attention.py
-
-import numpy as np
-import torch
-import torch.nn.functional as F
-from torch import nn
-
-def get_attn_mask(n, attn_mode, local_attn_ctx=None):
+### Code from : https://github.com/openai/sparse_attention/blob/master/utils.py ###
+def get_attn_mask(n, attn_mode, local_attn_ctx=None, device='cuda'):
     if attn_mode == 'all':
-        b = torch.tril(torch.ones([n, n]))
+        # ✓ BIDIRECTIONAL - all patches attend to all patches
+        b = torch.ones(n, n, device=device)
+    
     elif attn_mode == 'local':
+        # ✓ BIDIRECTIONAL LOCAL - attend to nearby patches in both directions
         bandwidth = local_attn_ctx
-        ctx = min(n - 1, bandwidth - 1)
-        b = torch.tril(torch.ones([n, n]), ctx)
+        # Create a band matrix (not just lower triangular)
+        b = torch.zeros(n, n, device=device)
+        for i in range(n):
+            start = max(0, i - bandwidth // 2)
+            end = min(n, i + bandwidth // 2 + 1)
+            b[i, start:end] = 1
+    
     elif attn_mode == 'strided':
+        # ✓ BIDIRECTIONAL STRIDED
         stride = local_attn_ctx
-        x = torch.reshape(torch.arange(n, dtype=torch.int32), [n, 1])
-        y = torch.transpose(x, 0, 1)
-        z = torch.zeros([n, n], dtype=torch.int32)
-        q = z + x
-        k = z + y
-        c1 = q >= k
-        c2 = torch.eq(torch.fmod(q - k, stride), 0)
-        c3 = torch.logical_and(c1, c2)
-        b = c3.float()
-    else:
-        raise ValueError('Not yet implemented')
-    b = torch.reshape(b, [1, 1, n, n])
+        x = torch.arange(n, dtype=torch.int32, device=device).view(n, 1)
+        y = x.t()
+        q = x.expand(n, n)
+        k = y.expand(n, n)
+        # Remove c1 = q >= k (this was the causal constraint!)
+        c2 = ((q - k).abs() % stride) == 0  # Distance is multiple of stride
+        b = c2.float()
+    
+    b = b.view(1, 1, n, n)
     return b
 
-def strided_transpose(x, n_ctx, local_attn_ctx, blocksize):
+
+def strided_transpose(x, n_ctx, local_attn_ctx, blocksize=None):
+    """
+    Transpose for strided attention pattern.
+    
+    Args:
+        x: tensor of shape [batch, seq_len, embd]
+        n_ctx: context length
+        local_attn_ctx: stride length
+        blocksize: not used in PyTorch version (kept for API compatibility)
+    
+    Returns:
+        transposed tensor
+    """
     bT_ctx = n_ctx // local_attn_ctx
-    assert bT_ctx % blocksize == 0, f'{bT_ctx}, {blocksize}'
-    n, t, embd = x.size()
-    x = torch.reshape(x, [n, bT_ctx, local_attn_ctx, embd])
-    x = torch.transpose(x, 0, 2, 1, 3)
-    x = torch.reshape(x, [n, t, embd])
+    n, t, embd = x.shape
+    x = x.view(n, bT_ctx, local_attn_ctx, embd)
+    x = x.permute(0, 2, 1, 3)
+    x = x.reshape(n, t, embd)
     return x
 
-def split_heads(x, n):
-    return torch.transpose(split_states(x, n), 0, 2, 1, 3)
+
+def split_heads(x, n_heads):
+    """
+    Split the last dimension into (n_heads, depth).
+    Transpose to shape [batch, n_heads, seq_len, depth]
+    """
+    batch_size, seq_len, d_model = x.shape
+    depth = d_model // n_heads
+    x = x.view(batch_size, seq_len, n_heads, depth)
+    return x.permute(0, 2, 1, 3)
+
 
 def merge_heads(x):
-    return merge_states(torch.transpose(x, 0, 2, 1, 3))
+    """
+    Merge heads back to original shape.
+    Input: [batch, n_heads, seq_len, depth]
+    Output: [batch, seq_len, d_model]
+    """
+    batch_size, n_heads, seq_len, depth = x.shape
+    x = x.permute(0, 2, 1, 3)
+    return x.reshape(batch_size, seq_len, n_heads * depth)
 
-def split_states(x, n):
-    """
-    reshape (batch, pixel, state) -> (batch, pixel, head, head_state)
-    """
-    x_shape = x.size()
-    m = x_shape[-1]
-    new_x_shape = x_shape[:-1] + [n, m // n]
-    return torch.reshape(x, new_x_shape)
 
-def merge_states(x):
+def attention_impl(q, k, v, n_heads, attention_dropout, attn_mode, local_attn_ctx=None):
     """
-    reshape (batch, pixel, head, head_state) -> (batch, pixel, state)
+    Standard attention implementation with different masking patterns.
+    
+    Args:
+        q, k, v: query, key, value tensors of shape [batch, seq_len, d_model]
+        n_heads: number of attention heads
+        attn_mode: attention pattern ('all', 'local', 'strided')
+        local_attn_ctx: context window for local/strided attention
+    
+    Returns:
+        attention output of shape [batch, seq_len, d_model]
     """
-    x_shape = x.size()
-    new_x_shape = x_shape[:-2] + [np.prod(x_shape[-2:])]
-    return torch.reshape(x, new_x_shape)
-
-def attention_impl(q, k, v, heads, attn_mode, local_attn_ctx=None):
-    q = split_heads(q, heads)
-    k = split_heads(k, heads)
-    v = split_heads(v, heads)
-    n_timesteps = k.size()[2]
-    mask = get_attn_mask(n_timesteps, attn_mode, local_attn_ctx).float()
+    # Split heads: [batch, n_heads, seq_len, depth]
+    q = split_heads(q, n_heads)
+    k = split_heads(k, n_heads)
+    v = split_heads(v, n_heads)
+    
+    # Get attention mask
+    n_timesteps = k.shape[2]
+    mask = get_attn_mask(n_timesteps, attn_mode, local_attn_ctx, device=q.device)
+    
+    # Scaled dot-product attention
+    # [batch, n_heads, seq_len, seq_len]
+    depth = q.shape[-1]
+    scale_amount = 1.0 / np.sqrt(depth)
+    
+    # Compute attention scores
     w = torch.matmul(q, k.transpose(-2, -1))
-    scale_amount = 1.0 / np.sqrt(q.size()[-1])
     w = w * scale_amount
+    
+    # Apply mask (using large negative value for masked positions)
     w = w * mask + -1e9 * (1 - mask)
+    
+    # Softmax
     w = F.softmax(w, dim=-1)
+
+    w = F.dropout(w, p=attention_dropout)
+    
+    # Apply attention to values
     a = torch.matmul(w, v)
+    
+    # Merge heads
     a = merge_heads(a)
+    
     return a
-
-def blocksparse_attention_impl(q, k, v, heads, attn_mode, local_attn_ctx=None, blocksize=32, num_verts=None, vertsize=None):
-    n_ctx = q.size()[1]
-    if attn_mode == 'strided':
-        q = strided_transpose(q, n_ctx, local_attn_ctx, blocksize)
-        k = strided_transpose(k, n_ctx, local_attn_ctx, blocksize)
-        v = strided_transpose(v, n_ctx, local_attn_ctx, blocksize)
-    n_state = q.size()[-1] // heads
-    scale_amount = 1.0 / np.sqrt(n_state)
-    w = torch.matmul(q, k.transpose(-2, -1))
-    w = F.softmax(w * scale_amount, dim=-1)
-    a = torch.matmul(w, v)
-    if attn_mode == 'strided':
-        n, t, embd = a.size()
-        bT_ctx = n_ctx // local_attn_ctx
-        a = torch.reshape(a, [n, local_attn_ctx, bT_ctx, embd])
-        a = torch.transpose(a, 0, 2, 1, 3)
-        a = torch.reshape(a, [n, t, embd])
-    return a
-
-class SparseAttention(nn.Module):
-    def __init__(self, heads, attn_mode, local_attn_ctx=None, blocksize=32):
-        super(SparseAttention, self).__init__()
-        self.heads = heads
-        self.attn_mode = attn_mode
-        self.local_attn_ctx = local_attn_ctx
-        self.blocksize = blocksize
-
-    def forward(self, q, k, v):
-        return blocksparse_attention_impl(q, k, v, self.heads, self.attn_mode, self.local_attn_ctx)
 
 
 class MultiHeadSparseAttention(nn.Module):
-    def __init__(self, d_hidden, num_heads, attention_dropout, attn_mode='all', local_attn_ctx=None, blocksize=32):
-        super(MultiHeadSparseAttention, self).__init__()
-        assert d_hidden % num_heads == 0, "d_hidden must be divisible by num_heads"
-        
+    """
+    Multi-head sparse attention module.
+    
+    Supports different attention patterns: 'all', 'local', 'strided'
+    """
+    def __init__(self, d_hidden, num_heads, attention_dropout, attn_mode='all', local_attn_ctx=None):
+        super().__init__()
         self.d_hidden = d_hidden
         self.num_heads = num_heads
-        self.d_k = d_hidden // num_heads
-        self.dropout = nn.Dropout(attention_dropout)
-        
-        # Linear projections
-        self.W_q = nn.Linear(d_hidden, d_hidden, bias=False)
-        self.W_k = nn.Linear(d_hidden, d_hidden, bias=False)
-        self.W_v = nn.Linear(d_hidden, d_hidden, bias=False)
-        self.W_o = nn.Linear(d_hidden, d_hidden, bias=False)
-        
-        # Sparse attention parameters
+        self.attention_dropout = attention_dropout
         self.attn_mode = attn_mode
         self.local_attn_ctx = local_attn_ctx
-        self.blocksize = blocksize
         
-    def split_head(self, x):
-        batch_size, seq_length, d_hidden = x.size()
-        return x.view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2)
+        assert d_hidden % num_heads == 0, "d_hidden must be divisible by num_heads"
+        
+        # Linear projections
+        self.q_proj = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.k_proj = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.v_proj = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.out_proj = nn.Linear(d_hidden, d_hidden, bias=False)
     
-    def combine_heads(self, x):
-        batch_size, _, seq_length, d_k = x.size()
-        return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.d_hidden)
-    
-    def forward(self, x, mask=None):
-        batch_size, seq_length, _ = x.size()
+    def forward(self, x):
+        """
+        Args:
+            x: input tensor of shape [batch, seq_len, d_model]
         
-        # Project and split heads
-        q = self.split_head(self.W_q(x))  # (B, num_heads, seq_length, d_k)
-        k = self.split_head(self.W_k(x))
-        v = self.split_head(self.W_v(x))
+        Returns:
+            output tensor of shape [batch, seq_len, d_model]
+        """
+        # Project to Q, K, V
+        q = self.q_proj(x)
+        k = self.k_proj(x)
+        v = self.v_proj(x)
         
-        # Reshape for sparse attention: (B*num_heads, seq_length, d_k)
-        q = q.contiguous().view(batch_size * self.num_heads, seq_length, self.d_k)
-        k = k.contiguous().view(batch_size * self.num_heads, seq_length, self.d_k)
-        v = v.contiguous().view(batch_size * self.num_heads, seq_length, self.d_k)
-        
-        # Apply sparse attention
-        attn_output = blocksparse_attention_impl(
+        # Apply attention
+        attn_output = attention_impl(
             q, k, v, 
-            heads=self.num_heads, 
-            attn_mode=self.attn_mode, 
-            local_attn_ctx=self.local_attn_ctx,
-            blocksize=self.blocksize
+            self.num_heads, 
+            self.attention_dropout,
+            self.attn_mode, 
+            self.local_attn_ctx
         )
         
-        # Reshape back: (B, num_heads, seq_length, d_k)
-        attn_output = attn_output.view(batch_size, self.num_heads, seq_length, self.d_k)
-        
-        # Combine heads and project
-        output = self.W_o(self.combine_heads(attn_output))
-        output = self.dropout(output)
+        # Final projection
+        output = self.out_proj(attn_output)
         
         return output
 
 
-# # Example usage:
-# if __name__ == "__main__":
-#     n_batch = 4
-#     n_ctx = 1024
-#     n_embd = 256
-#     heads = 4
-#     attn_mode = "all"
-#     local_attn_ctx = 32
-#     blocksize = 32
+# For gradient checkpointing (equivalent to @recomputable decorator)
+def checkpoint_attention(q, k, v, n_heads, attn_mode, local_attn_ctx=None):
+    """
+    Attention with gradient checkpointing to save memory.
+    """
+    return torch.utils.checkpoint.checkpoint(
+        attention_impl,
+        q, k, v, n_heads, attn_mode, local_attn_ctx,
+        use_reentrant=False
+    )
 
-#     q = torch.randn(n_batch, n_ctx, n_embd)
-#     k = torch.randn(n_batch, n_ctx, n_embd)
-#     v = torch.randn(n_batch, n_ctx, n_embd)
 
-#     model = SparseAttention(heads, attn_mode, local_attn_ctx, blocksize)
-#     output = model(q, k, v)
-#     print(output[0])
+def strided_attention_impl(q, k, v, n_heads, local_attn_ctx, blocksize=32):
+    """
+    Strided attention with transposition (as in blocksparse version).
+    
+    Note: This is the dense implementation. For true block-sparse computation,
+    you would need a custom CUDA kernel or library like Triton.
+    """
+    n_ctx = q.shape[1]
+    
+    # Apply strided transpose
+    q = strided_transpose(q, n_ctx, local_attn_ctx, blocksize)
+    k = strided_transpose(k, n_ctx, local_attn_ctx, blocksize)
+    v = strided_transpose(v, n_ctx, local_attn_ctx, blocksize)
+    
+    # Apply attention
+    a = attention_impl(q, k, v, n_heads, 'strided', local_attn_ctx)
+    
+    # Reverse the transpose
+    n, t, embd = a.shape
+    bT_ctx = n_ctx // local_attn_ctx
+    a = a.view(n, local_attn_ctx, bT_ctx, embd)
+    a = a.permute(0, 2, 1, 3)
+    a = a.reshape(n, t, embd)
+    
+    return a

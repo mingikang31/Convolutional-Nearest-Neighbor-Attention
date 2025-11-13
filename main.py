@@ -62,7 +62,6 @@ def args_parser():
 
     # Additional Layer Arguments for Sparse Attention
     parser.add_argument("--sparse_mode", type=str, default="all", choices=["all", "local", "strided"], help="Sparsity mode for Sparse Attention Models")
-    parser.add_argument("--sparse_block_size", type=int, default=32, help="Block size for Sparse Attention Models")
     parser.add_argument("--sparse_context_window", type=int, default=128, help="Context window for Sparse Attention Models")
 
     

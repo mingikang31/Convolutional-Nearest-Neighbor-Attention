@@ -237,9 +237,8 @@ class TransformerEncoder(nn.Module):
                 "num_heads": num_heads,
                 "attention_dropout": attention_dropout,
                 "attn_mode": args.sparse_mode,
-                "local_attn_ctx": args.sparse_context_window,
-                "blocksize": args.sparse_block_size
-            }
+                "local_attn_ctx": args.sparse_context_window
+                }
             self.attention = MultiHeadSparseAttention(**sparse_attention_params)
 
         else: 
