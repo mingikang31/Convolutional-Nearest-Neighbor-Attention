@@ -1,23 +1,11 @@
 #!/bin/bash 
-#SBATCH --nodes=1 
-#SBATCH --mem=64G
-#SBATCH -p arm --gres=shard:8
-#SBATCH --cpus-per-task=16
-#SBATCH --job-name=ARM
-#SBATCH --time=72:00:00
-#SBATCH --output=slurm_out/%j.out
-#SBATCH --error=slurm_out/%j.err
-#SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT_80
-#SBATCH --mail-user=mkang2@bowdoin.edu
 
-source ~/.bashrc
-conda activate mingi-arm
+### Conv-Test for CVPR paper 
 
-cd /mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention
-
+cd /home/exouser/Convolutional-Nearest-Neighbor-Attention/
 # Configuration
-DATASETS=("cifar10" "cifar100")
-K_VALUES=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "16" "25")  
+DATASETS=("cifar100")
+K_VALUES=("3" "4" "5" "6")  
 BLOCKS=("ConvNNAttention") #"KvtAttention")
 LR="1e-4"                                         
 
