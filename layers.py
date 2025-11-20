@@ -821,7 +821,7 @@ class MultiHeadLocalAttention(nn.Module):
 
 
 
-### Code from : https://github.com/openai/sparse_attention/blob/master/utils.py ###
+### Code from : https://github.com/openai/sparse_attention/blob/master/attention.py ###
 def get_attn_mask(n, attn_mode, local_attn_ctx=None, device='cuda'):
     if attn_mode == 'all':
         # ✓ BIDIRECTIONAL - all patches attend to all patches
