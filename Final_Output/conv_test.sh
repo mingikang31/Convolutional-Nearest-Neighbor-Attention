@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-### Conv-Test for CVPR paper 
+### Conv-Test 
 
 cd /home/exouser/Convolutional-Nearest-Neighbor-Attention/
 

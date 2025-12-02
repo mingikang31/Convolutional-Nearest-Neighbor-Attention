@@ -3,7 +3,7 @@
 #SBATCH --mem=64G
 #SBATCH -p gpu --gres=gpu:a100:1
 #SBATCH --cpus-per-task=4
-#SBATCH --job-name=CVPR-VIT
+#SBATCH --job-name=VIT
 #SBATCH --time=500:00:00
 #SBATCH --output=slurm_out/%j.out
 #SBATCH --error=slurm_out/%j.err

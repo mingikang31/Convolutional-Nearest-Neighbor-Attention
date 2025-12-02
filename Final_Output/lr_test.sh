@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-### LR-Test for CVPR paper 
+### LR-Test
 
 cd /home/exouser/Convolutional-Nearest-Neighbor-Attention/
 
