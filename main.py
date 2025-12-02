@@ -26,10 +26,10 @@ d_mlp: 768
 """
 
 def args_parser():
-    parser = argparse.ArgumentParser(description="Convolutional Nearest Neighbor training and evaluation", add_help=False) 
+    parser = argparse.ArgumentParser(description="Convolutional Nearest Neighbor Attention training and evaluation", add_help=False) 
     
     # Model Arguments
-    parser.add_argument("--layer", type=str, default="Attention", choices=["Attention", "ConvNNAttention", "KvtAttention", "LocalAttention", "NeighborhoodAttention", "BranchConv", "BranchAttention", "ConvNNAttention_Modified", "ConvNNAttention_Depthwise", "ConvNNAttention_Same_KVT"], help="Layer to use for training and evaluation")
+    parser.add_argument("--layer", type=str, default="Attention", choices=["Attention", "ConvNNAttention", "KvtAttention", "LocalAttention", "NeighborhoodAttention", "SparseAttention", "BranchConv", "BranchAttention"], help="Layer to use for training and evaluation")
 
     parser.add_argument("--patch_size", type=int, default=16, help="Patch size for Attention Models")
     parser.add_argument("--num_layers", type=int, default=12, help="Number of layers in the model")   
@@ -44,7 +44,7 @@ def args_parser():
     parser.add_argument("--attention_dropout", type=float, default=0.1, help="Attention dropout rate for the model")    
     
     # Additional Layer Arguments for ConvNN
-    parser.add_argument("--convolution_type", type=str, default="standard", choices=["standard", "depthwise", "depthwise-separable"], help="Convolution type for ConvNN Layers")
+    parser.add_argument("--convolution_type", type=str, default="depthwise", choices=["standard", "depthwise", "depthwise-separable"], help="Convolution type for ConvNN Layers")
     parser.add_argument("--softmax_topk_val", action="store_true", help="Use top-k values for softmax computation in Attention Models")
     parser.set_defaults(softmax_topk_val=True)
     parser.add_argument("--K", type=int, default=9, help="K-nearest neighbor for ConvNN Layer")
@@ -59,6 +59,10 @@ def args_parser():
 
     # Additional Layer Arguments for Conv1d
     parser.add_argument("--kernel_size", type=int, default=9, help="Kernel size for Conv1d Layer")
+
+    # Additional Layer Arguments for Sparse Attention
+    parser.add_argument("--sparse_mode", type=str, default="all", choices=["all", "local", "strided"], help="Sparsity mode for Sparse Attention Models")
+    parser.add_argument("--sparse_context_window", type=int, default=128, help="Context window for Sparse Attention Models")
 
     
     # Data Arguments

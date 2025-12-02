@@ -1,0 +1,28 @@
+usage: main.py [-h] [--layer {Attention,ConvNNAttention,KvtAttention,LocalAttention,NeighborhoodAttention,BranchConv,BranchAttention}] [--patch_size PATCH_SIZE]
+               [--num_layers NUM_LAYERS] [--num_heads NUM_HEADS] [--d_hidden D_HIDDEN] [--d_mlp D_MLP] [--dropout DROPOUT] [--attention_dropout ATTENTION_DROPOUT]
+               [--convolution_type {standard,depthwise,depthwise-separable}] [--softmax_topk_val] [--K K] [--sampling_type {all,random,spatial}] [--num_samples NUM_SAMPLES]
+               [--sample_padding SAMPLE_PADDING] [--magnitude_type {cosine,euclidean,matmul}] [--coordinate_encoding] [--branch_ratio BRANCH_RATIO] [--kernel_size KERNEL_SIZE]
+               [--dataset {cifar10,cifar100,imagenet}] [--resize RESIZE] [--augment] [--noise NOISE] [--data_path DATA_PATH] [--use_compiled]
+               [--compile_mode {default,reduce-overhead,reduce-memory,reduce-overhead,max-autotune}] [--batch_size BATCH_SIZE] [--num_epochs NUM_EPOCHS] [--use_amp]
+               [--clip_grad_norm CLIP_GRAD_NORM] [--criterion {CrossEntropy,MSE}] [--optimizer {adam,sgd,adamw}] [--momentum MOMENTUM] [--weight_decay WEIGHT_DECAY] [--lr LR]
+               [--lr_step LR_STEP] [--lr_gamma LR_GAMMA] [--scheduler {step,cosine,plateau,none}] [--device {cpu,cuda,mps}] [--seed SEED] [--output_dir OUTPUT_DIR] [--test_only]
+main.py: error: unrecognized arguments:  
+/var/spool/slurmd/job22405/slurm_script: line 107: --num_layers: command not found
+/var/spool/slurmd/job22405/slurm_script: line 108: --num_heads: command not found
+/var/spool/slurmd/job22405/slurm_script: line 109: --d_hidden: command not found
+/var/spool/slurmd/job22405/slurm_script: line 124: --seed: command not found
+/var/spool/slurmd/job22405/slurm_script: line 126: --output_dir: command not found
+usage: main.py [-h] [--layer {Attention,ConvNNAttention,KvtAttention,LocalAttention,NeighborhoodAttention,BranchConv,BranchAttention}] [--patch_size PATCH_SIZE]
+               [--num_layers NUM_LAYERS] [--num_heads NUM_HEADS] [--d_hidden D_HIDDEN] [--d_mlp D_MLP] [--dropout DROPOUT] [--attention_dropout ATTENTION_DROPOUT]
+               [--convolution_type {standard,depthwise,depthwise-separable}] [--softmax_topk_val] [--K K] [--sampling_type {all,random,spatial}] [--num_samples NUM_SAMPLES]
+               [--sample_padding SAMPLE_PADDING] [--magnitude_type {cosine,euclidean,matmul}] [--coordinate_encoding] [--branch_ratio BRANCH_RATIO] [--kernel_size KERNEL_SIZE]
+               [--dataset {cifar10,cifar100,imagenet}] [--resize RESIZE] [--augment] [--noise NOISE] [--data_path DATA_PATH] [--use_compiled]
+               [--compile_mode {default,reduce-overhead,reduce-memory,reduce-overhead,max-autotune}] [--batch_size BATCH_SIZE] [--num_epochs NUM_EPOCHS] [--use_amp]
+               [--clip_grad_norm CLIP_GRAD_NORM] [--criterion {CrossEntropy,MSE}] [--optimizer {adam,sgd,adamw}] [--momentum MOMENTUM] [--weight_decay WEIGHT_DECAY] [--lr LR]
+               [--lr_step LR_STEP] [--lr_gamma LR_GAMMA] [--scheduler {step,cosine,plateau,none}] [--device {cpu,cuda,mps}] [--seed SEED] [--output_dir OUTPUT_DIR] [--test_only]
+main.py: error: unrecognized arguments:  
+/var/spool/slurmd/job22405/slurm_script: line 132: --num_layers: command not found
+/var/spool/slurmd/job22405/slurm_script: line 133: --num_heads: command not found
+/var/spool/slurmd/job22405/slurm_script: line 134: --d_hidden: command not found
+/var/spool/slurmd/job22405/slurm_script: line 149: --seed: command not found
+/var/spool/slurmd/job22405/slurm_script: line 151: --output_dir: command not found

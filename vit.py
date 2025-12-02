@@ -14,6 +14,7 @@ from layers import (
     MultiHeadBranchingAttention,
     MultiHeadKvtAttention, 
     MultiHeadLocalAttention, 
+    MultiHeadSparseAttention
 )
 
 
@@ -201,40 +202,47 @@ class TransformerEncoder(nn.Module):
         # 6. Local Attention Layer
         elif args.layer == "LocalAttention":
             local_attention_params = {
-                "window_size": 128,  # Default window size for local attention
-                "dim_head": 64,  # Default dimension of each head
-                "causal": False,  # Whether to use causal attention
-                "prenorm": False,  # Whether to use pre-norm
-                "qk_rmsnorm": False,  # Whether to use RMSNorm for query and key
-                "qk_scale": 8,  # Scaling factor for query and key
-                "use_xpos": False,  # Whether to use XPOS
-                "xpos_scale_base": None,  # Base scale for XPOS
-                "exact_windowsize": None,  # Exact window size for local attention
-                "gate_values_per_head": False  # Whether to gate values per head
-                
+                "dim": d_hidden,  # Dimension of the model
+                "window_size": 128, 
+                "dim_head": 64, 
+                "heads": num_heads,
+                "dropout": attention_dropout,
+                 # Additional parameters    
+                 "causal": False,  # Whether to use causal attention
+                 "prenorm": False,  # Whether to use pre-norm
+                 "qk_rmsnorm": False,  # Whether to use RMSNorm for query and key
+                 "qk_scale": 8,  # Scaling factor for query and key
+                 "use_xpos": False,  # Whether to use XPOS
+                 "xpos_scale_base": None,  # Base scale for XPOS
+                 "exact_windowsize": None,  # Exact window size for local attention
+                 "gate_values_per_head": False,  # Whether to gate values per head
             }
-            self.attention = MultiHeadLocalAttention(dim=d_hidden, heads=num_heads, dropout=attention_dropout, **local_attention_params)
+            self.attention = MultiHeadLocalAttention(**local_attention_params)
 
         # 7. Neighborhood Attention Layer
         elif args.layer == "NeighborhoodAttention": 
             neighborhood_attention_params = {
                 "stride": 1,  # Default stride for neighborhood attention
                 "dilation": 1,  # Default dilation for neighborhood attention
-                "qkv_bias": True,  # Whether to use bias in QKV projections
+                "qkv_bias": False,  # Whether to use bias in QKV projections
                 "qk_scale": None,  # Scaling factor for QK
                 "is_causal": False,  # Whether to use causal attention
             }
             
             self.attention = NeighborhoodAttention1D(embed_dim=d_hidden, num_heads=num_heads, kernel_size=args.K, proj_drop=attention_dropout, **neighborhood_attention_params
             ) 
-        elif args.layer == "ConvNNAttention_Modified":
-            self.attention = MultiHeadConvNNAttention_Modified(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
-        elif args.layer == "ConvNNAttention_Depthwise":
-            self.attention = MultiHeadConvNNAttention_Depthwise(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
-        elif args.layer == "ConvNNAttention_Same_KVT":
-            self.attention = MultiHeadConvNN_Same_KVT_Attention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
+        elif args.layer == "SparseAttention":
+            sparse_attention_params = {
+                "d_hidden": d_hidden,
+                "num_heads": num_heads,
+                "attention_dropout": attention_dropout,
+                "attn_mode": args.sparse_mode,
+                "local_attn_ctx": args.sparse_context_window
+                }
+            self.attention = MultiHeadSparseAttention(**sparse_attention_params)
+
         else: 
-            raise ValueError("Invalid layer type. Must be one of ['Attention', 'ConvNNAttention', 'KvtAttention', 'LocalAttention', 'NeighborhoodAttention', 'BranchConv', 'BranchAttention', 'ConvNNAttention_Modified']")
+            raise ValueError("Invalid layer type. Must be one of ['Attention', 'ConvNNAttention', 'KvtAttention', 'LocalAttention', 'NeighborhoodAttention', 'SparseAttention', 'BranchConv', 'BranchAttention']")
 
         self.norm1 = nn.LayerNorm(d_hidden)
         self.norm2 = nn.LayerNorm(d_hidden)

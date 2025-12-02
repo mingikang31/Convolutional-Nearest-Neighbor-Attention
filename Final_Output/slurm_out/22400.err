@@ -1,0 +1,102 @@
+Traceback (most recent call last):
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 169, in <module>
+    main(args)
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 154, in main
+    train_eval_results = Train_Eval(args, 
+                         ^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/train_eval.py", line 148, in Train_Eval
+    outputs = model(images)
+              ^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 69, in forward
+    x = self.transformer_encoder(x)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/container.py", line 250, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 253, in forward
+    attn_output = self.attention(norm_x)  
+                  ^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/natten/modules.py", line 110, in forward
+    x = neighborhood_attention_generic(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/natten/functional.py", line 387, in neighborhood_attention_generic
+    backend = backend or choose_backend(query, key, value, torch_compile=torch_compile)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/natten/backends/__init__.py", line 104, in choose_backend
+    raise NotImplementedError(
+NotImplementedError: NATTEN could not find a suitable backend for this use case. Run with NATTEN_LOG_LEVEL=DEBUG to find out why.
+Traceback (most recent call last):
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 169, in <module>
+    main(args)
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 154, in main
+    train_eval_results = Train_Eval(args, 
+                         ^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/train_eval.py", line 148, in Train_Eval
+    outputs = model(images)
+              ^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 69, in forward
+    x = self.transformer_encoder(x)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/container.py", line 250, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 253, in forward
+    attn_output = self.attention(norm_x)  
+                  ^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/natten/modules.py", line 110, in forward
+    x = neighborhood_attention_generic(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/natten/functional.py", line 387, in neighborhood_attention_generic
+    backend = backend or choose_backend(query, key, value, torch_compile=torch_compile)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/mingi-arm/lib/python3.11/site-packages/natten/backends/__init__.py", line 104, in choose_backend
+    raise NotImplementedError(
+NotImplementedError: NATTEN could not find a suitable backend for this use case. Run with NATTEN_LOG_LEVEL=DEBUG to find out why.

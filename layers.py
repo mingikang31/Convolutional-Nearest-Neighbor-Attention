@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import einsum
 import numpy as np 
+from typing import Optional
 
 from utils import default, LocalAttention, l2norm, exists, rearrange, apply_rotary_pos_emb
 
@@ -96,10 +97,10 @@ class MultiHeadAttention(nn.Module):
         self.d_k = d_hidden // num_heads # dimension of each head
         self.dropout = nn.Dropout(attention_dropout)
         
-        self.W_q = nn.Linear(d_hidden, d_hidden)
-        self.W_k = nn.Linear(d_hidden, d_hidden)
-        self.W_v = nn.Linear(d_hidden, d_hidden)
-        self.W_o = nn.Linear(d_hidden, d_hidden)        
+        self.W_q = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_k = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_v = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_o = nn.Linear(d_hidden, d_hidden, bias=False)        
     
     def scaled_dot_product_attention(self, Q, K, V, mask=None):
         attn_scores = torch.matmul(Q, K.transpose(-2, -1)) / np.sqrt(self.d_k)
@@ -160,21 +161,21 @@ class MultiHeadConvNNAttention(nn.Module):
         # 3 types of sampling: all, random, spatial
         self.sampling_type = sampling_type
         self.num_samples = int(num_samples) 
-        self.sample_padding = int(sample_padding) if sampling_type == 'spatial' else 0    
+        self.sample_padding = int(sample_padding) if sampling_type == 'spatial' else 0
 
         # Similarity Metric 
         self.magnitude_type = magnitude_type
-        self.maximum = True if self.magnitude_type == 'cosine' else False
+        self.maximum = True if self.magnitude_type in ('cosine', 'matmul') else False
 
         # Coordinate Encoding (optional) 
         self.coordinate_encoding = coordinate_encoding
         self.coordinate_cache = {}
         
         # Linear projections for query, key, value
-        self.W_q = nn.Linear(d_hidden, d_hidden)
-        self.W_k = nn.Linear(d_hidden, d_hidden)
-        self.W_v = nn.Linear(d_hidden, d_hidden)
-        self.W_o = nn.Linear(d_hidden, d_hidden)   
+        self.W_q = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_k = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_v = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_o = nn.Linear(d_hidden, d_hidden, bias=False)   
         self.dropout = nn.Dropout(attention_dropout)
 
         self.in_channels = (d_hidden // num_heads) + 1 if coordinate_encoding else (d_hidden // num_heads)
@@ -190,6 +191,7 @@ class MultiHeadConvNNAttention(nn.Module):
                 kernel_size=self.K,
                 stride=self.K,
                 padding=0,
+                bias=False
             )
         elif convolution_type == 'depthwise':
             self.conv = nn.Conv1d(
@@ -198,7 +200,8 @@ class MultiHeadConvNNAttention(nn.Module):
                 kernel_size=self.K,
                 stride=self.K,
                 padding=0,
-                groups=self.in_channels
+                groups=self.in_channels, 
+                bias=False
             )
             self.conv.weight.data.fill_(1.0)
         elif convolution_type == 'depthwise-separable':
@@ -210,7 +213,8 @@ class MultiHeadConvNNAttention(nn.Module):
                     kernel_size=self.K,
                     stride=self.K,
                     padding=0,
-                    groups=self.in_channels
+                    groups=self.in_channels,
+                    bias=False
                 ), 
                 # Pointwise Convolution
                 nn.Conv1d(
@@ -218,7 +222,8 @@ class MultiHeadConvNNAttention(nn.Module):
                     out_channels=self.out_channels,
                     kernel_size=1,
                     stride=1,
-                    padding=0
+                    padding=0, 
+                    bias=False
                 )
             )
 
@@ -270,10 +275,10 @@ class MultiHeadConvNNAttention(nn.Module):
             
             q = self._add_coordinate_encoding(q) if self.coordinate_encoding else q
 
-            similarity_matrix = self._calculate_cosine_matrix(k, q) if self.magnitude_type == 'cosine' else self._calculate_euclidean_matrix(k, q, sqrt=True)
+            similarity_matrix = self._calculate_matmul_matrix(k, q) if self.magnitude_type == 'matmul' else self._calculate_cosine_matrix(k, q) if self.magnitude_type == 'cosine' else self._calculate_euclidean_matrix(k, q, sqrt=True)
 
             
-            prime = self._prime(v, similarity_matrix, self.K, self.maximum) if not self.softmax_topk_val else self._prime_softmax_N(v, similarity_matrix, self.K, None, self.maximum)
+            prime = self._prime(v, similarity_matrix, self.K, self.maximum) if not self.softmax_topk_val else self._prime_softmax(v, similarity_matrix, self.K, self.maximum)
 
         elif self.sampling_type == 'random': # Random Samples
             rand_idx = torch.randperm(x.shape[1], device=x.device)[:self.num_samples]
@@ -342,7 +347,12 @@ class MultiHeadConvNNAttention(nn.Module):
 
         v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()
         prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
-        prime = topk_values_exp * prime 
+
+        # Normalize by K for distance metrics 
+        if not maximum: 
+            prime = prime / (topk_values_exp + 1e-8)
+        else:
+            prime = topk_values_exp * prime 
 
         prime = prime.view(b, c, -1)
 
@@ -368,15 +378,23 @@ class MultiHeadConvNNAttention(nn.Module):
         # Gather matrix values and apply similarity weighting 
         v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()    
         prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
-        prime = topk_values_exp * prime
-
+        
+        if not maximum:  # euclidean distance
+            prime = prime / (topk_values_exp + 1e-8)
+        else:
+            prime = topk_values_exp * prime
         prime = prime.view(b, c, -1)
         return prime
 
     def _prime_softmax(self, v, qk, K, maximum):
         b, c, t = v.shape
         topk_values, topk_indices = torch.topk(qk, k=K, dim=2, largest=maximum)
-        topk_values = torch.softmax(topk_values, dim=-1)
+        
+        # Apply softmax
+        if maximum:  # cosine/matmul (maximize)
+            topk_values = torch.softmax(topk_values, dim=-1)
+        else:  # euclidean (minimize) - negate before softmax
+            topk_values = torch.softmax(-topk_values, dim=-1)
 
         topk_indices_exp = topk_indices.unsqueeze(1).expand(b, c, t, K)
         topk_values_exp = topk_values.unsqueeze(1).expand(b, c, t, K)
@@ -403,10 +421,13 @@ class MultiHeadConvNNAttention(nn.Module):
         topk_values_exp = topk_values.unsqueeze(1).expand(b, c, t, K-1)
         ones = torch.ones((b, c, t, 1), device=v.device)
         topk_values_exp = torch.cat((ones, topk_values_exp), dim=-1)
-
-        # Apply softmax over all K values (self-token + K-1 neighbors)
-        topk_values_exp = torch.softmax(topk_values_exp, dim=-1)
         
+        # Apply softmax
+        if maximum:
+            topk_values_exp = torch.softmax(topk_values_exp, dim=-1)
+        else:
+            topk_values_exp = torch.softmax(-topk_values_exp, dim=-1)
+                
         # Gather matrix values and apply similarity weighting 
         v_expanded = v.unsqueeze(-1).expand(b, c, t, K).contiguous()    
         prime = torch.gather(v_expanded, dim=2, index=topk_indices_exp)
@@ -799,3 +820,213 @@ class MultiHeadLocalAttention(nn.Module):
         return out, kv
 
 
+
+### Code from : https://github.com/openai/sparse_attention/blob/master/attention.py ###
+def get_attn_mask(n, attn_mode, local_attn_ctx=None, device='cuda'):
+    if attn_mode == 'all':
+        # ✓ BIDIRECTIONAL - all patches attend to all patches
+        b = torch.ones(n, n, device=device)
+    
+    elif attn_mode == 'local':
+        # ✓ BIDIRECTIONAL LOCAL - attend to nearby patches in both directions
+        bandwidth = local_attn_ctx
+        # Create a band matrix (not just lower triangular)
+        b = torch.zeros(n, n, device=device)
+        for i in range(n):
+            start = max(0, i - bandwidth // 2)
+            end = min(n, i + bandwidth // 2 + 1)
+            b[i, start:end] = 1
+    
+    elif attn_mode == 'strided':
+        # ✓ BIDIRECTIONAL STRIDED
+        stride = local_attn_ctx
+        x = torch.arange(n, dtype=torch.int32, device=device).view(n, 1)
+        y = x.t()
+        q = x.expand(n, n)
+        k = y.expand(n, n)
+        # Remove c1 = q >= k (this was the causal constraint!)
+        c2 = ((q - k).abs() % stride) == 0  # Distance is multiple of stride
+        b = c2.float()
+    
+    b = b.view(1, 1, n, n)
+    return b
+
+
+def strided_transpose(x, n_ctx, local_attn_ctx, blocksize=None):
+    """
+    Transpose for strided attention pattern.
+    
+    Args:
+        x: tensor of shape [batch, seq_len, embd]
+        n_ctx: context length
+        local_attn_ctx: stride length
+        blocksize: not used in PyTorch version (kept for API compatibility)
+    
+    Returns:
+        transposed tensor
+    """
+    bT_ctx = n_ctx // local_attn_ctx
+    n, t, embd = x.shape
+    x = x.view(n, bT_ctx, local_attn_ctx, embd)
+    x = x.permute(0, 2, 1, 3)
+    x = x.reshape(n, t, embd)
+    return x
+
+
+def split_heads(x, n_heads):
+    """
+    Split the last dimension into (n_heads, depth).
+    Transpose to shape [batch, n_heads, seq_len, depth]
+    """
+    batch_size, seq_len, d_model = x.shape
+    depth = d_model // n_heads
+    x = x.view(batch_size, seq_len, n_heads, depth)
+    return x.permute(0, 2, 1, 3)
+
+
+def merge_heads(x):
+    """
+    Merge heads back to original shape.
+    Input: [batch, n_heads, seq_len, depth]
+    Output: [batch, seq_len, d_model]
+    """
+    batch_size, n_heads, seq_len, depth = x.shape
+    x = x.permute(0, 2, 1, 3)
+    return x.reshape(batch_size, seq_len, n_heads * depth)
+
+
+def attention_impl(q, k, v, n_heads, attention_dropout, attn_mode, local_attn_ctx=None):
+    """
+    Standard attention implementation with different masking patterns.
+    
+    Args:
+        q, k, v: query, key, value tensors of shape [batch, seq_len, d_model]
+        n_heads: number of attention heads
+        attn_mode: attention pattern ('all', 'local', 'strided')
+        local_attn_ctx: context window for local/strided attention
+    
+    Returns:
+        attention output of shape [batch, seq_len, d_model]
+    """
+    # Split heads: [batch, n_heads, seq_len, depth]
+    q = split_heads(q, n_heads)
+    k = split_heads(k, n_heads)
+    v = split_heads(v, n_heads)
+    
+    # Get attention mask
+    n_timesteps = k.shape[2]
+    mask = get_attn_mask(n_timesteps, attn_mode, local_attn_ctx, device=q.device)
+    
+    # Scaled dot-product attention
+    # [batch, n_heads, seq_len, seq_len]
+    depth = q.shape[-1]
+    scale_amount = 1.0 / np.sqrt(depth)
+    
+    # Compute attention scores
+    w = torch.matmul(q, k.transpose(-2, -1))
+    w = w * scale_amount
+    
+    # Apply mask (using large negative value for masked positions)
+    w = w * mask + -1e9 * (1 - mask)
+    
+    # Softmax
+    w = F.softmax(w, dim=-1)
+
+    w = F.dropout(w, p=attention_dropout)
+    
+    # Apply attention to values
+    a = torch.matmul(w, v)
+    
+    # Merge heads
+    a = merge_heads(a)
+    
+    return a
+
+
+class MultiHeadSparseAttention(nn.Module):
+    """
+    Multi-head sparse attention module.
+    
+    Supports different attention patterns: 'all', 'local', 'strided'
+    """
+    def __init__(self, d_hidden, num_heads, attention_dropout, attn_mode='all', local_attn_ctx=None):
+        super().__init__()
+        self.d_hidden = d_hidden
+        self.num_heads = num_heads
+        self.attention_dropout = attention_dropout
+        self.attn_mode = attn_mode
+        self.local_attn_ctx = local_attn_ctx
+        
+        assert d_hidden % num_heads == 0, "d_hidden must be divisible by num_heads"
+        
+        # Linear projections
+        self.q_proj = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.k_proj = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.v_proj = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.out_proj = nn.Linear(d_hidden, d_hidden, bias=False)
+    
+    def forward(self, x):
+        """
+        Args:
+            x: input tensor of shape [batch, seq_len, d_model]
+        
+        Returns:
+            output tensor of shape [batch, seq_len, d_model]
+        """
+        # Project to Q, K, V
+        q = self.q_proj(x)
+        k = self.k_proj(x)
+        v = self.v_proj(x)
+        
+        # Apply attention
+        attn_output = attention_impl(
+            q, k, v, 
+            self.num_heads, 
+            self.attention_dropout,
+            self.attn_mode, 
+            self.local_attn_ctx
+        )
+        
+        # Final projection
+        output = self.out_proj(attn_output)
+        
+        return output
+
+
+# For gradient checkpointing (equivalent to @recomputable decorator)
+def checkpoint_attention(q, k, v, n_heads, attn_mode, local_attn_ctx=None):
+    """
+    Attention with gradient checkpointing to save memory.
+    """
+    return torch.utils.checkpoint.checkpoint(
+        attention_impl,
+        q, k, v, n_heads, attn_mode, local_attn_ctx,
+        use_reentrant=False
+    )
+
+
+def strided_attention_impl(q, k, v, n_heads, local_attn_ctx, blocksize=32):
+    """
+    Strided attention with transposition (as in blocksparse version).
+    
+    Note: This is the dense implementation. For true block-sparse computation,
+    you would need a custom CUDA kernel or library like Triton.
+    """
+    n_ctx = q.shape[1]
+    
+    # Apply strided transpose
+    q = strided_transpose(q, n_ctx, local_attn_ctx, blocksize)
+    k = strided_transpose(k, n_ctx, local_attn_ctx, blocksize)
+    v = strided_transpose(v, n_ctx, local_attn_ctx, blocksize)
+    
+    # Apply attention
+    a = attention_impl(q, k, v, n_heads, 'strided', local_attn_ctx)
+    
+    # Reverse the transpose
+    n, t, embd = a.shape
+    bT_ctx = n_ctx // local_attn_ctx
+    a = a.view(n, local_attn_ctx, bT_ctx, embd)
+    a = a.permute(0, 2, 1, 3)
+    a = a.reshape(n, t, embd)
+    
+    return a
