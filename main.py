@@ -74,8 +74,8 @@ def args_parser():
     parser.add_argument("--data_path", type=str, default="./Data", help="Path to the dataset")
         
     # Training Arguments
-    parser.add_argument("--use_compiled", action="store_true", help="Use compiled model for training and evaluation")
-    parser.set_defaults(use_compiled=False)
+    parser.add_argument("--compile", action="store_true", help="Use compiled model for training and evaluation")
+    parser.set_defaults(compile=False)
     parser.add_argument("--compile_mode", type=str, default="default", choices=["default", "reduce-overhead", "reduce-memory", "reduce-overhead", "max-autotune"], help="Compilation mode for torch.compile")
 
     parser.add_argument("--batch_size", type=int, default=256, help="Batch size for training and evaluation")
@@ -150,6 +150,14 @@ def main(args):
         # Check if the output directory exists, if not create it
         if args.output_dir:
             Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+            
+        # Compile Model 
+        if args.compile: 
+            model = torch.compile(
+                model, 
+                mode=args.compile_mode, 
+                fullgraph=False, 
+                dynamic=False) 
 
         # Set the seed for reproducibility
         set_seed(args.seed)
@@ -169,5 +177,4 @@ def main(args):
 if __name__ == '__main__': 
     parser = argparse.ArgumentParser(description="Convolutional Nearest Neighbor training and evaluation", parents=[args_parser()])
     args = parser.parse_args()
-
     main(args)

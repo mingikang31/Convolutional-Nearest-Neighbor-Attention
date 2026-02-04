@@ -3,13 +3,11 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
-from tqdm import tqdm
 import time 
-
+from torch.amp.grad_scaler import GradScaler
+from torch.amp.autocast_mode import autocast
 from utils import set_seed
-from thop import profile
-
+import torch.profiler
 
 def Train_Eval(args, 
                model: nn.Module, 
@@ -19,7 +17,8 @@ def Train_Eval(args,
     
     if args.seed != 0:
         set_seed(args.seed)
-    
+
+    # Loss Criterion
     if args.criterion == 'CrossEntropy':
         criterion = nn.CrossEntropyLoss()
     elif args.criterion == 'MSE':
@@ -33,7 +32,6 @@ def Train_Eval(args,
     elif args.optimizer == 'adamw':
         optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         
-
     # Learning Rate Scheduler
     if args.scheduler == 'step':
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=args.lr_step, gamma=args.lr_gamma)
@@ -49,36 +47,13 @@ def Train_Eval(args,
     model.to(device)
     criterion.to(device)
     
-    if args.use_amp:
-        scaler = torch.amp.GradScaler(device)
+    scaler = GradScaler() if args.use_amp else None 
         
     epoch_results = [] 
-
-    # ==================== COMPILE MODEL =====================
-    if args.use_compiled:
-        print(f"Compiling the model with mode: {args.compile_mode} ...")
-        model = torch.compile(
-            model, 
-            mode=args.compile_mode, 
-            fullgraph=False, 
-            dynamic=False
-            )
-        print(f"Model compiled successfully with {args.compile_mode} mode.")
-
-        # Warm-up run to ensure compilation
-        try: 
-            input_tensor, _ = next(iter(train_loader))
-            input_tensor = input_tensor.to(device)
-            with torch.no_grad():
-                _ = model(input_tensor[0:1])
-            print("Warm-up run successful.")
-        except Exception as e:
-            print(f"Warm-up run failed: {e}")
-
-    # ==================== ROBUST GFLOPs Calculation with PyTorch Profiler ====================
+    
+    ## [GFLOPS] Computation using PyTorch Profiler ##
     try:
-        import torch.profiler
-
+        
         # Get a single batch from the train_loader to determine input size
         input_tensor, _ = next(iter(train_loader))
         input_tensor = input_tensor.to(device)
@@ -91,31 +66,22 @@ def Train_Eval(args,
             with torch.no_grad():
                 model(input_tensor[0:1])
 
-        # A more robust way to get total FLOPs: sum them up from all events
         total_flops = sum(event.flops for event in prof.key_averages())
-
         if total_flops > 0:
             gflops = total_flops / 1e9
             params = sum(p.numel() for p in model.parameters() if p.requires_grad)
             params_m = params / 1e6
-            print(f"   - Trainable Parameters: {params_m:.8f} M")
-
             print(f"Model Complexity (Profiler):")
+            print(f"   - Total Parameters: {params_m:.8f} M")
             print(f"   - GFLOPs: {gflops:.8f}")
-            print(f"   - Trainable Parameters: {params_m:.8f} M")
             epoch_results.append(f"Model Complexity (Profiler): GFLOPs: {gflops:.8f}, Trainable Parameters: {params_m:.8f} M")
             
-        else:
-            # If this still fails, fvcore is the best alternative
-            print("Profiler returned 0 FLOPs. Consider using the 'fvcore' method instead for a theoretical count.")
-
     except Exception as e:
         print(f"Could not calculate GFLOPs with PyTorch Profiler: {e}")
     # =====================================================================
     
     # Training Loop
     epoch_times = [] # Average Epoch Time 
-    
     max_accuracy = 0.0 
     max_epoch = 0
     
@@ -135,11 +101,11 @@ def Train_Eval(args,
             
             # use mixed precision training
             if args.use_amp:
-                with torch.amp.autocast('cuda'):
+                with autocast(device_type=args.device):
                     outputs = model(images)
                     loss = criterion(outputs, labels)
                 scaler.scale(loss).backward()
-                if hasattr(args, 'clip_grad_norm') and args.clip_grad_norm is not None:
+                if args.clip_grad_norm:
                     scaler.unscale_(optimizer) # Unscale gradients before clipping
                     torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_grad_norm)
                 scaler.step(optimizer)
@@ -148,7 +114,7 @@ def Train_Eval(args,
                 outputs = model(images)
                 loss = criterion(outputs, labels)
                 loss.backward()
-                if hasattr(args, 'clip_grad_norm') and args.clip_grad_norm is not None:
+                if args.clip_grad_norm:
                     torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_grad_norm)
                 optimizer.step()            
 
@@ -170,7 +136,7 @@ def Train_Eval(args,
             for images, labels in test_loader: 
                 images, labels = images.to(device), labels.to(device)
                 if args.use_amp:
-                    with torch.cuda.amp.autocast():
+                    with autocast(device_type=args.device):
                         outputs = model(images)
                 else: 
                     outputs = model(images)
