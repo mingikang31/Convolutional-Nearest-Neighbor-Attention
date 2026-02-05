@@ -18,6 +18,7 @@ from layers import (
 )
 
 
+
 '''VGG Model Class'''
 class ViT(nn.Module): 
     def __init__(self, args): 
@@ -26,7 +27,6 @@ class ViT(nn.Module):
         assert args.d_hidden % args.num_heads == 0, "d_hidden must be divisible by n_heads"
         
         self.args = args
-        self.args.model = "VIT"
         self.model = "VIT"
         
         self.d_hidden = self.args.d_hidden 
@@ -46,7 +46,7 @@ class ViT(nn.Module):
         self.max_seq_length = self.n_patches + 1 # +1 for class token
         
         self.patch_embedding = PatchEmbedding(self.d_hidden, self.img_size, self.patch_size, self.n_channels) # Patch Embedding Layer
-        self.positional_encoding = PositionalEncoding(self.d_hidden, self.max_seq_length)
+        self.positional_encoding = PositionalEncoding(self.d_hidden, self.max_seq_length)        
         
         self.transformer_encoder = nn.Sequential(*[TransformerEncoder(
             args=args, 
@@ -56,6 +56,79 @@ class ViT(nn.Module):
             dropout=self.dropout, 
             attention_dropout=self.attention_dropout
             ) for _ in range(self.n_layers)])
+        
+        self.classifier = nn.Linear(self.d_hidden, self.n_classes)
+        
+        self.device = args.device
+        
+        self.to(self.device)
+        self.name = f"{self.args.model} {self.args.layer}"
+        
+    def forward(self, x): 
+        x = self.patch_embedding(x)
+        x = self.positional_encoding(x)
+        x = self.transformer_encoder(x)
+        x = self.classifier(x[:, 0]) # Taking the CLS token for classification
+        return x
+
+    def summary(self): 
+        original_device = next(self.parameters()).device
+        try:
+            self.to("cpu")
+            print(f"--- Summary for {self.name} ---")
+            summary(self, input_size=self.img_size, device="cpu") 
+        except Exception as e:
+            print(f"Could not generate summary: {e}")
+        finally:
+            self.to(original_device)
+        
+    def parameter_count(self): 
+        total_params = sum(p.numel() for p in self.parameters())
+        trainable_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
+        return total_params, trainable_params
+
+
+
+'''VGG Model Class'''
+class ViT_DropPath(nn.Module): 
+    def __init__(self, args): 
+        super(ViT_DropPath, self).__init__()
+        assert args.img_size[1] % args.patch_size == 0 and args.img_size[2] % args.patch_size == 0, "img_size dimensions must be divisible by patch_size dimensions"
+        assert args.d_hidden % args.num_heads == 0, "d_hidden must be divisible by n_heads"
+        
+        self.args = args
+        self.model = "VIT"
+        
+        self.d_hidden = self.args.d_hidden 
+        self.d_mlp = self.args.d_mlp
+        
+        self.img_size = self.args.img_size[1:]
+        self.n_classes = self.args.num_classes # Number of Classes
+        self.n_heads = self.args.num_heads
+        self.patch_size = (self.args.patch_size, self.args.patch_size) # Patch Size
+        self.n_channels = self.args.img_size[0]
+        self.n_layers = self.args.num_layers # Number of Layers
+        
+        self.n_patches = (self.img_size[0] * self.img_size[1]) // (self.patch_size[0] * self.patch_size[1])
+        
+        self.dropout = self.args.dropout # Dropout Rate
+        self.attention_dropout = self.args.attention_dropout # Attention Dropout Rate   
+        self.max_seq_length = self.n_patches + 1 # +1 for class token
+        
+        self.patch_embedding = PatchEmbedding(self.d_hidden, self.img_size, self.patch_size, self.n_channels) # Patch Embedding Layer
+        self.positional_encoding = PositionalEncoding(self.d_hidden, self.max_seq_length)        
+
+        self.dpr = [x.item() for x in torch.linspace(0, self.args.drop_path_rate, self.n_layers)]  # stochastic depth decay rule
+
+        self.transformer_encoder = nn.Sequential(*[TransformerEncoder_DropPath(
+            args=args, 
+            d_hidden=self.d_hidden, 
+            d_mlp=self.d_mlp, 
+            num_heads=self.n_heads, 
+            dropout=self.dropout, 
+            attention_dropout=self.attention_dropout,
+            drop_path=self.dpr[i]
+            ) for i in range(self.n_layers)])
         
         self.classifier = nn.Linear(self.d_hidden, self.n_classes)
         
@@ -192,9 +265,11 @@ class TransformerEncoder(nn.Module):
         # 3. Branching Conv1d Layer
         elif args.layer == "BranchConv":
             self.attention = MultiHeadBranchingConv(d_hidden, num_heads, attention_dropout, **branching_conv_params)
+            
         # 4. Branching Attention Layer
         elif args.layer == "BranchAttention":
             self.attention = MultiHeadBranchingAttention(d_hidden, num_heads, attention_dropout, **branching_attn_params)
+            
         # 5. Kvt Attention Layer
         elif args.layer == "KvtAttention":
             self.attention = MultiHeadKvtAttention(dim=d_hidden, num_heads=num_heads, attn_drop=attention_dropout, topk=args.K)
@@ -268,3 +343,214 @@ class TransformerEncoder(nn.Module):
         mlp_output = self.mlp(norm_x)
         x = x + self.dropout2(mlp_output)  
         return x
+
+"""Transformer Encoder with DropPath - Stochastic Depth"""
+# Used for Swin Transformer Experiments 
+class TransformerEncoder_DropPath(nn.Module):
+    def __init__(self, args, d_hidden, d_mlp, num_heads, dropout, attention_dropout, drop_path=0.0):
+        super(TransformerEncoder_DropPath, self).__init__() 
+        self.args = args 
+
+        self.d_hidden = d_hidden 
+        self.d_mlp = d_mlp
+        self.num_heads = num_heads
+        self.dropout = dropout
+        self.attention_dropout = attention_dropout
+        self.drop_path = DropPath(drop_path) if drop_path > 0.0 else nn.Identity()
+        
+        convnn_attn_params = {
+            "K": args.K, 
+            "sampling_type": args.sampling_type,
+            "num_samples": args.num_samples,
+            "sample_padding": args.sample_padding,
+            "magnitude_type": args.magnitude_type,
+            "coordinate_encoding": args.coordinate_encoding, 
+            "convolution_type": args.convolution_type, 
+            "softmax_topk_val": args.softmax_topk_val
+        }
+
+        branching_conv_params = {
+            "kernel_size": args.kernel_size,
+            "K": args.K,
+            "sampling_type": args.sampling_type,
+            "num_samples": args.num_samples,
+            "sample_padding": args.sample_padding,
+            "magnitude_type": args.magnitude_type,
+            "coordinate_encoding": args.coordinate_encoding,
+            "convolution_type": args.convolution_type,
+            "softmax_topk_val": args.softmax_topk_val,
+            "branch_ratio": args.branch_ratio
+        }
+
+        branching_attn_params = {
+            "K": args.K,
+            "sampling_type": args.sampling_type,
+            "num_samples": args.num_samples,
+            "sample_padding": args.sample_padding,
+            "magnitude_type": args.magnitude_type,
+            "coordinate_encoding": args.coordinate_encoding,
+            "convolution_type": args.convolution_type,
+            "softmax_topk_val": args.softmax_topk_val, 
+            "branch_ratio": args.branch_ratio
+        }
+
+        # 1. Multi-Head Attention Layer
+        if args.layer == "Attention":
+            self.attention = MultiHeadAttention(d_hidden, num_heads, attention_dropout)
+
+        # 2. ConvNN Attention Layer
+        elif args.layer == "ConvNNAttention":
+            self.attention = MultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
+
+        # 3. Branching Conv1d Layer
+        elif args.layer == "BranchConv":
+            self.attention = MultiHeadBranchingConv(d_hidden, num_heads, attention_dropout, **branching_conv_params)
+            
+        # 4. Branching Attention Layer
+        elif args.layer == "BranchAttention":
+            self.attention = MultiHeadBranchingAttention(d_hidden, num_heads, attention_dropout, **branching_attn_params)
+            
+        # 5. Kvt Attention Layer
+        elif args.layer == "KvtAttention":
+            self.attention = MultiHeadKvtAttention(dim=d_hidden, num_heads=num_heads, attn_drop=attention_dropout, topk=args.K)
+
+        # 6. Local Attention Layer
+        elif args.layer == "LocalAttention":
+            local_attention_params = {
+                "dim": d_hidden,  # Dimension of the model
+                "window_size": 128, 
+                "dim_head": 64, 
+                "heads": num_heads,
+                "dropout": attention_dropout,
+                 # Additional parameters    
+                 "causal": False,  # Whether to use causal attention
+                 "prenorm": False,  # Whether to use pre-norm
+                 "qk_rmsnorm": False,  # Whether to use RMSNorm for query and key
+                 "qk_scale": 8,  # Scaling factor for query and key
+                 "use_xpos": False,  # Whether to use XPOS
+                 "xpos_scale_base": None,  # Base scale for XPOS
+                 "exact_windowsize": None,  # Exact window size for local attention
+                 "gate_values_per_head": False,  # Whether to gate values per head
+            }
+            self.attention = MultiHeadLocalAttention(**local_attention_params)
+
+        # 7. Neighborhood Attention Layer
+        elif args.layer == "NeighborhoodAttention": 
+            neighborhood_attention_params = {
+                "stride": 1,  # Default stride for neighborhood attention
+                "dilation": 1,  # Default dilation for neighborhood attention
+                "qkv_bias": False,  # Whether to use bias in QKV projections
+                "qk_scale": None,  # Scaling factor for QK
+                "is_causal": False,  # Whether to use causal attention
+            }
+            
+            self.attention = NeighborhoodAttention1D(embed_dim=d_hidden, num_heads=num_heads, kernel_size=args.K, proj_drop=attention_dropout, **neighborhood_attention_params
+            ) 
+        elif args.layer == "SparseAttention":
+            sparse_attention_params = {
+                "d_hidden": d_hidden,
+                "num_heads": num_heads,
+                "attention_dropout": attention_dropout,
+                "attn_mode": args.sparse_mode,
+                "local_attn_ctx": args.sparse_context_window
+                }
+            self.attention = MultiHeadSparseAttention(**sparse_attention_params)
+
+        else: 
+            raise ValueError("Invalid layer type. Must be one of ['Attention', 'ConvNNAttention', 'KvtAttention', 'LocalAttention', 'NeighborhoodAttention', 'SparseAttention', 'BranchConv', 'BranchAttention']")
+
+        self.norm1 = nn.LayerNorm(d_hidden)
+        self.norm2 = nn.LayerNorm(d_hidden)
+
+        
+        # Multilayer Perceptron 
+        self.mlp = nn.Sequential(
+            nn.Linear(d_hidden, d_mlp),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(d_mlp, d_hidden)
+        )
+
+    def forward(self, x): 
+        # Pre-Norm Multi-Head Attention 
+        norm_x = self.norm1(x) 
+        attn_output = self.attention(norm_x)  
+        x = x + self.drop_path(attn_output)
+        
+        # Post-Norm Feed Forward Network
+        norm_x = self.norm2(x)  
+        mlp_output = self.mlp(norm_x)
+        x = x + self.drop_path(mlp_output)  
+        return x
+
+"""Also can use timm's DropPath Implementation"""
+# from timm.models.layers import DropPath
+class DropPath(nn.Module):
+    """Drop paths (Stochastic Depth) per sample  (when applied in main path of residual blocks)."""
+    def __init__(self, drop_prob: float = 0.0):
+        super(DropPath, self).__init__()
+        self.drop_prob = drop_prob
+        
+    def forward(self, x):
+        if self.drop_prob == 0.0 or not self.training:
+            return x
+        
+        keep_prob = 1 - self.drop_prob
+        shape = (x.shape[0],) + (1,) * (x.ndim - 1)
+        random_tensor = keep_prob + torch.rand(shape, dtype=x.dtype, device=x.device)
+        random_tensor.floor_()  # binarize
+        output = x.div(keep_prob) * random_tensor
+        return output
+
+
+if __name__ == "__main__":
+    from argparse import Namespace
+
+    args = Namespace(
+        model="vit-tiny",
+        layer="ConvNNAttention",
+        K=9,
+        kernel_size=3,
+        padding=1,
+        sampling_type="all",
+        num_samples=-1,
+        sample_padding=0,
+        shuffle_pattern="NA",
+        shuffle_scale=0.0,
+        magnitude_type="cosine",
+        similarity_type="Col",
+        aggregation_type="Col",
+        lambda_param=0.5,
+        attention_dropout=0.1,
+        branch_ratio=0.5,
+        num_classes=1000, 
+        img_size=(3, 224, 224),
+        dropout=0.1,
+        drop_path_rate=0.1,
+        coordinate_encoding=False, 
+        convolution_type="depthwise",
+        softmax_topk_val=True, 
+        device = "cpu"
+    )
+
+    args.patch_size = 16
+    args.num_layers = 12
+    args.num_heads = 1
+    args.d_hidden = 192
+    args.d_mlp = 768
+    
+    model = ViT_DropPath(args)
+    total_params, trainable_params = model.parameter_count()
+    print(f"Total Parameters: {total_params}")
+    print(f"Trainable Parameters: {trainable_params}")
+
+    ex = torch.randn(3, 3, 224, 224)
+    out = model(ex)
+    print(f"Output shape: {out.shape}")
+    
+    summary(model, (3, 224, 224))
+
+    # ConvNN ResNet-50
+    # Total Parameters = 25,559,912
+
+    # 

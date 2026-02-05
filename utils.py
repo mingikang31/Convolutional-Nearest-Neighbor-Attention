@@ -1,13 +1,7 @@
 """Utility Functions for the Project"""
-import torch 
-from torch import einsum
-import torch.nn as nn 
-import torch.nn.functional as F
-from torch.amp import autocast
-import random 
-import numpy as np 
-from einops import rearrange, repeat, pack, unpack
-import math 
+import torch.nn as nn
+import os 
+from typing import Optional
 
 def print_cuda_info():
     """
@@ -64,6 +58,10 @@ def set_seed(seed):
     Args:
         seed (int): The seed value.
     """
+    import random
+    import numpy as np
+    import torch
+
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -73,7 +71,24 @@ def set_seed(seed):
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
-"""# Local Attention Module"""
+def argsSimpleNameSpace():
+    from types import SimpleNamespace
+        
+    args = SimpleNamespace(
+        a = 1, 
+        b = 2, 
+        c = 3
+    )
+    
+
+""" Local Attention Module """
+import torch
+from torch import nn, einsum
+from torch.amp import autocast
+import torch.nn.functional as F
+from einops import rearrange, repeat, pack, unpack
+import math 
+
 
 class SinusoidalEmbeddings(nn.Module):
     def __init__(
