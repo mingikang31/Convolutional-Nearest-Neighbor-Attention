@@ -8,7 +8,7 @@ Testing/data/*
 Data/* 
 !Data/placeholder.txt
 
-
+*.pth
 
 .DS_Store
 

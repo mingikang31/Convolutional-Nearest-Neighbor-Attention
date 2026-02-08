@@ -175,7 +175,6 @@ def main(args):
         args.img_size = dataset.img_size 
     elif args.dataset == "imagenet1k":
         args.batch_size = 1024 # Standard Batch Size for ImageNet-1K
-        args.augment = True
         dataset = ImageNet1K(args)
         args.num_classes = dataset.num_classes 
         args.img_size = dataset.img_size
@@ -186,35 +185,35 @@ def main(args):
     if args.model == "vit-tiny":
         args.patch_size = 16
         args.num_layers = 12
-        args.num_heads = 3
+        # args.num_heads = 3
         args.d_hidden = 192
         args.d_mlp = 768
         
     elif args.model == "vit-small":
         args.patch_size = 16
         args.num_layers = 12
-        args.num_heads = 6
+        # args.num_heads = 6
         args.d_hidden = 384
         args.d_mlp = 1536
         
     elif args.model == "vit-base":
         args.patch_size = 16
         args.num_layers = 12
-        args.num_heads = 12
+        # args.num_heads = 12
         args.d_hidden = 768
         args.d_mlp = 3072
         
     elif args.model == "vit-large":
         args.patch_size = 16
         args.num_layers = 24
-        args.num_heads = 16
+        # args.num_heads = 16
         args.d_hidden = 1024
         args.d_mlp = 4096
         
     elif args.model == "vit-huge":
         args.patch_size = 14
         args.num_layers = 32
-        args.num_heads = 16
+        # args.num_heads = 16
         args.d_hidden = 1280
         args.d_mlp = 5120
     else:
