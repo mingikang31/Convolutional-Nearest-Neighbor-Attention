@@ -18,15 +18,15 @@ torchrun --nproc_per_node=4 \
         --K 9 \
         --convolution_type depthwise \
         --softmax_topk_val \
-        --sampling_type random \
-        --num_samples 32 \
+        --sampling_type all \
+        --num_samples -1 \
         --num_heads 1 \
         --dataset imagenet1k \
         --data_path /home/exouser/Datasets \
         --compile \
         --use_amp \
         --device cuda \
-        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention_NH1_Rand_K9_N32/ \
+        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention_NH1_All_K9/ \
         --num_workers 16 \
         --pin_memory \
         --ddp \
@@ -67,3 +67,21 @@ torchrun --nproc_per_node=4 \
 # Total time = 590 s. * 300 epochs ~ 49.2 Hours
 # [Epoch 001] Time: 699.0366s | [Train] Loss: 7.00485574 Accuracy: Top1: 0.0000%, Top5: 0.0000% | [Test] Loss: 6.88593769 Accuracy: Top1: 0.2969%, Top5: 1.1562%
 # [Epoch 002] Time: 609.2266s | [Train] Loss: 6.79427098 Accuracy: Top1: 0.0000%, Top5: 0.0000% | [Test] Loss: 6.11738300 Accuracy: Top1: 3.1016%, Top5: 9.6094%
+
+
+## [ConvNN-Attention NH=1 All K=9] ##
+### ViT-Base Training Log on JetStream2 H100 g5.4xl ###
+
+### gpustat log during training ###
+# Batch Size: 320 per GPU, Total Batch Size: 1280
+# imagenet1k                Sun Feb  8 23:15:59 2026  580.126.09
+# [0] NVIDIA H100 80GB HBM3 | 61°C, 100 % | 48458 / 81559 MB | exouser(48430M)
+# [1] NVIDIA H100 80GB HBM3 | 63°C, 100 % | 48402 / 81559 MB | exouser(48374M)
+# [2] NVIDIA H100 80GB HBM3 | 66°C,  85 % | 48458 / 81559 MB | exouser(48430M)
+# [3] NVIDIA H100 80GB HBM3 | 63°C, 100 % | 48458 / 81559 MB | exouser(48430M)
+
+## Training Log from Current Configuration ##
+# Total time = 530 s. * 300 epochs ~ 44 Hours
+# [Epoch 001] Time: 604.0850s | [Train] Loss: 7.02065522 Accuracy: Top1: 0.0000%, Top5: 0.0000% | [Test] Loss: 6.89257812 Accuracy: Top1: 0.2500%, Top5: 0.9824%
+# [Epoch 002] Time: 514.9330s | [Train] Loss: 6.73700757 Accuracy: Top1: 0.0000%, Top5: 0.0000% | [Test] Loss: 5.81484318 Accuracy: Top1: 5.1309%, Top5: 14.2500%
+
