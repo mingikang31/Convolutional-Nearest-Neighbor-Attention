@@ -14,7 +14,7 @@ torchrun --nproc_per_node=4 \
          --rdzv_endpoint=localhost:$MASTER_PORT \
          main.py \
         --model vit-base \
-        --layer ConvNNAttention \
+        --layer Attention \
         --K 9 \
         --convolution_type depthwise \
         --softmax_topk_val \
@@ -26,7 +26,7 @@ torchrun --nproc_per_node=4 \
         --compile \
         --use_amp \
         --device cuda \
-        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention_NH1_All_K9/ \
+        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-Attention_NH1/ \
         --num_workers 16 \
         --pin_memory \
         --ddp \
