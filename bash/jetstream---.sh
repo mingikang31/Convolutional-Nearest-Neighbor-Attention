@@ -15,22 +15,72 @@ torchrun --nproc_per_node=4 \
          main.py \
         --model vit-base \
         --layer ConvNNAttention \
-        --K 9 \
+        --K 4 \
         --convolution_type depthwise \
         --softmax_topk_val \
-        --sampling_type spatial \
-        --num_samples 128 \
+        --sampling_type all \
+        --num_samples -1 \
         --num_heads 1 \
         --dataset imagenet1k \
         --data_path /home/exouser/Datasets \
         --compile \
         --use_amp \
         --device cuda \
-        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention_NH1_Spat_K9_N128/ \
+        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention_NH1_All_K4/ \
         --num_workers 16 \
         --pin_memory \
         --ddp \
-        --ddp_batch_size 320
+        --ddp_batch_size 320 || echo "K=4 training failed"
+
+
+torchrun --nproc_per_node=4 \
+         --rdzv_backend=c10d \
+         --rdzv_endpoint=localhost:$MASTER_PORT \
+         main.py \
+        --model vit-base \
+        --layer ConvNNAttention \
+        --K 2 \
+        --convolution_type depthwise \
+        --softmax_topk_val \
+        --sampling_type all \
+        --num_samples -1 \
+        --num_heads 1 \
+        --dataset imagenet1k \
+        --data_path /home/exouser/Datasets \
+        --compile \
+        --use_amp \
+        --device cuda \
+        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention_NH1_All_K2/ \
+        --num_workers 16 \
+        --pin_memory \
+        --ddp \
+        --ddp_batch_size 320 || echo "K=2 training failed"
+
+
+torchrun --nproc_per_node=4 \
+         --rdzv_backend=c10d \
+         --rdzv_endpoint=localhost:$MASTER_PORT \
+         main.py \
+        --model vit-base \
+        --layer ConvNNAttention \
+        --K 25 \
+        --convolution_type depthwise \
+        --softmax_topk_val \
+        --sampling_type all \
+        --num_samples -1 \
+        --num_heads 1 \
+        --dataset imagenet1k \
+        --data_path /home/exouser/Datasets \
+        --compile \
+        --use_amp \
+        --device cuda \
+        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention_NH1_All_K25/ \
+        --num_workers 16 \
+        --pin_memory \
+        --ddp \
+        --ddp_batch_size 320 || echo "K=25 training failed"
+
+echo "All training completed"
 
 
 ## [MHA Attention NH=12] ##
