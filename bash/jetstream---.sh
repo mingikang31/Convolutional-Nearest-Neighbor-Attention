@@ -18,15 +18,15 @@ torchrun --nproc_per_node=4 \
         --K 9 \
         --convolution_type depthwise \
         --softmax_topk_val \
-        --sampling_type all \
-        --num_samples -1 \
-        --num_heads 12 \
+        --sampling_type spatial \
+        --num_samples 128 \
+        --num_heads 1 \
         --dataset imagenet1k \
         --data_path /home/exouser/Datasets \
         --compile \
         --use_amp \
         --device cuda \
-        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention_NH12_All_K9/ \
+        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention_NH1_Spat_K9_N128/ \
         --num_workers 16 \
         --pin_memory \
         --ddp \
