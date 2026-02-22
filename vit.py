@@ -9,12 +9,14 @@ import numpy as np
 # from natten import NeighborhoodAttention1D, NeighborhoodAttention2D
 from layers import (
     MultiHeadAttention, 
-    MultiHeadConvNNAttention, 
-    MultiHeadBranchingConv, 
-    MultiHeadBranchingAttention,
     MultiHeadKvtAttention, 
     MultiHeadLocalAttention, 
     MultiHeadSparseAttention
+)
+
+from ConvNNAttention import (
+    MultiHeadConvNNAttention, 
+    MultiHeadConvNNAttention_Sampled
 )
 
 
@@ -219,39 +221,16 @@ class TransformerEncoder(nn.Module):
         self.attention_dropout = attention_dropout
 
         convnn_attn_params = {
+                "K": args.K, 
+                "convolution_type": args.convolution_type,
+        }
+        
+        convnn_attn_sampled_params = {
             "K": args.K, 
             "sampling_type": args.sampling_type,
             "num_samples": args.num_samples,
             "sample_padding": args.sample_padding,
-            "magnitude_type": args.magnitude_type,
-            "coordinate_encoding": args.coordinate_encoding, 
             "convolution_type": args.convolution_type, 
-            "softmax_topk_val": args.softmax_topk_val
-        }
-
-        branching_conv_params = {
-            "kernel_size": args.kernel_size,
-            "K": args.K,
-            "sampling_type": args.sampling_type,
-            "num_samples": args.num_samples,
-            "sample_padding": args.sample_padding,
-            "magnitude_type": args.magnitude_type,
-            "coordinate_encoding": args.coordinate_encoding,
-            "convolution_type": args.convolution_type,
-            "softmax_topk_val": args.softmax_topk_val,
-            "branch_ratio": args.branch_ratio
-        }
-
-        branching_attn_params = {
-            "K": args.K,
-            "sampling_type": args.sampling_type,
-            "num_samples": args.num_samples,
-            "sample_padding": args.sample_padding,
-            "magnitude_type": args.magnitude_type,
-            "coordinate_encoding": args.coordinate_encoding,
-            "convolution_type": args.convolution_type,
-            "softmax_topk_val": args.softmax_topk_val, 
-            "branch_ratio": args.branch_ratio
         }
 
         # 1. Multi-Head Attention Layer
@@ -260,16 +239,11 @@ class TransformerEncoder(nn.Module):
 
         # 2. ConvNN Attention Layer
         elif args.layer == "ConvNNAttention":
-            self.attention = MultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
+            if args.sampling_type == "all": 
+                self.attention = MultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
+            else: 
+                self.attention = MultiHeadConvNNAttention_Sampled(d_hidden, num_heads, attention_dropout, **convnn_attn_sampled_params)
 
-        # 3. Branching Conv1d Layer
-        elif args.layer == "BranchConv":
-            self.attention = MultiHeadBranchingConv(d_hidden, num_heads, attention_dropout, **branching_conv_params)
-            
-        # 4. Branching Attention Layer
-        elif args.layer == "BranchAttention":
-            self.attention = MultiHeadBranchingAttention(d_hidden, num_heads, attention_dropout, **branching_attn_params)
-            
         # 5. Kvt Attention Layer
         elif args.layer == "KvtAttention":
             self.attention = MultiHeadKvtAttention(dim=d_hidden, num_heads=num_heads, attn_drop=attention_dropout, topk=args.K)
@@ -359,40 +333,18 @@ class TransformerEncoder_DropPath(nn.Module):
         self.drop_path = DropPath(drop_path) if drop_path > 0.0 else nn.Identity()
         
         convnn_attn_params = {
+                "K": args.K, 
+                "convolution_type": args.convolution_type,
+        }
+        
+        convnn_attn_sampled_params = {
             "K": args.K, 
             "sampling_type": args.sampling_type,
             "num_samples": args.num_samples,
             "sample_padding": args.sample_padding,
-            "magnitude_type": args.magnitude_type,
-            "coordinate_encoding": args.coordinate_encoding, 
             "convolution_type": args.convolution_type, 
-            "softmax_topk_val": args.softmax_topk_val
         }
 
-        branching_conv_params = {
-            "kernel_size": args.kernel_size,
-            "K": args.K,
-            "sampling_type": args.sampling_type,
-            "num_samples": args.num_samples,
-            "sample_padding": args.sample_padding,
-            "magnitude_type": args.magnitude_type,
-            "coordinate_encoding": args.coordinate_encoding,
-            "convolution_type": args.convolution_type,
-            "softmax_topk_val": args.softmax_topk_val,
-            "branch_ratio": args.branch_ratio
-        }
-
-        branching_attn_params = {
-            "K": args.K,
-            "sampling_type": args.sampling_type,
-            "num_samples": args.num_samples,
-            "sample_padding": args.sample_padding,
-            "magnitude_type": args.magnitude_type,
-            "coordinate_encoding": args.coordinate_encoding,
-            "convolution_type": args.convolution_type,
-            "softmax_topk_val": args.softmax_topk_val, 
-            "branch_ratio": args.branch_ratio
-        }
 
         # 1. Multi-Head Attention Layer
         if args.layer == "Attention":
@@ -400,15 +352,10 @@ class TransformerEncoder_DropPath(nn.Module):
 
         # 2. ConvNN Attention Layer
         elif args.layer == "ConvNNAttention":
-            self.attention = MultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
-
-        # 3. Branching Conv1d Layer
-        elif args.layer == "BranchConv":
-            self.attention = MultiHeadBranchingConv(d_hidden, num_heads, attention_dropout, **branching_conv_params)
-            
-        # 4. Branching Attention Layer
-        elif args.layer == "BranchAttention":
-            self.attention = MultiHeadBranchingAttention(d_hidden, num_heads, attention_dropout, **branching_attn_params)
+            if args.sampling_type == "all": 
+                self.attention = MultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
+            else: 
+                self.attention = MultiHeadConvNNAttention_Sampled(d_hidden, num_heads, attention_dropout, **convnn_attn_sampled_params)
             
         # 5. Kvt Attention Layer
         elif args.layer == "KvtAttention":
@@ -502,55 +449,3 @@ class DropPath(nn.Module):
         output = x.div(keep_prob) * random_tensor
         return output
 
-
-if __name__ == "__main__":
-    from argparse import Namespace
-
-    args = Namespace(
-        model="vit-tiny",
-        layer="ConvNNAttention",
-        K=9,
-        kernel_size=3,
-        padding=1,
-        sampling_type="all",
-        num_samples=-1,
-        sample_padding=0,
-        shuffle_pattern="NA",
-        shuffle_scale=0.0,
-        magnitude_type="cosine",
-        similarity_type="Col",
-        aggregation_type="Col",
-        lambda_param=0.5,
-        attention_dropout=0.1,
-        branch_ratio=0.5,
-        num_classes=1000, 
-        img_size=(3, 224, 224),
-        dropout=0.1,
-        drop_path_rate=0.1,
-        coordinate_encoding=False, 
-        convolution_type="depthwise",
-        softmax_topk_val=True, 
-        device = "cpu"
-    )
-
-    args.patch_size = 16
-    args.num_layers = 12
-    args.num_heads = 1
-    args.d_hidden = 192
-    args.d_mlp = 768
-    
-    model = ViT_DropPath(args)
-    total_params, trainable_params = model.parameter_count()
-    print(f"Total Parameters: {total_params}")
-    print(f"Trainable Parameters: {trainable_params}")
-
-    ex = torch.randn(3, 3, 224, 224)
-    out = model(ex)
-    print(f"Output shape: {out.shape}")
-    
-    summary(model, (3, 224, 224))
-
-    # ConvNN ResNet-50
-    # Total Parameters = 25,559,912
-
-    # 
