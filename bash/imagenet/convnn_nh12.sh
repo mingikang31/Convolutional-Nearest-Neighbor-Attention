@@ -17,7 +17,6 @@ torchrun --nproc_per_node=4 \
         --layer ConvNNAttention \
         --K 9 \
         --convolution_type depthwise \
-        --softmax_topk_val \
         --sampling_type all \
         --num_samples -1 \
         --num_heads 12 \
@@ -41,7 +40,6 @@ torchrun --nproc_per_node=4 \
         --layer ConvNNAttention \
         --K 9 \
         --convolution_type depthwise \
-        --softmax_topk_val \
         --sampling_type random \
         --num_samples 32 \
         --num_heads 12 \
@@ -65,7 +63,6 @@ torchrun --nproc_per_node=4 \
         --layer ConvNNAttention \
         --K 9 \
         --convolution_type depthwise \
-        --softmax_topk_val \
         --sampling_type spatial \
         --num_samples 128 \
         --num_heads 12 \
@@ -88,7 +85,6 @@ torchrun --nproc_per_node=4 \
         --layer ConvNNAttention \
         --K 16 \
         --convolution_type depthwise \
-        --softmax_topk_val \
         --sampling_type all \
         --num_samples -1 \
         --num_heads 12 \
