@@ -9,3 +9,5 @@ thop
 einops
 torchsummary
 natten
+mmcv
+mmsegmentation
