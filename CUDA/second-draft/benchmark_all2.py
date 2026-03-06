@@ -81,6 +81,10 @@ def check_forward(original, module, v, attn, label):
 
 def check_backward(original, module, v, attn, label):
     """Compare gradients flowing through both modules."""
+    # Zero module grads to prevent accumulation across calls
+    original.zero_grad(set_to_none=True)
+    module.zero_grad(set_to_none=True)
+
     # Clone inputs so each module gets fresh gradients
     v1 = v.clone().detach().requires_grad_(True)
     a1 = attn.clone().detach().requires_grad_(True)
@@ -170,11 +174,6 @@ def run_all(device='cuda'):
 
         p3 = check_backward(original, tiled, v, attn, "Tiled CUDA")
         p4 = check_backward(original, triton_mod, v, attn, "Triton    ")
-
-        
-        # # These run sequentially with the SAME `original` module:
-        # p3 = check_backward(original, tiled, v, attn, "Tiled CUDA")    # ← original gets grads
-        # p4 = check_backward(original, triton_mod, v, attn, "Triton")   # ← original grads ACCUMULATE
 
         if not all([p1, p2, p3, p4]):
             all_correct = False
