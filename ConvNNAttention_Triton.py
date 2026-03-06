@@ -166,15 +166,116 @@ class FusedPrimeConvTriton(nn.Module):
         return PrimeConvTritonFunction.apply(v, attn, self.conv_weight, self.K)
 
 
-# from convnn_triton import FusedPrimeConvTriton
+import torch 
+import torch.nn as nn 
 
-# # In __init__:
-# self.fused_prime_conv = FusedPrimeConvTriton(d_k=self.d_k, K=self.K)
-# # Copy existing conv weights: (d_k, 1, K) → (d_k, K)
-# self.fused_prime_conv.conv_weight.data.copy_(self.conv.weight.data.squeeze(1))
+"""Regular ConvNN Attention Implementation"""
+class MultiHeadConvNNAttention_Triton(nn.Module):
+    def __init__(self, 
+                 d_hidden,
+                 num_heads, 
+                 attention_dropout, 
+                 K, 
+                 convolution_type='depthwise',
+                 seq_length=197):
 
-# # In forward, replace:
-# #   prime = self._prime(v_merged, am_merged, self.K)
-# #   out = self.conv(prime)
-# # With:
-# out = self.fused_prime_conv(v_merged, am_merged)
+        super(MultiHeadConvNNAttention_Triton, self).__init__()
+        assert d_hidden % num_heads == 0, "d_hidden must be divisible by num_heads"
+
+        self.d_hidden = d_hidden 
+        self.num_heads = num_heads 
+        self.attention_dropout = attention_dropout 
+        self.d_k = d_hidden // num_heads 
+        self.K = K 
+        self.seq_length = seq_length
+
+        self.W_q = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_k = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_v = nn.Linear(d_hidden, d_hidden, bias=False)
+        self.W_o = nn.Linear(d_hidden, d_hidden, bias=False)
+
+        self.dropout = nn.Dropout(attention_dropout)
+
+        self.in_channels = d_hidden // num_heads
+        self.out_channels = d_hidden // num_heads
+
+        if convolution_type == 'standard': 
+            self.conv = nn.Conv1d(
+                in_channels=self.in_channels,
+                out_channels=self.out_channels,
+                kernel_size=self.K,
+                stride=self.K,
+                padding=0,
+                bias=False
+            )
+        elif convolution_type == 'depthwise':
+            self.conv = nn.Conv1d(
+                in_channels=self.in_channels, 
+                out_channels=self.out_channels,
+                kernel_size=self.K,
+                stride=self.K,
+                padding=0,
+                groups=self.in_channels, 
+                bias=False
+            )
+        elif convolution_type == 'depthwise-separable':
+            self.conv = nn.Sequential(
+                # Depthwise Convolution
+                nn.Conv1d(
+                    in_channels=self.in_channels,
+                    out_channels=self.in_channels,
+                    kernel_size=self.K,
+                    stride=self.K,
+                    padding=0,
+                    groups=self.in_channels,
+                    bias=False
+                ), 
+                # Pointwise Convolution
+                nn.Conv1d(
+                    in_channels=self.in_channels,
+                    out_channels=self.out_channels,
+                    kernel_size=1,
+                    stride=1,
+                    padding=0, 
+                    bias=False
+                )
+            )
+        self.conv.weight.data.fill_(1.0)
+
+        self.fused_prime_conv = FusedPrimeConvTriton(d_k=self.d_k, K=self.K)
+        self.fused_prime_conv.conv_weight.data.copy_(self.conv.weight.data.squeeze(1))
+
+    def split_head(self, x):
+        batch_size, seq_length, d_hidden = x.size() 
+        return x.view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2) # (B, num_heads, seq_length, d_k)
+
+    def combine_heads(self, x):
+        batch_size, _, seq_length, d_k = x.size() 
+        return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.d_hidden)
+
+    def forward(self, x):
+        B = x.shape[0]
+
+        # Linear Projection + Split Heads 
+        q = self.split_head(self.W_q(x)) # (B, NH, SL, DK)
+        k = self.split_head(self.W_k(x))
+        v = self.split_head(self.W_v(x))
+
+        # Attention Matrix: (B, NH, SL, SL) - Q @ K^T
+        attn_matrix = torch.matmul(q, k.transpose(-2, -1)) / np.sqrt(self.d_k)
+
+        # Merge B and num_heads into dim for prime & conv 
+        ## (B, NH, SL, DK) → (B*NH, DK, SL) for v and (B, NH, SL, SL) → (B*NH, SL, SL)
+        v_merged = v.reshape(B * self.num_heads, self.seq_length, self.d_k).permute(0, 2, 1)
+        am_merged = attn_matrix.reshape(B * self.num_heads, self.seq_length, self.seq_length)
+
+        # Prime and Convolution 
+        out = self.fused_prime_conv(v_merged, am_merged) # (B*NH, DK, SL)
+
+        # Reshape back: (B*NH, DK, SL) → (B, NH, SL, DK)
+        out = out.permute(0, 2, 1).contiguous().view(B, self.num_heads, self.seq_length, self.d_k)
+        out = self.dropout(out) 
+
+        # Combine Heads and Final Linear Projection
+        output = self.W_o(self.combine_heads(out)) # (B, SL, d_hidden)
+        return output
