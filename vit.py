@@ -19,6 +19,7 @@ from ConvNNAttention import (
     MultiHeadConvNNAttention_Sampled
 )
 
+from ConvNNAttention_Triton import MultiHeadConvNNAttention_Triton, FusedPrimeConvTriton
 
 
 '''VGG Model Class'''
@@ -243,7 +244,12 @@ class TransformerEncoder(nn.Module):
                 self.attention = MultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
             else: 
                 self.attention = MultiHeadConvNNAttention_Sampled(d_hidden, num_heads, attention_dropout, **convnn_attn_sampled_params)
+        
+        # ** Triton ConvNN Attention Layer
+        elif args.layer == "ConvNNAttention-Triton":
+            self.attention = MultiHeadConvNNAttention_Triton(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
 
+            
         # 5. Kvt Attention Layer
         elif args.layer == "KvtAttention":
             self.attention = MultiHeadKvtAttention(dim=d_hidden, num_heads=num_heads, attn_drop=attention_dropout, topk=args.K)
@@ -291,7 +297,7 @@ class TransformerEncoder(nn.Module):
             self.attention = MultiHeadSparseAttention(**sparse_attention_params)
 
         else: 
-            raise ValueError("Invalid layer type. Must be one of ['Attention', 'ConvNNAttention', 'KvtAttention', 'LocalAttention', 'NeighborhoodAttention', 'SparseAttention', 'BranchConv', 'BranchAttention']")
+            raise ValueError("Invalid layer type. Must be one of ['Attention', 'ConvNNAttention', 'ConvNNAttention-Triton', 'KvtAttention', 'LocalAttention', 'NeighborhoodAttention', 'SparseAttention', 'BranchConv', 'BranchAttention']")
 
         self.norm1 = nn.LayerNorm(d_hidden)
         self.norm2 = nn.LayerNorm(d_hidden)
@@ -356,7 +362,11 @@ class TransformerEncoder_DropPath(nn.Module):
                 self.attention = MultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
             else: 
                 self.attention = MultiHeadConvNNAttention_Sampled(d_hidden, num_heads, attention_dropout, **convnn_attn_sampled_params)
-            
+                
+        # ** Triton ConvNN Attention Layer
+        elif args.layer == "ConvNNAttention-Triton":
+            self.attention = MultiHeadConvNNAttention_Triton(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
+
         # 5. Kvt Attention Layer
         elif args.layer == "KvtAttention":
             self.attention = MultiHeadKvtAttention(dim=d_hidden, num_heads=num_heads, attn_drop=attention_dropout, topk=args.K)
@@ -404,7 +414,7 @@ class TransformerEncoder_DropPath(nn.Module):
             self.attention = MultiHeadSparseAttention(**sparse_attention_params)
 
         else: 
-            raise ValueError("Invalid layer type. Must be one of ['Attention', 'ConvNNAttention', 'KvtAttention', 'LocalAttention', 'NeighborhoodAttention', 'SparseAttention', 'BranchConv', 'BranchAttention']")
+            raise ValueError("Invalid layer type. Must be one of ['Attention', 'ConvNNAttention', 'ConvNNAttention-Triton', 'KvtAttention', 'LocalAttention', 'NeighborhoodAttention', 'SparseAttention', 'BranchConv', 'BranchAttention']")
 
         self.norm1 = nn.LayerNorm(d_hidden)
         self.norm2 = nn.LayerNorm(d_hidden)
