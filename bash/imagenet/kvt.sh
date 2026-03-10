@@ -15,46 +15,6 @@ torchrun --nproc_per_node=4 \
          main.py \
         --model vit-base \
         --layer KvtAttention \
-        --K 2 \
-        --num_heads 12 \
-        --dataset imagenet1k \
-        --data_path /home/exouser/Datasets \
-        --compile \
-        --use_amp \
-        --device cuda \
-        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-KvtAttention_NH12_K2/ \
-        --num_workers 16 \
-        --pin_memory \
-        --ddp \
-        --ddp_batch_size 320 || echo "K=2 training failed"
-
-
-torchrun --nproc_per_node=4 \
-         --rdzv_backend=c10d \
-         --rdzv_endpoint=localhost:$MASTER_PORT \
-         main.py \
-        --model vit-base \
-        --layer KvtAttention \
-        --K 4 \
-        --num_heads 12 \
-        --dataset imagenet1k \
-        --data_path /home/exouser/Datasets \
-        --compile \
-        --use_amp \
-        --device cuda \
-        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-KvtAttention_NH12_K4/ \
-        --num_workers 16 \
-        --pin_memory \
-        --ddp \
-        --ddp_batch_size 320 || echo "K=4 training failed"
-
-
-torchrun --nproc_per_node=4 \
-         --rdzv_backend=c10d \
-         --rdzv_endpoint=localhost:$MASTER_PORT \
-         main.py \
-        --model vit-base \
-        --layer KvtAttention \
         --K 9 \
         --num_heads 12 \
         --dataset imagenet1k \
@@ -86,5 +46,63 @@ torchrun --nproc_per_node=4 \
         --pin_memory \
         --ddp \
         --ddp_batch_size 320 || echo "K=16 training failed"
+
+torchrun --nproc_per_node=4 \
+         --rdzv_backend=c10d \
+         --rdzv_endpoint=localhost:$MASTER_PORT \
+         main.py \
+        --model vit-base \
+        --layer KvtAttention \
+        --K 25 \
+        --num_heads 12 \
+        --dataset imagenet1k \
+        --data_path /home/exouser/Datasets \
+        --compile \
+        --use_amp \
+        --device cuda \
+        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-KvtAttention_NH12_K25/ \
+        --num_workers 16 \
+        --pin_memory \
+        --ddp \
+        --ddp_batch_size 320 || echo "K=25 training failed"
+
+torchrun --nproc_per_node=4 \
+         --rdzv_backend=c10d \
+         --rdzv_endpoint=localhost:$MASTER_PORT \
+         main.py \
+        --model vit-base \
+        --layer KvtAttention \
+        --K 36 \
+        --num_heads 12 \
+        --dataset imagenet1k \
+        --data_path /home/exouser/Datasets \
+        --compile \
+        --use_amp \
+        --device cuda \
+        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-KvtAttention_NH12_K36/ \
+        --num_workers 16 \
+        --pin_memory \
+        --ddp \
+        --ddp_batch_size 320 || echo "K=36 training failed"
+
+
+torchrun --nproc_per_node=4 \
+         --rdzv_backend=c10d \
+         --rdzv_endpoint=localhost:$MASTER_PORT \
+         main.py \
+        --model vit-base \
+        --layer KvtAttention \
+        --K 100 \
+        --num_heads 12 \
+        --dataset imagenet1k \
+        --data_path /home/exouser/Datasets \
+        --compile \
+        --use_amp \
+        --device cuda \
+        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-KvtAttention_NH12_K100/ \
+        --num_workers 16 \
+        --pin_memory \
+        --ddp \
+        --ddp_batch_size 320 || echo "K=100 training failed"
 
 echo "All training completed"
