@@ -1,0 +1,21 @@
+Not using Distributed Data Parallel Mode
+Files already downloaded and verified
+Files already downloaded and verified
+Model: vit-tiny ConvNNAttention-Triton
+Total Parameters: 5538148
+Trainable Parameters: 5538148
+Model Complexity (Profiler):
+   - Total Parameters: 5.53814800 M
+   - GFLOPs: 2.32913454
+compiled success!
+[Epoch 001] Time: 145.2032s | [Train] Loss: nan Accuracy: Top1: 1.8374%, Top5: 7.4736% | [Test] Loss: nan Accuracy: Top1: 1.2164%, Top5: 6.0127%
+[Epoch 002] Time: 32.1349s | [Train] Loss: nan Accuracy: Top1: 1.0254%, Top5: 5.0723% | [Test] Loss: nan Accuracy: Top1: 1.1966%, Top5: 5.8940%
+[Epoch 003] Time: 32.2967s | [Train] Loss: nan Accuracy: Top1: 1.0350%, Top5: 5.1019% | [Test] Loss: nan Accuracy: Top1: 1.0087%, Top5: 5.1721%
+[Epoch 004] Time: 32.2647s | [Train] Loss: nan Accuracy: Top1: 1.0142%, Top5: 5.0759% | [Test] Loss: nan Accuracy: Top1: 1.2164%, Top5: 6.0127%
+[Epoch 005] Time: 32.6593s | [Train] Loss: nan Accuracy: Top1: 1.0290%, Top5: 5.0879% | [Test] Loss: nan Accuracy: Top1: 1.0087%, Top5: 5.1721%
+[Epoch 006] Time: 32.4938s | [Train] Loss: nan Accuracy: Top1: 1.0282%, Top5: 5.0911% | [Test] Loss: nan Accuracy: Top1: 1.0087%, Top5: 5.1721%
+[Epoch 007] Time: 32.4150s | [Train] Loss: nan Accuracy: Top1: 1.0250%, Top5: 5.0951% | [Test] Loss: nan Accuracy: Top1: 1.2164%, Top5: 6.0127%
+[Epoch 008] Time: 32.7006s | [Train] Loss: nan Accuracy: Top1: 1.0414%, Top5: 5.0963% | [Test] Loss: nan Accuracy: Top1: 1.0087%, Top5: 5.1721%
+[Epoch 009] Time: 32.6494s | [Train] Loss: nan Accuracy: Top1: 1.0202%, Top5: 5.0863% | [Test] Loss: nan Accuracy: Top1: 1.0087%, Top5: 5.1721%
+[Epoch 010] Time: 32.7065s | [Train] Loss: nan Accuracy: Top1: 1.0290%, Top5: 5.0655% | [Test] Loss: nan Accuracy: Top1: 1.2164%, Top5: 6.0127%
+[Epoch 011] Time: 32.7794s | [Train] Loss: nan Accuracy: Top1: 1.0170%, Top5: 5.0775% | [Test] Loss: nan Accuracy: Top1: 1.0087%, Top5: 5.1721%

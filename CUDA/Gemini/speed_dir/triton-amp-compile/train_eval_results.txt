@@ -1,0 +1,9 @@
+Model Complexity (Profiler): GFLOPs: 2.32909997, Trainable Parameters: 5.48621800 M
+[Epoch 001] Time: 249.8610s | [Train] Loss: nan Accuracy: Top1: 31.9914%, Top5: 81.0850% | [Test] Loss: nan Accuracy: Top1: 10.6641%, Top5: 51.5332%
+[Epoch 002] Time: 110.0829s | [Train] Loss: nan Accuracy: Top1: 10.0343%, Top5: 49.9972% | [Test] Loss: nan Accuracy: Top1: 10.4492%, Top5: 50.7715%
+[Epoch 003] Time: 106.4376s | [Train] Loss: nan Accuracy: Top1: 10.0195%, Top5: 50.0128% | [Test] Loss: nan Accuracy: Top1: 10.4980%, Top5: 50.8105%
+[Epoch 004] Time: 106.4426s | [Train] Loss: nan Accuracy: Top1: 10.0064%, Top5: 50.0367% | [Test] Loss: nan Accuracy: Top1: 11.1035%, Top5: 51.5918%
+[Epoch 005] Time: 106.4136s | [Train] Loss: nan Accuracy: Top1: 10.0151%, Top5: 50.0295% | [Test] Loss: nan Accuracy: Top1: 10.4492%, Top5: 50.8789%
+
+Average Epoch Time: 135.8475s
+Max Accuracy: 11.1035% at Epoch 4

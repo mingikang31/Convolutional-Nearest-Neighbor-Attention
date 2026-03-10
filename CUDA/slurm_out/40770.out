@@ -1,0 +1,16 @@
+Not using Distributed Data Parallel Mode
+Files already downloaded and verified
+Files already downloaded and verified
+Model: vit-tiny ConvNNAttention-Triton
+Total Parameters: 5538148
+Trainable Parameters: 5538148
+Could not calculate GFLOPs with PyTorch Profiler: name 'np' is not defined
+Not using Distributed Data Parallel Mode
+Files already downloaded and verified
+Files already downloaded and verified
+Model: vit-tiny ConvNNAttention
+Total Parameters: 5517412
+Trainable Parameters: 5517412
+Model Complexity (Profiler):
+   - Total Parameters: 5.51741200 M
+   - GFLOPs: 2.33321952

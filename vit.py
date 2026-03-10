@@ -20,6 +20,7 @@ from ConvNNAttention import (
 )
 
 from ConvNNAttention_Triton import MultiHeadConvNNAttention_Triton, FusedPrimeConvTriton
+from FastConvNNAttention import FastMultiHeadConvNNAttention
 
 
 '''VGG Model Class'''
@@ -247,7 +248,7 @@ class TransformerEncoder(nn.Module):
         
         # ** Triton ConvNN Attention Layer
         elif args.layer == "ConvNNAttention-Triton":
-            self.attention = MultiHeadConvNNAttention_Triton(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
+            self.attention = FastMultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
 
             
         # 5. Kvt Attention Layer
@@ -365,7 +366,7 @@ class TransformerEncoder_DropPath(nn.Module):
                 
         # ** Triton ConvNN Attention Layer
         elif args.layer == "ConvNNAttention-Triton":
-            self.attention = MultiHeadConvNNAttention_Triton(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
+            self.attention = FastMultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
 
         # 5. Kvt Attention Layer
         elif args.layer == "KvtAttention":

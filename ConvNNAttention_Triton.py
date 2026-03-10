@@ -91,6 +91,12 @@ class PrimeConvTritonFunction(torch.autograd.Function):
             conv_w: (d_k, K)
             K:      int
         """
+        # CRITICAL: Triton kernels use pointer arithmetic that assumes contiguous
+        # memory layout. v often arrives non-contiguous after permute() in the
+        # attention module (e.g., v.reshape(...).permute(0, 2, 1)).
+        v = v.contiguous()
+        attn = attn.contiguous()
+
         B_NH, d_k, SL = v.shape
 
         # Step 1: Top-K + softmax (PyTorch -- already fast)
@@ -120,6 +126,13 @@ class PrimeConvTritonFunction(torch.autograd.Function):
         K = ctx.K
         B_NH, d_k, SL = v.shape
 
+        # Cast everything to float32 for numerical stability under AMP
+        compute_dtype = torch.float32
+        grad_output = grad_output.to(compute_dtype)
+        v = v.to(compute_dtype)
+        conv_w = conv_w.to(compute_dtype)
+        topk_sw = topk_sw.to(compute_dtype)
+
         # Expand for broadcasting: all (B_NH, d_k, SL, K)
         idx_exp = topk_indices.unsqueeze(1).expand(-1, d_k, -1, -1)
         sw_exp  = topk_sw.unsqueeze(1).expand(-1, d_k, -1, -1)
@@ -131,7 +144,7 @@ class PrimeConvTritonFunction(torch.autograd.Function):
         v_gathered = torch.gather(v_exp, 2, idx_exp)
 
         # grad_v: flatten last two dims so scatter_add_ works on 3D tensor
-        grad_v = torch.zeros_like(v)
+        grad_v = torch.zeros(B_NH, d_k, SL, device=v.device, dtype=compute_dtype)
         grad_v.scatter_add_(
             2,
             idx_exp.reshape(B_NH, d_k, SL * K),
@@ -147,7 +160,7 @@ class PrimeConvTritonFunction(torch.autograd.Function):
         dot = (topk_sw * ds).sum(dim=-1, keepdim=True)
         grad_topk = topk_sw * (ds - dot)
 
-        grad_attn = torch.zeros(B_NH, SL, SL, device=v.device, dtype=v.dtype)
+        grad_attn = torch.zeros(B_NH, SL, SL, device=v.device, dtype=compute_dtype)
         grad_attn.scatter_add_(2, topk_indices, grad_topk)
 
         return grad_v, grad_attn, grad_conv_w, None
@@ -166,8 +179,12 @@ class FusedPrimeConvTriton(nn.Module):
         return PrimeConvTritonFunction.apply(v, attn, self.conv_weight, self.K)
 
 
+
+
+        
 import torch 
 import torch.nn as nn 
+import numpy as np
 
 """Regular ConvNN Attention Implementation"""
 class MultiHeadConvNNAttention_Triton(nn.Module):

@@ -1,0 +1,10 @@
+Not using Distributed Data Parallel Mode
+Files already downloaded and verified
+Files already downloaded and verified
+Model: vit-tiny ConvNNAttention-Triton
+Total Parameters: 5538148
+Trainable Parameters: 5538148
+Model Complexity (Profiler):
+   - Total Parameters: 5.53814800 M
+   - GFLOPs: 2.32913454
+[Epoch 001] Time: 45.3594s | [Train] Loss: 4.69434260 Accuracy: Top1: 4.0285%, Top5: 15.0356% | [Test] Loss: 4.70628956 Accuracy: Top1: 4.6776%, Top5: 17.2963%
