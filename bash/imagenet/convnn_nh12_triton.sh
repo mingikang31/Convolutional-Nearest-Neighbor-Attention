@@ -23,7 +23,6 @@ torchrun --nproc_per_node=4 \
         --num_heads 12 \
         --dataset imagenet1k \
         --data_path /home/exouser/Datasets \
-        --compile \
         --use_amp \
         --device cuda \
         --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention-Triton_NH12_All_K25/ \
@@ -46,7 +45,6 @@ torchrun --nproc_per_node=4 \
         --num_heads 12 \
         --dataset imagenet1k \
         --data_path /home/exouser/Datasets \
-        --compile \
         --use_amp \
         --device cuda \
         --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention-Triton_NH12_All_K36/ \
@@ -68,7 +66,6 @@ torchrun --nproc_per_node=4 \
         --num_heads 12 \
         --dataset imagenet1k \
         --data_path /home/exouser/Datasets \
-        --compile \
         --use_amp \
         --device cuda \
         --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention-Triton_NH12_All_K100/ \
@@ -92,7 +89,6 @@ torchrun --nproc_per_node=4 \
         --num_heads 12 \
         --dataset imagenet1k \
         --data_path /home/exouser/Datasets \
-        --compile \
         --use_amp \
         --device cuda \
         --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention-Triton_NH12_All_K9/ \
@@ -114,7 +110,6 @@ torchrun --nproc_per_node=4 \
         --num_heads 12 \
         --dataset imagenet1k \
         --data_path /home/exouser/Datasets \
-        --compile \
         --use_amp \
         --device cuda \
         --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention-Triton_NH12_All_K16/ \
