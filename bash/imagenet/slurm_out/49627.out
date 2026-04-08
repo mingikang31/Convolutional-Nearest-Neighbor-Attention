@@ -1,0 +1,8 @@
+Not using Distributed Data Parallel Mode
+Loading cached ImageNet file from /mnt/research/j.farias/mkang2/Datasets/imagenet1k_hf_cache
+Model: vit-base ConvNNAttention-Triton
+Total Parameters: 86456296
+Trainable Parameters: 86456296
+Model Complexity (Profiler):
+   - Total Parameters: 86.45629600 M
+   - GFLOPs: 34.41611136

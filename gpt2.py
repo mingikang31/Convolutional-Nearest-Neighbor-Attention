@@ -389,7 +389,7 @@ if __name__ == "__main__":
     logits, loss = attn_gpt(ex)
     print("Logits shape:", logits.shape)
 
-    # Correct Check
+    # Sanity Check -> When K = seq_length (K=10 for 1024 seq_length and 12 heads)
     convnn_gpt.eval()
     attn_gpt.eval()
     convnn = convnn_gpt.transformer_blocks[0].attention

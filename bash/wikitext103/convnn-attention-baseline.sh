@@ -39,7 +39,6 @@ python language_main.py \
     --sampling_type all \
     --dataset $dataset \
     --use_amp \
-    --data_path ./Data \
     --batch_size 32 \
     --num_epochs 20 \
     --clip_grad_norm 1.0 \
@@ -74,7 +73,6 @@ python language_main.py \
     --layer Attention \
     --dataset $dataset \
     --use_amp \
-    --data_path ./Data \
     --batch_size 32 \
     --num_epochs 20 \
     --clip_grad_norm 1.0 \

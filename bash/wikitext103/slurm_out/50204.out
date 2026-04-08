@@ -1,0 +1,8 @@
+Requirement already satisfied: einops in /mnt/research/j.farias/mkang2/miniconda3_arm/envs/torch-gh200/lib/python3.11/site-packages (0.8.2)
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_1024
+Model: GPT2_12L_12H_768D_ConvNNAttention
+Total Parameters: 124442880
+Trainable Parameters: 124442880
+Model Complexity (Profiler):
+   - Total Parameters: 124.44288000 M
+   - GFLOPs: 272.09351347

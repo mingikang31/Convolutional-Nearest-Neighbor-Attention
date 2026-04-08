@@ -1,0 +1,18 @@
+WARNING: overwriting environment variables set in the machine
+overwriting variable ['LD_LIBRARY_PATH']
+Traceback (most recent call last):
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/language_main.py", line 11, in <module>
+    from train_eval import Train_Eval_GPT
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/train_eval.py", line 22, in <module>
+    from utils import set_seed
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/utils.py", line 89, in <module>
+    from einops import rearrange, repeat, pack, unpack
+ModuleNotFoundError: No module named 'einops'
+Traceback (most recent call last):
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/language_main.py", line 11, in <module>
+    from train_eval import Train_Eval_GPT
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/train_eval.py", line 22, in <module>
+    from utils import set_seed
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/utils.py", line 89, in <module>
+    from einops import rearrange, repeat, pack, unpack
+ModuleNotFoundError: No module named 'einops'

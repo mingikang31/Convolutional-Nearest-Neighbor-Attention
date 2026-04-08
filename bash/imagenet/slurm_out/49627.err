@@ -1,0 +1,46 @@
+Traceback (most recent call last):
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 278, in <module>
+    main(args)
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/main.py", line 257, in main
+    train_eval_results = Train_Eval_ImageNet(
+                         ^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/train_eval.py", line 356, in Train_Eval_ImageNet
+    outputs = model(images)                    
+              ^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/torch-pro6000/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/torch-pro6000/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 147, in forward
+    x = self.transformer_encoder(x)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/torch-pro6000/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/torch-pro6000/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/torch-pro6000/lib/python3.11/site-packages/torch/nn/modules/container.py", line 250, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/torch-pro6000/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/torch-pro6000/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/vit.py", line 435, in forward
+    attn_output = self.attention(norm_x)  
+                  ^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/torch-pro6000/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3/envs/torch-pro6000/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/FastConvNNAttention.py", line 191, in forward
+    topk_values = torch.softmax(topk_values, dim=-1)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 924.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 529.56 MiB is free. Including non-PyTorch memory, this process has 94.43 GiB memory in use. Of the allocated memory 91.93 GiB is allocated by PyTorch, and 1.81 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
