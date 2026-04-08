@@ -19,7 +19,8 @@ from ConvNNAttention import (
     MultiHeadConvNNAttention_Sampled
 )
 
-from ConvNNAttention_Triton import MultiHeadConvNNAttention_Triton, FusedPrimeConvTriton
+from ConvNNAttention_Triton_NOTINUSE import MultiHeadConvNNAttention_Triton, FusedPrimeConvTriton
+
 from FastConvNNAttention import FastMultiHeadConvNNAttention
 
 

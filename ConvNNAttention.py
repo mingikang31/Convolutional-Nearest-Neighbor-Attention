@@ -59,7 +59,7 @@ class MultiHeadConvNNAttention(nn.Module):
                 nn.Conv1d(
                     in_channels=self.in_channels,
                     out_channels=self.in_channels,
-                    kernel_size=self.K,
+                    kernel_size=self.K,          
                     stride=self.K,
                     padding=0,
                     groups=self.in_channels,

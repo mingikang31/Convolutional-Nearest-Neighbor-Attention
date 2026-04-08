@@ -489,3 +489,209 @@ def load_model(model, checkpoint_path, device='cuda'):
 
     print(f"Loaded model from epoch {checkpoint['epoch']} with best accuracy {checkpoint['best_accuracy']:.4f}%")
     return model
+
+
+def Train_Eval_GPT(args, 
+                   model: nn.Module, 
+                   train_loader, 
+                   test_loader, 
+                   val_loader
+                   ):
+    """ Training & Evaluation Loop for GPT Language Modeling - Perplexity (PPL) Evaluation"""
+    # Set Seed
+    if args.seed != 0:
+        set_seed(args.seed)
+
+    # Optimizer
+    if args.optimizer == 'adam':
+        optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    elif args.optimizer == 'sgd':
+        optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
+    elif args.optimizer == 'adamw':
+        optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+
+    # Scheduler Setup
+    total_steps = len(train_loader) * args.num_epochs 
+    warmup_steps = int(0.05 * total_steps) # Warmup for 5% of training steps
+
+    # Learning Rate Scheduler
+    scheduler = None
+    if args.scheduler == 'step':
+        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=args.lr_step, gamma=args.lr_gamma)
+    elif args.scheduler == 'cosine': 
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.num_epochs)
+    elif args.scheduler == 'plateau':
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5)
+    elif args.scheduler == 'linear': ## MAIN ONE IN USE
+        scheduler = get_linear_schedule_with_warmup(
+            optimizer, 
+            num_warmup_steps=warmup_steps, 
+            num_training_steps=total_steps
+        )
+
+    # Device 
+    device = args.device 
+    model.to(device) 
+
+    scaler = GradScaler() if args.use_amp else None
+    
+    epoch_results = [] 
+    
+    ## [GFLOPS] Computation using PyTorch Profiler ##
+    try:
+        model.eval()
+        batch = next(iter(train_loader))
+        tokens = batch["input_ids"].to(device)
+        inputs = tokens[:, :-1].contiguous()
+        targets = tokens[:, 1:].contiguous()
+
+        # Profile a single forward pass
+        with torch.profiler.profile(
+            activities=[torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA],
+            with_flops=True
+        ) as prof:
+            with torch.no_grad():
+                logits, loss = model(inputs[0:1], target=targets[0:1])
+
+        total_flops = sum(event.flops for event in prof.key_averages())
+
+        if total_flops > 0:
+            gflops = total_flops / 1e9
+            params = sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6
+
+            print(f"Model Complexity (Profiler):")
+            print(f"   - Total Parameters: {params:.8f} M")
+            print(f"   - GFLOPs: {gflops:.8f}")
+            epoch_results.append(f"Model Complexity (Profiler): GFLOPs: {gflops:.8f}, Trainable Parameters: {params:.8f} M")
+
+    except Exception as e:
+        print(f"Could not calculate GFLOPs with PyTorch Profiler: {e}")
+        
+    # Compile Model 
+    if args.compile: 
+        model = torch.compile(
+            model, 
+            mode=args.compile_mode, 
+            fullgraph=False, 
+            dynamic=False) 
+        print("compiled success!")
+        
+    # Training Loop 
+    epoch_times = [] # Average Epoch Time
+    min_perplexity = float('inf')
+    min_epoch = 0
+
+    for epoch in range(args.num_epochs):
+        start_time = time.time() 
+
+        # Training Loop
+        train_running_loss = 0.0
+        model.train() 
+        for batch in train_loader: 
+            tokens = batch["input_ids"].to(device)
+
+            inputs = tokens[:, :-1].contiguous()
+            targets = tokens[:, 1:].contiguous()
+
+            optimizer.zero_grad() 
+            if args.use_amp: 
+                with autocast(device_type=args.device):
+                    logits, loss = model(inputs, target=targets)
+
+                # nan for loss
+                if torch.isnan(loss):
+                    print(f"Warning: NaN loss at Epoch {epoch+1}")
+                    continue
+                    
+                scaler.scale(loss).backward()
+                
+                if args.clip_grad_norm: 
+                    scaler.unscale_(optimizer) 
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_grad_norm)
+                
+                scaler.step(optimizer)
+                scaler.update()
+            else: 
+                logits, loss = model(inputs, target=targets)
+                loss.backward()
+                if args.clip_grad_norm:
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_grad_norm)
+                optimizer.step()
+            if scheduler and args.scheduler == 'linear':
+                scheduler.step()
+
+            train_running_loss += loss.item()
+
+        avg_train_loss = train_running_loss / len(train_loader)
+        train_ppl = torch.exp(torch.tensor(avg_train_loss)).item()
+        
+        # Validation Loop
+        val_running_loss = 0.0
+        model.eval()
+        with torch.no_grad():
+            for batch in val_loader:   
+                tokens = batch["input_ids"].to(device)
+
+                inputs = tokens[:, :-1].contiguous()
+                targets = tokens[:, 1:].contiguous()
+
+                if args.use_amp:
+                    with autocast(device_type=args.device):
+                        logits, loss = model(inputs, target=targets)
+                else:
+                    logits, loss = model(inputs, target=targets)
+
+                val_running_loss += loss.item()
+                
+        avg_val_loss = val_running_loss / len(val_loader)
+        val_ppl = torch.exp(torch.tensor(avg_val_loss)).item()
+
+        # Single Epoch Duration
+        epoch_time = time.time() - start_time
+        epoch_times.append(epoch_time)
+        
+
+        # Save Epoch Results
+        epoch_results.append(f"[Epoch {epoch+1:03d}] Time: {epoch_time:.4f}s | [Train] Loss: {avg_train_loss:.8f} Perplexity: {train_ppl:.2f} | [Val] Loss: {avg_val_loss:.8f} Perplexity: {val_ppl:.2f}")
+        print(epoch_results[-1])
+        
+        # Min PPL 
+        if val_ppl < min_perplexity:
+            min_perplexity = val_ppl
+            min_epoch = epoch + 1
+
+        # Learning Rate Scheduler Step
+        if scheduler and args.scheduler != 'linear': 
+            if isinstance(scheduler, optim.lr_scheduler.ReduceLROnPlateau):
+                scheduler.step(val_ppl)
+            else:
+                scheduler.step()
+
+
+    # Test Loop (Final Evaluation)
+    test_running_loss = 0.0
+    model.eval()
+    with torch.no_grad():
+        for batch in test_loader:   
+            tokens = batch["input_ids"].to(device)
+
+            inputs = tokens[:, :-1].contiguous()
+            targets = tokens[:, 1:].contiguous()
+
+            if args.use_amp:
+                with autocast(device_type=args.device):
+                    logits, loss = model(inputs, target=targets)
+            else:
+                logits, loss = model(inputs, target=targets)
+
+            test_running_loss += loss.item()
+                
+    avg_test_loss = test_running_loss / len(test_loader)
+    test_ppl = torch.exp(torch.tensor(avg_test_loss)).item()
+
+    epoch_results.append(f"\n[Test] Loss: {avg_test_loss:.8f} Perplexity: {test_ppl:.2f}")
+                
+    epoch_results.append(f"\nAverage Epoch Time: {sum(epoch_times) / len(epoch_times):.4f}s")
+    epoch_results.append(f"Min Perplexity: {min_perplexity:.4f} at Epoch {min_epoch}")
+
+    return epoch_results
