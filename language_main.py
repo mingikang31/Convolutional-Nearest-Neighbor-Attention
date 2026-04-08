@@ -13,6 +13,16 @@ from utils import write_to_file, set_seed
 
 """Default Model: GPT2-small"""
 
+"""
+Parameters Layers d_model
+Small - 117M 12 768
+Medium - 345M 24 1024
+Large - 762M 36 1280
+XLarge - 1542M 48 1600
+"""
+
+
+
 def args_parser():
     parser = argparse.ArgumentParser(description="ZiLU Activation Function Experiments for GPT2 Models")
 
