@@ -17,7 +17,7 @@ cd /mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention
 
 python main.py \
     --model vit-base \
-    --layer ConvNNAttention-Triton \
+    --layer FastConvNNAttention \
     --K 100 \
     --convolution_type depthwise \
     --sampling_type all \
@@ -28,6 +28,6 @@ python main.py \
     --use_amp \
     --batch_size 256 \
     --device cuda \
-    --output_dir ./Output/ImageNet1K/ViT-Base-ConvNNAttention-Triton_NH12_All_K100/ \
+    --output_dir ./Output/ImageNet1K/ViT-Base-FastConvNNAttention_NH12_All_K100/ \
     --num_workers 16 \
     --pin_memory

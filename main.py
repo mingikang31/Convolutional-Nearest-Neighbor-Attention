@@ -55,7 +55,7 @@ def args_parser():
                         )
     
     # Model Arguments
-    parser.add_argument("--layer", type=str, default="Attention", choices=["Attention", "ConvNNAttention", "ConvNNAttention-Triton", "KvtAttention", "LocalAttention", "NeighborhoodAttention", "SparseAttention"], help="Layer to use for training and evaluation")
+    parser.add_argument("--layer", type=str, default="Attention", choices=["Attention", "ConvNNAttention", "FastConvNNAttention", "EfficientConvNNAttention", "KvtAttention", "LocalAttention", "NeighborhoodAttention", "SparseAttention"], help="Layer to use for training and evaluation")
 
     parser.add_argument("--patch_size", type=int, default=16, help="Patch size for Attention Models")
     parser.add_argument("--num_layers", type=int, default=12, help="Number of layers in the model")   

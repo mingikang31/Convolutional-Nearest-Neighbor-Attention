@@ -1,0 +1,164 @@
+\section{Large Scale ImageNet-1K Evaluation}
+
+\subsection{ImageNet and the ImageNet Large Scale Visual Recognition Challenge}
+
+The ImageNet project represents a monumental effort in dataset curation for computer vision. Originally introduced by Deng \textit{et al.} \cite{deng2009imagenet}, ImageNet is a large-scale visual database organized according to the WordNet hierarchy, containing over 14 million hand-annotated images across more than 20,000 synsets (synonym sets). This comprehensive resource has fundamentally shaped modern deep learning research and practice.
+
+The success of ImageNet as a benchmark catalyzed the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) \cite{DBLP:conf/ijcv/RussakovskyDSKSSKF15}, an annual competition that ran from 2010 to 2017. The ILSVRC introduced standardized evaluation protocols for object detection, localization, classification, and scene understanding tasks. The competition's influence cannot be overstated: it directly motivated breakthrough architectures such as AlexNet \cite{krizhevsky2012imagenet}, which initiated the deep learning revolution in computer vision.
+
+\subsection{ImageNet-1K: The Classification Benchmark}
+
+ImageNet-1K, formally known as the ILSVRC 2012 image classification dataset \cite{DBLP:conf/ijcv/RussakovskyDSKSSKF15}, has become the de facto standard benchmark for evaluating visual recognition models. The dataset comprises:
+
+\begin{itemize}
+    \item \textbf{Training set:} 1,281,167 images across 1,000 object categories
+    \item \textbf{Validation set:} 50,000 images (50 per class) 
+    \item \textbf{Test set:} 100,000 images (100 per class)
+    \item \textbf{Semantic coverage:} 1,000 diverse and non-exclusive object classes from WordNet
+\end{itemize}
+
+The large-scale nature of ImageNet-1K presents significant challenges that drive algorithmic innovation: diverse object appearances, complex backgrounds, viewpoint variations, and within-class visual diversity. These characteristics make ImageNet-1K a rigorous evaluation metric for assessing model generalization capabilities.
+
+\subsection{Significance and Impact on Vision Transformer Development}
+
+Since AlexNet's 2012 victory on ILSVRC \cite{krizhevsky2012imagenet}, ImageNet-1K has remained the primary benchmark for evaluating advances in computer vision. Recent architectures—particularly Vision Transformers (ViT) \cite{dosovitskiy2020image}, Data-Efficient Image Transformers (DeiT) \cite{touvron2021training}, and Swin Transformers \cite{DBLP:conf/iccv/LiuL00W0LG21}—are routinely evaluated on ImageNet-1K to establish state-of-the-art performance.
+
+The standardization provided by ImageNet-1K enables fair comparison across methods and institutional boundaries, a critical requirement for reproducible science in computer vision. Our evaluation on ImageNet-1K allows direct comparison with prior work on attention mechanisms and convolutional approaches to visual recognition.
+
+\subsection{Dataset and Experimental Setup}
+The ImageNet-1K dataset, derived from the ILSVRC 2012 challenge, comprises 1,281,167 training images, 50,000 validation images, and 100,000 test images spanning 1,000 object categories. All models are trained on 224×224 RGB images. 
+
+We closely follow the training protocol established by the Swin Transformer \cite{DBLP:conf/iccv/LiuL00W0LG21}, which has become the de facto standard for vision transformer evaluation on large-scale datasets.
+
+\subsection{Data Augmentation Strategy}
+\subsubsection{Training Augmentation}
+Training images undergo the following sequential transformations: 
+\begin{enumerate}
+    \item RandomResizedCrop to 224×224
+    \item Horizontal flipping (probability: 0.5)
+    \item Color jittering ($\lambda = 0.4$)
+    \item RandAugment with magnitude $m=9$ and number of layers $n=2$ (implementation: 'rand-m9-mstd0.5-inc1')
+    \item Bicubic interpolation
+    \item Random erasing (probability: 0.25, mode: pixel-level) 
+\end{enumerate}
+
+\subsubsection{MixUp and CutMix}
+Following established practice, we apply MixUp and CutMix with the following hyperparameters:
+\begin{enumerate}
+    \item MixUp coefficient $\alpha = 0.8$
+    \item CutMix coefficient $\alpha = 1.0$
+    \item Application probability: $p = 1.0$ per batch
+    \item Mixing strategy switch probability: 0.5 (stochastic selection between MixUp and CutMix)
+    \item Label smoothing: 0.1
+\end{enumerate}
+
+\subsubsection{Validation Augmentation}
+Validation and test images undergo lighter augmentation: resize shorter edge to 256 pixels (preserving aspect ratio) with bicubic interpolation, center crop to 224×224, and normalize using ImageNet statistics: $\mu = (0.485, 0.456, 0.406)$, $\sigma = (0.229, 0.224, 0.225)$.
+
+\subsection{Training Configuration}
+\subsubsection{Loss Functions and Optimization}
+We employ SoftTargetCrossEntropy loss during training to accommodate soft labels from MixUp/CutMix operations, while using standard CrossEntropyLoss for validation. All models are optimized with AdamW using learning rate $\text{lr} = 10^{-3}$, weight decay $\lambda = 0.05$, and momentum parameters $\beta_1 = 0.9, \beta_2 = 0.999$. Gradient norm clipping is set to 5.0.
+
+\subsubsection{Learning Rate Schedule}
+We adopt a cosine annealing schedule with linear warmup: initial warmup learning rate $10^{-7}$, 20-epoch warmup phase, followed by cosine decay to $\text{lr}_{\min} = 5 \times 10^{-6}$ over 300 training epochs.
+
+\subsubsection{Mixed Precision and Numerical Optimization}
+We leverage automatic mixed precision (AMP) training, utilizing bfloat16 precision on H100 GPUs where available, otherwise falling back to float16. Additionally, we enable TensorFloat-32 (TF32) matrix multiplications for computational efficiency on Ampere and newer GPU architectures.
+
+\subsection{Distributed Training}
+\paragraph{Hardware Configuration}
+Experiments were conducted on the Indiana Jetstream2 platform with four NVIDIA H100 GPUs. We employ PyTorch's Distributed Data Parallel (DDP) backend with NCCL communication, distributing a global batch size of 1,280 samples (320 per GPU). DistributedSampler ensures non-overlapping data partitions across all processes, preserving training reproducibility and preventing data leakage.
+
+\paragraph{Reproducibility}
+All experiments are conducted with fixed random seeds ($\text{seed} = 0$) applied to PyTorch, NumPy, and the Python random module to ensure deterministic behavior across runs.
+
+### CIFAR10 and
+
+
+\section{Initial Proof of Concept Validation on Small Scale Datasets}
+
+\subsection{Motivation for CIFAR Datasets in Architecture Validation}
+
+Before large-scale evaluation on ImageNet-1K, we validate our approach on CIFAR-10 and CIFAR-100 to establish proof-of-concept and enable rapid iteration. These datasets strike a critical balance: they are computationally tractable (enabling quick experimental cycles) while remaining sufficiently challenging to discern meaningful architectural differences. CIFAR datasets have proven invaluable for early-stage evaluation of novel attention mechanisms \cite{touvron2021training, DBLP:conf/iccv/LiuL00W0LG21}, allowing researchers to validate hypotheses before committing to expensive large-scale training runs.
+
+\subsection{CIFAR-10 and CIFAR-100: Dataset Overview}
+
+CIFAR-10 and CIFAR-100 were introduced by Krizhevsky \cite{krizhevsky2009learning} as the Canadian Institute for Advanced Research datasets. Both consist of $32 \times 32$ RGB color images collected from the 80 million tiny images dataset \cite{torralba200880}. Key characteristics:
+
+\textbf{CIFAR-10:}
+\begin{itemize}
+    \item 60,000 total images across 10 semantically distinct categories
+    \item 50,000 training images (5,000 per class)
+    \item 10,000 test images (1,000 per class)
+    \item Categories: airplane, automobile, bird, cat, deer, dog, frog, horse, ship, truck
+\end{itemize}
+
+\textbf{CIFAR-100:}
+\begin{itemize}
+    \item 60,000 total images across 100 fine-grained categories
+    \item 50,000 training images (500 per class)
+    \item 10,000 test images (100 per class)
+    \item Hierarchical organization: 20 superclasses, each containing 5 fine-grained classes
+\end{itemize}
+
+While modest by modern standards, CIFAR datasets remain rigorous benchmarks: the $32 \times 32$ resolution necessitates learning global patterns despite severe resolution constraints, and the moderate dataset size prevents memorization, demanding genuine feature learning.
+
+\subsection{Experimental Design: Supporting Multiple Architectures}
+
+A key advantage of CIFAR evaluation is the ability to fairly compare disparate architectures (CNNs vs. Vision Transformers) while isolating the contribution of attention mechanisms. Our experimental protocol addresses the inherent architectural differences:
+
+\subsubsection{Preprocessing for Convolutional Networks}
+For VGG-11 and ConvNN-based approaches, we maintain the native $32 \times 32$ image resolution. This choice preserves the spatial locality and local feature hierarchy that convolutional architectures exploit. At this resolution, our \convnn operations perform neighbor selection in relatively dense feature maps, allowing us to isolate the benefits of adaptive spatial-feature fusion without confounding resolution effects. The small receptive field ensures that \convnn neighborhoods capture meaningfully related spatial regions.
+
+\subsubsection{Preprocessing for Vision Transformers}
+For ViT-Tiny experiments, we resize all images to $224 \times 224$ resolution to align with the patchification mechanism of transformer architectures. Vision Transformers divide images into non-overlapping $16 \times 16$ patches and flatten them into sequences; smaller resolution inputs yield fewer tokens (e.g., $32 \times 32$ produces only 4 patches in each dimension = 16 total patches), which may not provide sufficient sequence length for attention mechanisms to learn meaningful relationships. Resizing to $224 \times 224$ generates $(224/16)^2 = 196$ patches, enabling the transformer's positional encoding and multi-head attention to operate in a regime where sequence modeling aspects become meaningful.
+
+\subsubsection{Normalization}
+We apply per-channel standardization using dataset-specific statistics, computed from the training set only to prevent data leakage:
+
+\begin{enumerate}
+    \item \textbf{CIFAR-10:} Mean: $[0.4914, 0.4822, 0.4465]$; Std: $[0.2470, 0.2435, 0.2616]$
+    \item \textbf{CIFAR-100:} Mean: $[0.5071, 0.4867, 0.4408]$; Std: $[0.2675, 0.2565, 0.2761]$
+\end{enumerate}
+
+Normalization is applied after all geometric transformations (resizing, cropping) and immediately before model ingestion.
+
+\subsection{Data Augmentation Policy}
+
+We deliberately employ \textit{no data augmentation} beyond normalization (e.g., no random cropping, horizontal flipping, color jittering, mixup, or cutout). This controlled experimental design serves several purposes:
+
+\begin{enumerate}
+    \item \textbf{Architectural purity:} Isolates the contribution of attention mechanisms without confounding regularization from data augmentation
+    \item \textbf{Controlled comparison:} Enables fair evaluation of \convnn relative to standard attention and convolutional baselines
+    \item \textbf{Hypothesis validation:} Tests whether our method provides intrinsic regularization benefits or merely complements standard augmentation
+\end{enumerate}
+
+We acknowledge that production-grade vision models benefit substantially from aggressive augmentation \cite{cubuk2019randaugment, DBLP:conf/iccv/LiuL00W0LG21}. Future work will investigate how \convnn interacts with augmentation strategies and whether its properties complement or compete with augmentation-based regularization.
+
+\subsection{Training Configuration}
+
+\subsubsection{Optimization and Loss Functions}
+We employ standard CrossEntropyLoss for all CIFAR experiments. Models are optimized with AdamW optimizer using learning rate $\text{lr} = 10^{-4}$, weight decay $\lambda = 10^{-2}$, and default momentum parameters $\beta_1 = 0.9, \beta_2 = 0.999$. The learning rate of $10^{-4}$ is selected to enable stable convergence on modest-scale datasets, preventing optimization instabilities that can arise with larger learning rates on CIFAR's limited training data.
+
+\subsubsection{Learning Rate Schedule}
+Unlike large-scale ImageNet experiments, CIFAR experiments employ \textit{constant} learning rates without decay scheduling. This design choice reflects the smaller dataset size and limited training duration (150 epochs): learning rate schedules provide diminishing returns on short training runs, and constant rates provide a cleaner baseline for comparing attention mechanisms without introducing scheduler-related variance.
+
+Optional step-based decay is supported in our implementation (step size: 20 epochs, decay factor: $\gamma = 0.1$) but remains disabled in reported CIFAR experiments to maintain experimental purity. Future ablations will examine how learning rate scheduling interacts with different attention mechanisms.
+
+\subsubsection{Training Hyperparameters}
+\begin{itemize}
+    \item Batch size: 256
+    \item Training epochs: 150
+    \item Gradient norm clipping: 1.0
+    \item Dropout rate: 0.1
+    \item Attention dropout rate: 0.1
+    \item DropPath rate: 0.1 (for vision transformer experiments only)
+    \item Random seed: 42 (varied across runs)
+\end{itemize}
+
+\subsubsection{Numerical Precision}
+All experiments employ full float32 precision. No mixed precision training or TensorFloat-32 optimizations are applied, ensuring numerically stable comparisons across all methods on modest-scale datasets where such optimizations provide minimal computational benefit.
+
+\subsection{Hardware Configuration and Implementation}
+
+Experiments are implemented in PyTorch 2.0 and executed on single NVIDIA A100 PCIe (80 GB memory) GPUs. The generous GPU memory enables batch size 256 with large intermediate feature maps, and the A100's 40 TFlops FP32 compute ensures typical training completes within 4--6 hours per model. All experiments use fixed random seeds to ensure reproducibility, with seed values specified per experimental run.

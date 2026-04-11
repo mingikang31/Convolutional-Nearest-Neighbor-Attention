@@ -35,7 +35,7 @@ def args_parser():
     parser.add_argument('--dropout', type=float, default=0.1, help='Dropout for model')
 
     # ConvNN/Attention Layer Arguments
-    parser.add_argument("--layer", type=str, default="Attention", choices=["Attention", "ConvNNAttention", "ConvNNAttention-Triton", "KvtAttention", "LocalAttention", "NeighborhoodAttention", "SparseAttention"], help="Layer to use for training and evaluation")
+    parser.add_argument("--layer", type=str, default="Attention", choices=["Attention", "ConvNNAttention", "FastConvNNAttention", "EfficientConvNNAttention", "KvtAttention", "LocalAttention", "NeighborhoodAttention", "SparseAttention"], help="Layer to use for training and evaluation")
 
     # Additional Layer Arguments for ConvNN
     parser.add_argument("--convolution_type", type=str, default="depthwise", choices=["standard", "depthwise", "depthwise-separable"], help="Convolution type for ConvNN Layers")

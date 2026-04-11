@@ -9,13 +9,55 @@ echo "Using Port: $MASTER_PORT"
 # Supress warning
 export OMP_NUM_THREADS=1
 
+# ConvNN Triton K = 9, 16, 25, 36, 100
+torchrun --nproc_per_node=4 \
+         --rdzv_backend=c10d \
+         --rdzv_endpoint=localhost:$MASTER_PORT \
+         main.py \
+        --model vit-base \
+        --layer FastConvNNAttention \
+        --K 9 \
+        --convolution_type depthwise \
+        --sampling_type all \
+        --num_samples -1 \
+        --num_heads 12 \
+        --dataset imagenet1k \
+        --data_path /home/exouser/Datasets \
+        --use_amp \
+        --device cuda \
+        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-FastConvNNAttention_NH12_All_K9/ \
+        --num_workers 16 \
+        --pin_memory \
+        --ddp \
+        --ddp_batch_size 320 || echo "K=9 all training failed"
 
 torchrun --nproc_per_node=4 \
          --rdzv_backend=c10d \
          --rdzv_endpoint=localhost:$MASTER_PORT \
          main.py \
         --model vit-base \
-        --layer ConvNNAttention-Triton \
+        --layer FastConvNNAttention \
+        --K 16 \
+        --convolution_type depthwise \
+        --sampling_type all \
+        --num_samples -1 \
+        --num_heads 12 \
+        --dataset imagenet1k \
+        --data_path /home/exouser/Datasets \
+        --use_amp \
+        --device cuda \
+        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-FastConvNNAttention_Triton_NH12_All_K16/ \
+        --num_workers 16 \
+        --pin_memory \
+        --ddp \
+        --ddp_batch_size 320 || echo "K=16 all training failed"
+
+torchrun --nproc_per_node=4 \
+         --rdzv_backend=c10d \
+         --rdzv_endpoint=localhost:$MASTER_PORT \
+         main.py \
+        --model vit-base \
+        --layer FastConvNNAttention \
         --K 25 \
         --convolution_type depthwise \
         --sampling_type all \
@@ -25,7 +67,7 @@ torchrun --nproc_per_node=4 \
         --data_path /home/exouser/Datasets \
         --use_amp \
         --device cuda \
-        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention-Triton_NH12_All_K25/ \
+        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-FastConvNNAttention_NH12_All_K25/ \
         --num_workers 16 \
         --pin_memory \
         --ddp \
@@ -37,7 +79,7 @@ torchrun --nproc_per_node=4 \
          --rdzv_endpoint=localhost:$MASTER_PORT \
          main.py \
         --model vit-base \
-        --layer ConvNNAttention-Triton \
+        --layer FastConvNNAttention \
         --K 36 \
         --convolution_type depthwise \
         --sampling_type all \
@@ -47,7 +89,7 @@ torchrun --nproc_per_node=4 \
         --data_path /home/exouser/Datasets \
         --use_amp \
         --device cuda \
-        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention-Triton_NH12_All_K36/ \
+        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-FastConvNNAttention_NH12_All_K36/ \
         --num_workers 16 \
         --pin_memory \
         --ddp \
@@ -58,7 +100,7 @@ torchrun --nproc_per_node=4 \
          --rdzv_endpoint=localhost:$MASTER_PORT \
          main.py \
         --model vit-base \
-        --layer ConvNNAttention-Triton \
+        --layer FastConvNNAttention \
         --K 100 \
         --convolution_type depthwise \
         --sampling_type all \
@@ -68,56 +110,11 @@ torchrun --nproc_per_node=4 \
         --data_path /home/exouser/Datasets \
         --use_amp \
         --device cuda \
-        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention-Triton_NH12_All_K100/ \
+        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-FastConvNNAttention_NH12_All_K100/ \
         --num_workers 16 \
         --pin_memory \
         --ddp \
         --ddp_batch_size 320 || echo "K=100 all training failed"
-
-
-# ConvNN Triton K = 9, 16, 25 
-torchrun --nproc_per_node=4 \
-         --rdzv_backend=c10d \
-         --rdzv_endpoint=localhost:$MASTER_PORT \
-         main.py \
-        --model vit-base \
-        --layer ConvNNAttention-Triton \
-        --K 9 \
-        --convolution_type depthwise \
-        --sampling_type all \
-        --num_samples -1 \
-        --num_heads 12 \
-        --dataset imagenet1k \
-        --data_path /home/exouser/Datasets \
-        --use_amp \
-        --device cuda \
-        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention-Triton_NH12_All_K9/ \
-        --num_workers 16 \
-        --pin_memory \
-        --ddp \
-        --ddp_batch_size 320 || echo "K=9 all training failed"
-
-torchrun --nproc_per_node=4 \
-         --rdzv_backend=c10d \
-         --rdzv_endpoint=localhost:$MASTER_PORT \
-         main.py \
-        --model vit-base \
-        --layer ConvNNAttention-Triton \
-        --K 16 \
-        --convolution_type depthwise \
-        --sampling_type all \
-        --num_samples -1 \
-        --num_heads 12 \
-        --dataset imagenet1k \
-        --data_path /home/exouser/Datasets \
-        --use_amp \
-        --device cuda \
-        --output_dir /home/exouser/Convolutional-Nearest-Neighbor-Attention/Output/ImageNet1K/ViT-Base-ConvNNAttention-Triton_NH12_All_K16/ \
-        --num_workers 16 \
-        --pin_memory \
-        --ddp \
-        --ddp_batch_size 320 || echo "K=16 all training failed"
-
 
 
 echo "All training completed"

@@ -1,3 +1,10 @@
+"""
+FastConvNNAttention.py
+
+- Implementation of ConvNNAttention with Depthwise Convolution using Triton for fused operations.
+- Fuses the gathering of V, multiplication by Top-K attention weights, and the depthwise convolution step into a single efficient kernel.
+"""
+
 import torch
 import torch.nn as nn
 import numpy as np

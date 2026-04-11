@@ -145,7 +145,7 @@ python language_main.py \
     --embedding_dim 768 \
     --num_attention_heads 12 \
     --num_layers 12 \
-    --layer ConvNNAttention-Triton \
+    --layer FastConvNNAttention \
     --convolution_type depthwise \
     --K 36 \
     --sampling_type all \
@@ -182,7 +182,7 @@ python language_main.py \
     --embedding_dim 768 \
     --num_attention_heads 12 \
     --num_layers 12 \
-    --layer ConvNNAttention-Triton \
+    --layer FastConvNNAttention \
     --convolution_type depthwise \
     --K 49 \
     --sampling_type all \
@@ -219,7 +219,7 @@ python language_main.py \
     --embedding_dim 768 \
     --num_attention_heads 12 \
     --num_layers 12 \
-    --layer ConvNNAttention-Triton \
+    --layer FastConvNNAttention \
     --convolution_type depthwise \
     --K 64 \
     --sampling_type all \
@@ -256,7 +256,7 @@ python language_main.py \
     --embedding_dim 768 \
     --num_attention_heads 12 \
     --num_layers 12 \
-    --layer ConvNNAttention-Triton \
+    --layer FastConvNNAttention \
     --convolution_type depthwise \
     --K 81 \
     --sampling_type all \
@@ -292,7 +292,7 @@ python language_main.py \
     --embedding_dim 768 \
     --num_attention_heads 12 \
     --num_layers 12 \
-    --layer ConvNNAttention-Triton \
+    --layer FastConvNNAttention \
     --convolution_type depthwise \
     --K 100 \
     --sampling_type all \

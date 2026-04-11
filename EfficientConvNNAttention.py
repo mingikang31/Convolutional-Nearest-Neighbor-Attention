@@ -1,3 +1,9 @@
+"""
+EfficientConvNNAttention.py
+
+- Implementation of ConvNNAttention with Depthwise Convolution using CUDA/C++ for fused operations and pointer manipulation.
+"""
+
 import torch 
 import torch.nn as nn 
 import torch.nn.functional as F
@@ -69,30 +75,31 @@ class EfficientConvNNAttention(nn.Module):
         return x.transpose(1, 2).contiguous().view(batch_size, seq_length, self.d_hidden)
     
     def forward(self, x):
-        B = x.shape[0]
+        return 0 
+    
+        # B = x.shape[0]
         
-        q = self.split_head(self.W_q(x)) # (B, NH, SL, DK)
-        k = self.split_head(self.W_k(x)) # (B, NH, SL, DK)
-        v = self.split_head(self.W_v(x)) # (B, NH, SL, DK)
+        # q = self.split_head(self.W_q(x)) # (B, NH, SL, DK)
+        # k = self.split_head(self.W_k(x)) # (B, NH, SL, DK)
+        # v = self.split_head(self.W_v(x)) # (B, NH, SL, DK)
 
-        attn_matrix = torch.matmul(q, k.transpose(-2, -1)) / np.sqrt(self.d_k) # (B, NH, SL, SL)
+        # attn_matrix = torch.matmul(q, k.transpose(-2, -1)) / np.sqrt(self.d_k) # (B, NH, SL, SL)
 
-        v_merged = v.reshape(B * self.num_heads, self.seq_length, self.d_k).permute(0, 2, 1) # (B*NH, DK, SL)
-        am_merged = attn_matrix.reshape(B * self.num_heads, self.seq_length, self.seq_length) # (B*NH, SL, SL)
+        # v_merged = v.reshape(B * self.num_heads, self.seq_length, self.d_k).permute(0, 2, 1) # (B*NH, DK, SL)
+        # am_merged = attn_matrix.reshape(B * self.num_heads, self.seq_length, self.seq_length) # (B*NH, SL, SL)
 
-        v_primes = [] 
-        for i in range(self.K):
-            v_out_i = self.k_convs[i](v_merged) # (B*NH, DK, SL)
-            v_primes.append(v_out_i)
+        # v_primes = [] 
+        # for i in range(self.K):
+        #     v_out_i = self.k_convs[i](v_merged) # (B*NH, DK, SL)
+        #     v_primes.append(v_out_i)
 
-        for i in range(self.K):
-            topk_values, topk_indices = torch.topk(am_merged, k=self.K, dim=2, largest=True)
-            topk_values = torch.softmax(topk_values, dim=-1)
+        # for i in range(self.K):
+        #     topk_values, topk_indices = torch.topk(am_merged, k=self.K, dim=2, largest=True)
+        #     topk_values = torch.softmax(topk_values, dim=-1)
 
-            #
+        #     #
 
 
-        
 
 """Regular ConvNN Attention Implementation"""
 class MultiHeadConvNNAttention(nn.Module):
