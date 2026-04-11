@@ -1,0 +1,60 @@
+Downloading/Loading WikiText103 from Hugging Face
+Saving preprocessed dataset to /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_2048
+Model: GPT2_12L_12H_768D_ConvNNAttention
+Total Parameters: 125233152
+Trainable Parameters: 125233152
+Model Complexity (Profiler):
+   - Total Parameters: 125.23315200 M
+   - GFLOPs: 583.18316006
+✗ Experiment 1 failed
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_2048
+Model: GPT2_12L_12H_768D_ConvNNAttention
+Total Parameters: 125238528
+Trainable Parameters: 125238528
+Model Complexity (Profiler):
+   - Total Parameters: 125.23852800 M
+   - GFLOPs: 583.31521613
+✗ Experiment 2 failed
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_2048
+Model: GPT2_12L_12H_768D_ConvNNAttention
+Total Parameters: 125245440
+Trainable Parameters: 125245440
+Model Complexity (Profiler):
+   - Total Parameters: 125.24544000 M
+   - GFLOPs: 583.48500250
+✗ Experiment 3 failed
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_2048
+Model: GPT2_12L_12H_768D_ConvNNAttention
+Total Parameters: 125253888
+Trainable Parameters: 125253888
+Model Complexity (Profiler):
+   - Total Parameters: 125.25388800 M
+   - GFLOPs: 583.69251917
+✗ Experiment 4 failed
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_2048
+Model: GPT2_12L_12H_768D_ConvNNAttention
+Total Parameters: 125263872
+Trainable Parameters: 125263872
+Model Complexity (Profiler):
+   - Total Parameters: 125.26387200 M
+   - GFLOPs: 583.93776614
+✗ Experiment 5 failed
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_2048
+Model: GPT2_12L_12H_768D_ConvNNAttention
+Total Parameters: 125275392
+Trainable Parameters: 125275392
+Model Complexity (Profiler):
+   - Total Parameters: 125.27539200 M
+   - GFLOPs: 584.22074342
+✗ Experiment 6 failed
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_2048
+Model: GPT2_12L_12H_768D_Attention
+Total Parameters: 125226240
+Trainable Parameters: 125226240
+Model Complexity (Profiler):
+   - Total Parameters: 125.22624000 M
+   - GFLOPs: 660.85069608
+✗ Experiment 7 failed
+=============================
+Results: 0/7 experiments succeeded
+7 experiment(s) failed
