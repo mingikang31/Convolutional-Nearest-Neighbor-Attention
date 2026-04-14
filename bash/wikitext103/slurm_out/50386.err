@@ -1,0 +1,40 @@
+WARNING: overwriting environment variables set in the machine
+overwriting variable ['LD_LIBRARY_PATH']
+Traceback (most recent call last):
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/language_main.py", line 164, in <module>
+    main(args) 
+    ^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/language_main.py", line 114, in main
+    model = GPT2(
+            ^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/gpt2.py", line 50, in __init__
+    self.transformer_blocks = nn.ModuleList([
+                                            ^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/gpt2.py", line 51, in <listcomp>
+    TransformerBlock(args, embedding_dim, num_attention_heads, embedding_dim * 4, max_seq_length, dropout)
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/gpt2.py", line 535, in __init__
+    self.attention = FastCausalMultiHeadConvNNAttention(d_model, num_heads, max_seq_length, dropout, **convnn_attn_params)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/gpt2.py", line 433, in __init__
+    assert K > 0 and K <= d_embeddings // num_heads, "K must be between 1 and max_seq_length"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: K must be between 1 and max_seq_length
+Traceback (most recent call last):
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/language_main.py", line 164, in <module>
+    main(args) 
+    ^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/language_main.py", line 114, in main
+    model = GPT2(
+            ^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/gpt2.py", line 50, in __init__
+    self.transformer_blocks = nn.ModuleList([
+                                            ^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/gpt2.py", line 51, in <listcomp>
+    TransformerBlock(args, embedding_dim, num_attention_heads, embedding_dim * 4, max_seq_length, dropout)
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/gpt2.py", line 535, in __init__
+    self.attention = FastCausalMultiHeadConvNNAttention(d_model, num_heads, max_seq_length, dropout, **convnn_attn_params)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/gpt2.py", line 433, in __init__
+    assert K > 0 and K <= d_embeddings // num_heads, "K must be between 1 and max_seq_length"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: K must be between 1 and max_seq_length

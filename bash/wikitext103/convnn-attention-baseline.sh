@@ -136,116 +136,116 @@ dataset="wikitext103"
 # fi
 
 
-# ConvNN Attention Baseline
-output_dir="./Output/WikiText103/fastconvnn_K36_s42"
+# # ConvNN Attention Baseline
+# output_dir="./Output/WikiText103/fastconvnn_K36_s42"
 
-python language_main.py \
-    --vocab_size 50257 \
-    --max_seq_length 1024 \
-    --embedding_dim 768 \
-    --num_attention_heads 12 \
-    --num_layers 12 \
-    --layer FastConvNNAttention \
-    --convolution_type depthwise \
-    --K 36 \
-    --sampling_type all \
-    --dataset $dataset \
-    --use_amp \
-    --batch_size 32 \
-    --num_epochs 20 \
-    --clip_grad_norm 1.0 \
-    --optimizer adamw \
-    --weight_decay 0.1 \
-    --lr $LR \
-    --scheduler linear \
-    --device cuda \
-    --seed 42 \
-    --output_dir $output_dir \
-    --num_workers 14 \
-    --pin_memory
+# python language_main.py \
+#     --vocab_size 50257 \
+#     --max_seq_length 1024 \
+#     --embedding_dim 768 \
+#     --num_attention_heads 12 \
+#     --num_layers 12 \
+#     --layer FastConvNNAttention \
+#     --convolution_type depthwise \
+#     --K 36 \
+#     --sampling_type all \
+#     --dataset $dataset \
+#     --use_amp \
+#     --batch_size 32 \
+#     --num_epochs 20 \
+#     --clip_grad_norm 1.0 \
+#     --optimizer adamw \
+#     --weight_decay 0.1 \
+#     --lr $LR \
+#     --scheduler linear \
+#     --device cuda \
+#     --seed 42 \
+#     --output_dir $output_dir \
+#     --num_workers 14 \
+#     --pin_memory
 
-EXIT_CODE=$?
-COUNT=$((COUNT + 1))
-if [ $EXIT_CODE -eq 0 ]; then
-    echo "✓ Experiment $COUNT succeeded"
-else
-    echo "✗ Experiment $COUNT failed"
-    FAILED=$((FAILED + 1))
-fi
+# EXIT_CODE=$?
+# COUNT=$((COUNT + 1))
+# if [ $EXIT_CODE -eq 0 ]; then
+#     echo "✓ Experiment $COUNT succeeded"
+# else
+#     echo "✗ Experiment $COUNT failed"
+#     FAILED=$((FAILED + 1))
+# fi
 
-# ConvNN Attention Baseline
-output_dir="./Output/WikiText103/fastconvnn_K49_s42"
+# # ConvNN Attention Baseline
+# output_dir="./Output/WikiText103/fastconvnn_K49_s42"
 
-python language_main.py \
-    --vocab_size 50257 \
-    --max_seq_length 1024 \
-    --embedding_dim 768 \
-    --num_attention_heads 12 \
-    --num_layers 12 \
-    --layer FastConvNNAttention \
-    --convolution_type depthwise \
-    --K 49 \
-    --sampling_type all \
-    --dataset $dataset \
-    --use_amp \
-    --batch_size 32 \
-    --num_epochs 20 \
-    --clip_grad_norm 1.0 \
-    --optimizer adamw \
-    --weight_decay 0.1 \
-    --lr $LR \
-    --scheduler linear \
-    --device cuda \
-    --seed 42 \
-    --output_dir $output_dir \
-    --num_workers 14 \
-    --pin_memory
+# python language_main.py \
+#     --vocab_size 50257 \
+#     --max_seq_length 1024 \
+#     --embedding_dim 768 \
+#     --num_attention_heads 12 \
+#     --num_layers 12 \
+#     --layer FastConvNNAttention \
+#     --convolution_type depthwise \
+#     --K 49 \
+#     --sampling_type all \
+#     --dataset $dataset \
+#     --use_amp \
+#     --batch_size 32 \
+#     --num_epochs 20 \
+#     --clip_grad_norm 1.0 \
+#     --optimizer adamw \
+#     --weight_decay 0.1 \
+#     --lr $LR \
+#     --scheduler linear \
+#     --device cuda \
+#     --seed 42 \
+#     --output_dir $output_dir \
+#     --num_workers 14 \
+#     --pin_memory
 
-EXIT_CODE=$?
-COUNT=$((COUNT + 1))
-if [ $EXIT_CODE -eq 0 ]; then
-    echo "✓ Experiment $COUNT succeeded"
-else
-    echo "✗ Experiment $COUNT failed"
-    FAILED=$((FAILED + 1))
-fi
+# EXIT_CODE=$?
+# COUNT=$((COUNT + 1))
+# if [ $EXIT_CODE -eq 0 ]; then
+#     echo "✓ Experiment $COUNT succeeded"
+# else
+#     echo "✗ Experiment $COUNT failed"
+#     FAILED=$((FAILED + 1))
+# fi
 
-# ConvNN Attention Baseline
-output_dir="./Output/WikiText103/fastconvnn_K64_s42"
+# # ConvNN Attention Baseline
+# output_dir="./Output/WikiText103/fastconvnn_K64_s42"
 
-python language_main.py \
-    --vocab_size 50257 \
-    --max_seq_length 1024 \
-    --embedding_dim 768 \
-    --num_attention_heads 12 \
-    --num_layers 12 \
-    --layer FastConvNNAttention \
-    --convolution_type depthwise \
-    --K 64 \
-    --sampling_type all \
-    --dataset $dataset \
-    --use_amp \
-    --batch_size 32 \
-    --num_epochs 20 \
-    --clip_grad_norm 1.0 \
-    --optimizer adamw \
-    --weight_decay 0.1 \
-    --lr $LR \
-    --scheduler linear \
-    --device cuda \
-    --seed 42 \
-    --output_dir $output_dir \
-    --num_workers 14 \
-    --pin_memory
+# python language_main.py \
+#     --vocab_size 50257 \
+#     --max_seq_length 1024 \
+#     --embedding_dim 768 \
+#     --num_attention_heads 12 \
+#     --num_layers 12 \
+#     --layer FastConvNNAttention \
+#     --convolution_type depthwise \
+#     --K 64 \
+#     --sampling_type all \
+#     --dataset $dataset \
+#     --use_amp \
+#     --batch_size 32 \
+#     --num_epochs 20 \
+#     --clip_grad_norm 1.0 \
+#     --optimizer adamw \
+#     --weight_decay 0.1 \
+#     --lr $LR \
+#     --scheduler linear \
+#     --device cuda \
+#     --seed 42 \
+#     --output_dir $output_dir \
+#     --num_workers 14 \
+#     --pin_memory
 
-EXIT_CODE=$?
-COUNT=$((COUNT + 1))
-if [ $EXIT_CODE -eq 0 ]; then
-    echo "✓ Experiment $COUNT succeeded"
-else
-    echo "✗ Experiment $COUNT failed"
-    FAILED=$((FAILED + 1))
-fi
+# EXIT_CODE=$?
+# COUNT=$((COUNT + 1))
+# if [ $EXIT_CODE -eq 0 ]; then
+#     echo "✓ Experiment $COUNT succeeded"
+# else
+#     echo "✗ Experiment $COUNT failed"
+#     FAILED=$((FAILED + 1))
+# fi
 
 
 output_dir="./Output/WikiText103/fastconvnn_K81_s42"
@@ -319,6 +319,192 @@ else
     echo "✗ Experiment $COUNT failed"
     FAILED=$((FAILED + 1))
 fi
+
+output_dir="./Output/WikiText103/fastconvnn_K121_s42"
+
+python language_main.py \
+    --vocab_size 50257 \
+    --max_seq_length 1024 \
+    --embedding_dim 768 \
+    --num_attention_heads 12 \
+    --num_layers 12 \
+    --layer FastConvNNAttention \
+    --convolution_type depthwise \
+    --K 121 \
+    --sampling_type all \
+    --dataset $dataset \
+    --use_amp \
+    --batch_size 32 \
+    --num_epochs 20 \
+    --clip_grad_norm 1.0 \
+    --optimizer adamw \
+    --weight_decay 0.1 \
+    --lr $LR \
+    --scheduler linear \
+    --device cuda \
+    --seed 42 \
+    --output_dir $output_dir \
+    --num_workers 14 \
+    --pin_memory
+
+EXIT_CODE=$?
+COUNT=$((COUNT + 1))
+if [ $EXIT_CODE -eq 0 ]; then
+    echo "✓ Experiment $COUNT succeeded"
+else
+    echo "✗ Experiment $COUNT failed"
+    FAILED=$((FAILED + 1))
+fi
+
+
+output_dir="./Output/WikiText103/fastconvnn_K144_s42"
+
+python language_main.py \
+    --vocab_size 50257 \
+    --max_seq_length 1024 \
+    --embedding_dim 768 \
+    --num_attention_heads 12 \
+    --num_layers 12 \
+    --layer FastConvNNAttention \
+    --convolution_type depthwise \
+    --K 144 \
+    --sampling_type all \
+    --dataset $dataset \
+    --use_amp \
+    --batch_size 32 \
+    --num_epochs 20 \
+    --clip_grad_norm 1.0 \
+    --optimizer adamw \
+    --weight_decay 0.1 \
+    --lr $LR \
+    --scheduler linear \
+    --device cuda \
+    --seed 42 \
+    --output_dir $output_dir \
+    --num_workers 14 \
+    --pin_memory
+
+EXIT_CODE=$?
+COUNT=$((COUNT + 1))
+if [ $EXIT_CODE -eq 0 ]; then
+    echo "✓ Experiment $COUNT succeeded"
+else
+    echo "✗ Experiment $COUNT failed"
+    FAILED=$((FAILED + 1))
+fi
+
+
+output_dir="./Output/WikiText103/fastconvnn_K169_s42"
+
+python language_main.py \
+    --vocab_size 50257 \
+    --max_seq_length 1024 \
+    --embedding_dim 768 \
+    --num_attention_heads 12 \
+    --num_layers 12 \
+    --layer FastConvNNAttention \
+    --convolution_type depthwise \
+    --K 169 \
+    --sampling_type all \
+    --dataset $dataset \
+    --use_amp \
+    --batch_size 32 \
+    --num_epochs 20 \
+    --clip_grad_norm 1.0 \
+    --optimizer adamw \
+    --weight_decay 0.1 \
+    --lr $LR \
+    --scheduler linear \
+    --device cuda \
+    --seed 42 \
+    --output_dir $output_dir \
+    --num_workers 14 \
+    --pin_memory
+
+EXIT_CODE=$?
+COUNT=$((COUNT + 1))
+if [ $EXIT_CODE -eq 0 ]; then
+    echo "✓ Experiment $COUNT succeeded"
+else
+    echo "✗ Experiment $COUNT failed"
+    FAILED=$((FAILED + 1))
+fi
+
+
+output_dir="./Output/WikiText103/fastconvnn_K196_s42"
+
+python language_main.py \
+    --vocab_size 50257 \
+    --max_seq_length 1024 \
+    --embedding_dim 768 \
+    --num_attention_heads 12 \
+    --num_layers 12 \
+    --layer FastConvNNAttention \
+    --convolution_type depthwise \
+    --K 196 \
+    --sampling_type all \
+    --dataset $dataset \
+    --use_amp \
+    --batch_size 32 \
+    --num_epochs 20 \
+    --clip_grad_norm 1.0 \
+    --optimizer adamw \
+    --weight_decay 0.1 \
+    --lr $LR \
+    --scheduler linear \
+    --device cuda \
+    --seed 42 \
+    --output_dir $output_dir \
+    --num_workers 14 \
+    --pin_memory
+
+EXIT_CODE=$?
+COUNT=$((COUNT + 1))
+if [ $EXIT_CODE -eq 0 ]; then
+    echo "✓ Experiment $COUNT succeeded"
+else
+    echo "✗ Experiment $COUNT failed"
+    FAILED=$((FAILED + 1))
+fi
+
+
+output_dir="./Output/WikiText103/fastconvnn_K576_s42"
+
+python language_main.py \
+    --vocab_size 50257 \
+    --max_seq_length 1024 \
+    --embedding_dim 768 \
+    --num_attention_heads 12 \
+    --num_layers 12 \
+    --layer FastConvNNAttention \
+    --convolution_type depthwise \
+    --K 576 \
+    --sampling_type all \
+    --dataset $dataset \
+    --use_amp \
+    --batch_size 32 \
+    --num_epochs 20 \
+    --clip_grad_norm 1.0 \
+    --optimizer adamw \
+    --weight_decay 0.1 \
+    --lr $LR \
+    --scheduler linear \
+    --device cuda \
+    --seed 42 \
+    --output_dir $output_dir \
+    --num_workers 14 \
+    --pin_memory
+
+EXIT_CODE=$?
+COUNT=$((COUNT + 1))
+if [ $EXIT_CODE -eq 0 ]; then
+    echo "✓ Experiment $COUNT succeeded"
+else
+    echo "✗ Experiment $COUNT failed"
+    FAILED=$((FAILED + 1))
+fi
+
+
 
 # # Regular Attention Baseline
 # output_dir="./Output/WikiText103/self-attention_baseline_s42"

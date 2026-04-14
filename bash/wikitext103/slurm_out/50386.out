@@ -1,0 +1,91 @@
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_1024
+Model: GPT2_12L_12H_768D_FastConvNNAttention
+Total Parameters: 124467456
+Trainable Parameters: 124467456
+Model Complexity (Profiler):
+   - Total Parameters: 124.46745600 M
+   - GFLOPs: 272.05580160
+[Epoch 001] Time: 2514.7316s | [Train] Loss: 4.76730413 Perplexity: 117.60 | [Val] Loss: 3.57279053 Perplexity: 35.62
+[Epoch 002] Time: 2638.4235s | [Train] Loss: 3.43738768 Perplexity: 31.11 | [Val] Loss: 3.21000209 Perplexity: 24.78
+[Epoch 003] Time: 2646.1466s | [Train] Loss: 3.18297986 Perplexity: 24.12 | [Val] Loss: 3.07011050 Perplexity: 21.54
+[Epoch 004] Time: 2653.7810s | [Train] Loss: 3.04994621 Perplexity: 21.11 | [Val] Loss: 2.99703908 Perplexity: 20.03
+[Epoch 005] Time: 2679.7081s | [Train] Loss: 2.96143529 Perplexity: 19.33 | [Val] Loss: 2.94929111 Perplexity: 19.09
+[Epoch 006] Time: 2709.2275s | [Train] Loss: 2.89567075 Perplexity: 18.10 | [Val] Loss: 2.91785824 Perplexity: 18.50
+[Epoch 007] Time: 2735.7445s | [Train] Loss: 2.84281771 Perplexity: 17.16 | [Val] Loss: 2.89723799 Perplexity: 18.12
+[Epoch 008] Time: 2752.9417s | [Train] Loss: 2.79791593 Perplexity: 16.41 | [Val] Loss: 2.87886533 Perplexity: 17.79
+[Epoch 009] Time: 2769.8370s | [Train] Loss: 2.75794302 Perplexity: 15.77 | [Val] Loss: 2.86277321 Perplexity: 17.51
+[Epoch 010] Time: 2780.4907s | [Train] Loss: 2.72086592 Perplexity: 15.19 | [Val] Loss: 2.84948376 Perplexity: 17.28
+[Epoch 011] Time: 2793.0598s | [Train] Loss: 2.68556909 Perplexity: 14.67 | [Val] Loss: 2.84101671 Perplexity: 17.13
+[Epoch 012] Time: 2805.4081s | [Train] Loss: 2.65105413 Perplexity: 14.17 | [Val] Loss: 2.83154461 Perplexity: 16.97
+[Epoch 013] Time: 2812.9983s | [Train] Loss: 2.61666734 Perplexity: 13.69 | [Val] Loss: 2.82760441 Perplexity: 16.90
+[Epoch 014] Time: 2824.2300s | [Train] Loss: 2.58173564 Perplexity: 13.22 | [Val] Loss: 2.82016680 Perplexity: 16.78
+[Epoch 015] Time: 2837.7386s | [Train] Loss: 2.54579681 Perplexity: 12.75 | [Val] Loss: 2.81320614 Perplexity: 16.66
+[Epoch 016] Time: 2845.3446s | [Train] Loss: 2.50896439 Perplexity: 12.29 | [Val] Loss: 2.80503914 Perplexity: 16.53
+[Epoch 017] Time: 2855.0590s | [Train] Loss: 2.47059926 Perplexity: 11.83 | [Val] Loss: 2.80522001 Perplexity: 16.53
+[Epoch 018] Time: 2862.3768s | [Train] Loss: 2.43107919 Perplexity: 11.37 | [Val] Loss: 2.80160099 Perplexity: 16.47
+[Epoch 019] Time: 2872.7206s | [Train] Loss: 2.39073458 Perplexity: 10.92 | [Val] Loss: 2.80332866 Perplexity: 16.50
+[Epoch 020] Time: 2881.1454s | [Train] Loss: 2.35110224 Perplexity: 10.50 | [Val] Loss: 2.80611140 Perplexity: 16.55
+✓ Experiment 1 succeeded
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_1024
+Model: GPT2_12L_12H_768D_FastConvNNAttention
+Total Parameters: 124477440
+Trainable Parameters: 124477440
+Model Complexity (Profiler):
+   - Total Parameters: 124.47744000 M
+   - GFLOPs: 272.05580160
+[Epoch 001] Time: 3035.6194s | [Train] Loss: 4.77222382 Perplexity: 118.18 | [Val] Loss: 3.56703976 Perplexity: 35.41
+[Epoch 002] Time: 3170.6265s | [Train] Loss: 3.43512344 Perplexity: 31.04 | [Val] Loss: 3.20271623 Perplexity: 24.60
+[Epoch 003] Time: 3129.2017s | [Train] Loss: 3.17992743 Perplexity: 24.05 | [Val] Loss: 3.06662729 Perplexity: 21.47
+[Epoch 004] Time: 3118.8403s | [Train] Loss: 3.04696076 Perplexity: 21.05 | [Val] Loss: 2.99486896 Perplexity: 19.98
+[Epoch 005] Time: 3141.3753s | [Train] Loss: 2.95853510 Perplexity: 19.27 | [Val] Loss: 2.94937310 Perplexity: 19.09
+[Epoch 006] Time: 3168.8270s | [Train] Loss: 2.89290259 Perplexity: 18.05 | [Val] Loss: 2.91329724 Perplexity: 18.42
+[Epoch 007] Time: 3188.8739s | [Train] Loss: 2.83964034 Perplexity: 17.11 | [Val] Loss: 2.89431947 Perplexity: 18.07
+[Epoch 008] Time: 3203.2038s | [Train] Loss: 2.79489875 Perplexity: 16.36 | [Val] Loss: 2.87807575 Perplexity: 17.78
+[Epoch 009] Time: 3216.8791s | [Train] Loss: 2.75478988 Perplexity: 15.72 | [Val] Loss: 2.85676989 Perplexity: 17.41
+[Epoch 010] Time: 3231.6869s | [Train] Loss: 2.71760031 Perplexity: 15.14 | [Val] Loss: 2.84488416 Perplexity: 17.20
+[Epoch 011] Time: 3241.5058s | [Train] Loss: 2.68216646 Perplexity: 14.62 | [Val] Loss: 2.83927637 Perplexity: 17.10
+[Epoch 012] Time: 3252.7104s | [Train] Loss: 2.64755639 Perplexity: 14.12 | [Val] Loss: 2.82672408 Perplexity: 16.89
+[Epoch 013] Time: 3260.2288s | [Train] Loss: 2.61306118 Perplexity: 13.64 | [Val] Loss: 2.82366675 Perplexity: 16.84
+[Epoch 014] Time: 3266.2236s | [Train] Loss: 2.57810171 Perplexity: 13.17 | [Val] Loss: 2.81271756 Perplexity: 16.66
+[Epoch 015] Time: 3274.3827s | [Train] Loss: 2.54202539 Perplexity: 12.71 | [Val] Loss: 2.80981320 Perplexity: 16.61
+[Epoch 016] Time: 3278.4653s | [Train] Loss: 2.50509305 Perplexity: 12.24 | [Val] Loss: 2.80438188 Perplexity: 16.52
+[Epoch 017] Time: 3286.7098s | [Train] Loss: 2.46660438 Perplexity: 11.78 | [Val] Loss: 2.80120474 Perplexity: 16.46
+[Epoch 018] Time: 3294.9253s | [Train] Loss: 2.42694598 Perplexity: 11.32 | [Val] Loss: 2.79689977 Perplexity: 16.39
+[Epoch 019] Time: 3303.0606s | [Train] Loss: 2.38658918 Perplexity: 10.88 | [Val] Loss: 2.79974613 Perplexity: 16.44
+[Epoch 020] Time: 3308.5230s | [Train] Loss: 2.34689305 Perplexity: 10.45 | [Val] Loss: 2.80136448 Perplexity: 16.47
+✓ Experiment 2 succeeded
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_1024
+Model: GPT2_12L_12H_768D_FastConvNNAttention
+Total Parameters: 124488960
+Trainable Parameters: 124488960
+Model Complexity (Profiler):
+   - Total Parameters: 124.48896000 M
+   - GFLOPs: 272.05580160
+[Epoch 001] Time: 4221.6771s | [Train] Loss: 4.76548279 Perplexity: 117.39 | [Val] Loss: 3.57103878 Perplexity: 35.55
+[Epoch 002] Time: 4420.4721s | [Train] Loss: 3.43439531 Perplexity: 31.01 | [Val] Loss: 3.20615938 Perplexity: 24.68
+[Epoch 003] Time: 4412.9169s | [Train] Loss: 3.18029197 Perplexity: 24.05 | [Val] Loss: 3.07007912 Perplexity: 21.54
+[Epoch 004] Time: 4404.0877s | [Train] Loss: 3.04736832 Perplexity: 21.06 | [Val] Loss: 2.99541542 Perplexity: 19.99
+[Epoch 005] Time: 4399.2372s | [Train] Loss: 2.95903283 Perplexity: 19.28 | [Val] Loss: 2.95248288 Perplexity: 19.15
+[Epoch 006] Time: 4408.7226s | [Train] Loss: 2.89328473 Perplexity: 18.05 | [Val] Loss: 2.91510457 Perplexity: 18.45
+[Epoch 007] Time: 4415.7407s | [Train] Loss: 2.84036422 Perplexity: 17.12 | [Val] Loss: 2.89665428 Perplexity: 18.11
+[Epoch 008] Time: 4429.3815s | [Train] Loss: 2.79558840 Perplexity: 16.37 | [Val] Loss: 2.87974787 Perplexity: 17.81
+[Epoch 009] Time: 4435.2357s | [Train] Loss: 2.75558256 Perplexity: 15.73 | [Val] Loss: 2.86083519 Perplexity: 17.48
+[Epoch 010] Time: 4452.5753s | [Train] Loss: 2.71845466 Perplexity: 15.16 | [Val] Loss: 2.84867987 Perplexity: 17.26
+[Epoch 011] Time: 4616.6234s | [Train] Loss: 2.68315941 Perplexity: 14.63 | [Val] Loss: 2.84058550 Perplexity: 17.13
+[Epoch 012] Time: 4772.3178s | [Train] Loss: 2.64866727 Perplexity: 14.14 | [Val] Loss: 2.82972687 Perplexity: 16.94
+[Epoch 013] Time: 5498.7242s | [Train] Loss: 2.61431450 Perplexity: 13.66 | [Val] Loss: 2.82566187 Perplexity: 16.87
+[Epoch 014] Time: 5575.9169s | [Train] Loss: 2.57947425 Perplexity: 13.19 | [Val] Loss: 2.81913030 Perplexity: 16.76
+[Epoch 015] Time: 5589.6635s | [Train] Loss: 2.54353212 Perplexity: 12.72 | [Val] Loss: 2.81468728 Perplexity: 16.69
+[Epoch 016] Time: 5579.8104s | [Train] Loss: 2.50681094 Perplexity: 12.27 | [Val] Loss: 2.80836797 Perplexity: 16.58
+[Epoch 017] Time: 5578.3923s | [Train] Loss: 2.46850033 Perplexity: 11.80 | [Val] Loss: 2.80571970 Perplexity: 16.54
+[Epoch 018] Time: 5579.0778s | [Train] Loss: 2.42893367 Perplexity: 11.35 | [Val] Loss: 2.80177969 Perplexity: 16.47
+[Epoch 019] Time: 5583.4371s | [Train] Loss: 2.38880125 Perplexity: 10.90 | [Val] Loss: 2.80073637 Perplexity: 16.46
+[Epoch 020] Time: 5591.5375s | [Train] Loss: 2.34920501 Perplexity: 10.48 | [Val] Loss: 2.80494472 Perplexity: 16.53
+✓ Experiment 3 succeeded
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_1024
+✗ Experiment 4 failed
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_1024
+✗ Experiment 5 failed
+=============================
+Results: 3/5 experiments succeeded
+2 experiment(s) failed

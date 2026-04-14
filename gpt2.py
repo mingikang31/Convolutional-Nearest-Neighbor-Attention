@@ -171,7 +171,7 @@ class CausalMultiHeadConvNNAttention(nn.Module):
     def __init__(self, d_embeddings, num_heads, max_seq_length, dropout, K, convolution_type="depthwise"):
         super(CausalMultiHeadConvNNAttention, self).__init__()
         assert d_embeddings % num_heads == 0, "Match Embeddings with Number of Heads"
-        assert K > 0 and K <= d_embeddings // num_heads, "K must be between 1 and max_seq_length"
+        assert K > 0 and K <= max_seq_length, "K must be between 1 and max_seq_length"
 
         self.d_embeddings = d_embeddings
         self.num_heads = num_heads
@@ -430,7 +430,7 @@ class FastCausalMultiHeadConvNNAttention(nn.Module):
     def __init__(self, d_embeddings, num_heads, max_seq_length, dropout, K, convolution_type="depthwise"):
         super(FastCausalMultiHeadConvNNAttention, self).__init__()
         assert d_embeddings % num_heads == 0, "Match Embeddings with Number of Heads"
-        assert K > 0 and K <= d_embeddings // num_heads, "K must be between 1 and max_seq_length"
+        assert K > 0 and K <= max_seq_length, "K must be between 1 and max_seq_length"
 
         self.d_embeddings = d_embeddings
         self.num_heads = num_heads
