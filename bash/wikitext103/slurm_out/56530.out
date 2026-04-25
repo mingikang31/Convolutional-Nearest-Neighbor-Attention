@@ -1,0 +1,7 @@
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_1024
+Model: GPT2_12L_12H_768D_ConvNNAttention
+Total Parameters: 124882176
+Trainable Parameters: 124882176
+Model Complexity (Profiler):
+   - Total Parameters: 124.88217600 M
+   - GFLOPs: 272.14065331

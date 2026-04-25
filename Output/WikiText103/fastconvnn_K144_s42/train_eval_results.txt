@@ -1,0 +1,26 @@
+Model Complexity (Profiler): GFLOPs: 272.05580160, Trainable Parameters: 124.55040000 M
+[Epoch 001] Time: 8900.1740s | [Train] Loss: 4.76130705 Perplexity: 116.90 | [Val] Loss: 3.56796414 Perplexity: 35.44
+[Epoch 002] Time: 9165.7126s | [Train] Loss: 3.43733773 Perplexity: 31.10 | [Val] Loss: 3.20974702 Perplexity: 24.77
+[Epoch 003] Time: 8769.6671s | [Train] Loss: 3.18156530 Perplexity: 24.08 | [Val] Loss: 3.06708154 Perplexity: 21.48
+[Epoch 004] Time: 9722.0053s | [Train] Loss: 3.04727378 Perplexity: 21.06 | [Val] Loss: 2.99817604 Perplexity: 20.05
+[Epoch 005] Time: 9720.2574s | [Train] Loss: 2.95834836 Perplexity: 19.27 | [Val] Loss: 2.94715488 Perplexity: 19.05
+[Epoch 006] Time: 9698.5555s | [Train] Loss: 2.89176253 Perplexity: 18.03 | [Val] Loss: 2.91530356 Perplexity: 18.45
+[Epoch 007] Time: 9708.5659s | [Train] Loss: 2.83850146 Perplexity: 17.09 | [Val] Loss: 2.88915873 Perplexity: 17.98
+[Epoch 008] Time: 9721.4030s | [Train] Loss: 2.79354602 Perplexity: 16.34 | [Val] Loss: 2.87324798 Perplexity: 17.69
+[Epoch 009] Time: 9698.6338s | [Train] Loss: 2.75336953 Perplexity: 15.70 | [Val] Loss: 2.85505977 Perplexity: 17.38
+[Epoch 010] Time: 9709.5260s | [Train] Loss: 2.71593853 Perplexity: 15.12 | [Val] Loss: 2.84636846 Perplexity: 17.23
+[Epoch 011] Time: 9716.8044s | [Train] Loss: 2.68071870 Perplexity: 14.60 | [Val] Loss: 2.83755121 Perplexity: 17.07
+[Epoch 012] Time: 9725.1937s | [Train] Loss: 2.64613915 Perplexity: 14.10 | [Val] Loss: 2.82469019 Perplexity: 16.86
+[Epoch 013] Time: 9784.7426s | [Train] Loss: 2.61156765 Perplexity: 13.62 | [Val] Loss: 2.82411823 Perplexity: 16.85
+[Epoch 014] Time: 9786.1452s | [Train] Loss: 2.57685883 Perplexity: 13.16 | [Val] Loss: 2.81602147 Perplexity: 16.71
+[Epoch 015] Time: 9769.2589s | [Train] Loss: 2.54077568 Perplexity: 12.69 | [Val] Loss: 2.81126294 Perplexity: 16.63
+[Epoch 016] Time: 9693.5853s | [Train] Loss: 2.50369430 Perplexity: 12.23 | [Val] Loss: 2.80236819 Perplexity: 16.48
+[Epoch 017] Time: 7406.6422s | [Train] Loss: 2.46539867 Perplexity: 11.77 | [Val] Loss: 2.80181590 Perplexity: 16.47
+[Epoch 018] Time: 7412.6852s | [Train] Loss: 2.42584274 Perplexity: 11.31 | [Val] Loss: 2.79624364 Perplexity: 16.38
+[Epoch 019] Time: 7419.8316s | [Train] Loss: 2.38555470 Perplexity: 10.87 | [Val] Loss: 2.79952767 Perplexity: 16.44
+[Epoch 020] Time: 7430.8075s | [Train] Loss: 2.34589962 Perplexity: 10.44 | [Val] Loss: 2.80203345 Perplexity: 16.48
+
+[Test] Loss: 2.79531074 Perplexity: 16.37
+
+Average Epoch Time: 9148.0099s
+Min Perplexity: 16.3830 at Epoch 18
