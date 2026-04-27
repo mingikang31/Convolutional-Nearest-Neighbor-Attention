@@ -210,6 +210,7 @@ class CausalMultiHeadConvNNAttention(nn.Module):
                 groups=self.in_channels, 
                 bias=False
             )
+            self.conv.weight.data.fill_(1.0)
         elif convolution_type == 'depthwise-separable':
             self.conv = nn.Sequential(
                 # Depthwise Convolution
@@ -232,7 +233,7 @@ class CausalMultiHeadConvNNAttention(nn.Module):
                     bias=False
                 )
             )
-        self.conv.weight.data.fill_(1.0)
+            self.conv[0].weight.data.fill_(1.0)
 
         causal_mask = torch.tril(torch.ones(max_seq_length, max_seq_length)).view(1, 1, max_seq_length, max_seq_length)
         self.register_buffer('causal_mask', causal_mask)

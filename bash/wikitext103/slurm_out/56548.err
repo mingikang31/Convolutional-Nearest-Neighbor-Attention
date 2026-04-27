@@ -1,0 +1,25 @@
+WARNING: overwriting environment variables set in the machine
+overwriting variable ['LD_LIBRARY_PATH']
+Traceback (most recent call last):
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/language_main.py", line 164, in <module>
+    main(args) 
+    ^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/language_main.py", line 148, in main
+    train_eval_results = Train_Eval_GPT(
+                         ^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/train_eval.py", line 599, in Train_Eval_GPT
+    logits, loss = model(inputs, target=targets)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/torch-gh200/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/torch-gh200/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention/gpt2.py", line 105, in forward
+    loss = F.cross_entropy(logits.view(-1, logits.size(-1)), target.view(-1), ignore_index=-1)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/research/j.farias/mkang2/miniconda3_arm/envs/torch-gh200/lib/python3.11/site-packages/torch/nn/functional.py", line 3479, in cross_entropy
+    return torch._C._nn.cross_entropy_loss(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 3.06 GiB. GPU 0 has a total capacity of 95.00 GiB of which 2.13 GiB is free. Process 148675 has 19.03 GiB memory in use. Including non-PyTorch memory, this process has 73.70 GiB memory in use. Of the allocated memory 72.24 GiB is allocated by PyTorch, and 689.69 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

@@ -1,19 +1,4 @@
-Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_1024
-Model: GPT2_12L_12H_768D_ConvNNAttention
-Total Parameters: 124882176
-Trainable Parameters: 124882176
-Model Complexity (Profiler):
-   - Total Parameters: 124.88217600 M
-   - GFLOPs: 272.14065331
-Warning: NaN loss at Epoch 1
-✗ Experiment 1 failed
-Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_1024
-Model: GPT2_12L_12H_768D_ConvNNAttention
-Total Parameters: 125226240
-Trainable Parameters: 125226240
-Model Complexity (Profiler):
-   - Total Parameters: 125.22624000 M
-   - GFLOPs: 272.20664909
+Model Complexity (Profiler): GFLOPs: 272.20664909, Trainable Parameters: 125.22624000 M
 [Epoch 001] Time: 2833.1880s | [Train] Loss: 5.54005764 Perplexity: 254.69 | [Val] Loss: 4.56574661 Perplexity: 96.13
 [Epoch 002] Time: 2827.6736s | [Train] Loss: 4.32249395 Perplexity: 75.38 | [Val] Loss: 3.96855789 Perplexity: 52.91
 [Epoch 003] Time: 2833.7202s | [Train] Loss: 3.89992755 Perplexity: 49.40 | [Val] Loss: 3.67290157 Perplexity: 39.37
@@ -34,11 +19,8 @@ Model Complexity (Profiler):
 [Epoch 018] Time: 2849.1808s | [Train] Loss: 2.77903833 Perplexity: 16.10 | [Val] Loss: 2.91929778 Perplexity: 18.53
 [Epoch 019] Time: 2841.4804s | [Train] Loss: 2.74339974 Perplexity: 15.54 | [Val] Loss: 2.90857431 Perplexity: 18.33
 [Epoch 020] Time: 2836.9551s | [Train] Loss: 2.70933855 Perplexity: 15.02 | [Val] Loss: 2.90386084 Perplexity: 18.24
-✓ Experiment 2 succeeded
-Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_1024
-✗ Experiment 3 failed
-Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_1024
-✗ Experiment 4 failed
-=============================
-Results: 1/4 experiments succeeded
-3 experiment(s) failed
+
+[Test] Loss: 2.90355635 Perplexity: 18.24
+
+Average Epoch Time: 2824.9129s
+Min Perplexity: 18.2444 at Epoch 20
