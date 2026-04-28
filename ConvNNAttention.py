@@ -53,6 +53,7 @@ class MultiHeadConvNNAttention(nn.Module):
                 groups=self.in_channels, 
                 bias=False
             )
+            self.conv.weight.data.fill_(1.0)
         elif convolution_type == 'depthwise-separable':
             self.conv = nn.Sequential(
                 # Depthwise Convolution
@@ -75,7 +76,8 @@ class MultiHeadConvNNAttention(nn.Module):
                     bias=False
                 )
             )
-        self.conv.weight.data.fill_(1.0)
+            self.conv[0].weight.data.fill_(1.0)
+
 
     def split_head(self, x):
         batch_size, seq_length, d_hidden = x.size() 

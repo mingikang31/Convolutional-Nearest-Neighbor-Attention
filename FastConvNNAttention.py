@@ -312,7 +312,7 @@ class FastMultiHeadConvNNAttention(nn.Module):
 
         if convolution_type == "standard":
             # Standard Convolution weights (D_out, D_in, K)
-            self.conv_weight = nn.Parameter(torch.ones(self.d_k, self.d_k, self.K))
+            self.conv_weight = nn.Parameter(torch.rand(self.d_k, self.d_k, self.K))
         elif convolution_type == "depthwise":
             # Depthwise Convolution weights matching PyTorch's native Conv1d shape
             self.conv_weight = nn.Parameter(torch.ones(self.d_k, 1, self.K))
