@@ -1,0 +1,4 @@
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_1024
+Model: GPT2_12L_12H_768D_FastConvNNAttention
+Total Parameters: 124446720
+Trainable Parameters: 124446720

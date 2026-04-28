@@ -34,3 +34,67 @@ Model Complexity (Profiler):
 [Epoch 014] Time: 2870.8366s | [Train] Loss: 2.71923180 Perplexity: 15.17 | [Val] Loss: 2.85462239 Perplexity: 17.37
 [Epoch 015] Time: 2879.0821s | [Train] Loss: 2.68793112 Perplexity: 14.70 | [Val] Loss: 2.84328187 Perplexity: 17.17
 [Epoch 016] Time: 2889.7554s | [Train] Loss: 2.65330564 Perplexity: 14.20 | [Val] Loss: 2.83184785 Perplexity: 16.98
+[Epoch 017] Time: 2869.3119s | [Train] Loss: 2.61755414 Perplexity: 13.70 | [Val] Loss: 2.82411593 Perplexity: 16.85
+[Epoch 018] Time: 2873.7373s | [Train] Loss: 2.58214889 Perplexity: 13.23 | [Val] Loss: 2.81471846 Perplexity: 16.69
+[Epoch 019] Time: 2868.5673s | [Train] Loss: 2.54552266 Perplexity: 12.75 | [Val] Loss: 2.81084213 Perplexity: 16.62
+[Epoch 020] Time: 2866.2447s | [Train] Loss: 2.51062492 Perplexity: 12.31 | [Val] Loss: 2.80834135 Perplexity: 16.58
+✓ Experiment 2 succeeded
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_1024
+Model: GPT2_12L_12H_768D_ConvNNAttention
+Total Parameters: 124495872
+Trainable Parameters: 124495872
+Model Complexity (Profiler):
+   - Total Parameters: 124.49587200 M
+   - GFLOPs: 272.14065331
+[Epoch 001] Time: 2559.3186s | [Train] Loss: 4.83385323 Perplexity: 125.69 | [Val] Loss: 3.61485529 Perplexity: 37.15
+[Epoch 002] Time: 2558.3314s | [Train] Loss: 3.49124175 Perplexity: 32.83 | [Val] Loss: 3.24755868 Perplexity: 25.73
+[Epoch 003] Time: 2571.2942s | [Train] Loss: 3.24137645 Perplexity: 25.57 | [Val] Loss: 3.10935846 Perplexity: 22.41
+[Epoch 004] Time: 2577.3523s | [Train] Loss: 3.11141141 Perplexity: 22.45 | [Val] Loss: 3.03835732 Perplexity: 20.87
+[Epoch 005] Time: 2588.1157s | [Train] Loss: 3.02517892 Perplexity: 20.60 | [Val] Loss: 2.98998001 Perplexity: 19.89
+[Epoch 006] Time: 2585.2132s | [Train] Loss: 2.96171313 Perplexity: 19.33 | [Val] Loss: 2.95332265 Perplexity: 19.17
+[Epoch 007] Time: 2589.7665s | [Train] Loss: 2.91056313 Perplexity: 18.37 | [Val] Loss: 2.92650893 Perplexity: 18.66
+[Epoch 008] Time: 2587.8945s | [Train] Loss: 2.86761020 Perplexity: 17.59 | [Val] Loss: 2.90911785 Perplexity: 18.34
+[Epoch 009] Time: 2584.2337s | [Train] Loss: 2.82937440 Perplexity: 16.93 | [Val] Loss: 2.88448098 Perplexity: 17.89
+[Epoch 010] Time: 2587.3926s | [Train] Loss: 2.79413193 Perplexity: 16.35 | [Val] Loss: 2.88004768 Perplexity: 17.82
+[Epoch 011] Time: 2590.9083s | [Train] Loss: 2.76083407 Perplexity: 15.81 | [Val] Loss: 2.86583936 Perplexity: 17.56
+[Epoch 012] Time: 2589.1259s | [Train] Loss: 2.72841365 Perplexity: 15.31 | [Val] Loss: 2.85333410 Perplexity: 17.35
+[Epoch 013] Time: 2590.4692s | [Train] Loss: 2.69630433 Perplexity: 14.82 | [Val] Loss: 2.84693077 Perplexity: 17.23
+[Epoch 014] Time: 2590.0249s | [Train] Loss: 2.66396441 Perplexity: 14.35 | [Val] Loss: 2.83674085 Perplexity: 17.06
+[Epoch 015] Time: 2598.3205s | [Train] Loss: 2.63069196 Perplexity: 13.88 | [Val] Loss: 2.82848352 Perplexity: 16.92
+[Epoch 016] Time: 2587.4896s | [Train] Loss: 2.59675980 Perplexity: 13.42 | [Val] Loss: 2.82026455 Perplexity: 16.78
+[Epoch 017] Time: 2590.7115s | [Train] Loss: 2.56152271 Perplexity: 12.96 | [Val] Loss: 2.81104144 Perplexity: 16.63
+[Epoch 018] Time: 2589.1710s | [Train] Loss: 2.52535088 Perplexity: 12.50 | [Val] Loss: 2.80698159 Perplexity: 16.56
+[Epoch 019] Time: 2590.7132s | [Train] Loss: 2.48853572 Perplexity: 12.04 | [Val] Loss: 2.80210504 Perplexity: 16.48
+[Epoch 020] Time: 2597.5676s | [Train] Loss: 2.45258565 Perplexity: 11.62 | [Val] Loss: 2.80325219 Perplexity: 16.50
+✓ Experiment 3 succeeded
+Loading cached WikiText from /mnt/research/j.farias/mkang2/Datasets/wikitext103_cache_1024
+Model: GPT2_12L_12H_768D_ConvNNAttention
+Total Parameters: 124501248
+Trainable Parameters: 124501248
+Model Complexity (Profiler):
+   - Total Parameters: 124.50124800 M
+   - GFLOPs: 272.20664909
+[Epoch 001] Time: 3896.6991s | [Train] Loss: 4.81231493 Perplexity: 123.02 | [Val] Loss: 3.59867722 Perplexity: 36.55
+[Epoch 002] Time: 3891.8279s | [Train] Loss: 3.47115189 Perplexity: 32.17 | [Val] Loss: 3.22883394 Perplexity: 25.25
+[Epoch 003] Time: 3899.5430s | [Train] Loss: 3.21867509 Perplexity: 24.99 | [Val] Loss: 3.09219298 Perplexity: 22.03
+[Epoch 004] Time: 3906.9391s | [Train] Loss: 3.08751466 Perplexity: 21.92 | [Val] Loss: 3.01671022 Perplexity: 20.42
+[Epoch 005] Time: 3906.2771s | [Train] Loss: 3.00093003 Perplexity: 20.10 | [Val] Loss: 2.96589971 Perplexity: 19.41
+[Epoch 006] Time: 3913.3227s | [Train] Loss: 2.93691576 Perplexity: 18.86 | [Val] Loss: 2.93233371 Perplexity: 18.77
+[Epoch 007] Time: 3921.5176s | [Train] Loss: 2.88573273 Perplexity: 17.92 | [Val] Loss: 2.90784049 Perplexity: 18.32
+[Epoch 008] Time: 3910.8660s | [Train] Loss: 2.84255200 Perplexity: 17.16 | [Val] Loss: 2.89040413 Perplexity: 18.00
+[Epoch 009] Time: 3914.7272s | [Train] Loss: 2.80432052 Perplexity: 16.52 | [Val] Loss: 2.86971822 Perplexity: 17.63
+[Epoch 010] Time: 3918.0245s | [Train] Loss: 2.76872052 Perplexity: 15.94 | [Val] Loss: 2.85629913 Perplexity: 17.40
+[Epoch 011] Time: 3912.0786s | [Train] Loss: 2.73525686 Perplexity: 15.41 | [Val] Loss: 2.84749019 Perplexity: 17.24
+[Epoch 012] Time: 3921.1884s | [Train] Loss: 2.70267117 Perplexity: 14.92 | [Val] Loss: 2.83503953 Perplexity: 17.03
+[Epoch 013] Time: 3929.3375s | [Train] Loss: 2.67027811 Perplexity: 14.44 | [Val] Loss: 2.83012983 Perplexity: 16.95
+[Epoch 014] Time: 3919.6973s | [Train] Loss: 2.63743182 Perplexity: 13.98 | [Val] Loss: 2.81666830 Perplexity: 16.72
+[Epoch 015] Time: 3925.6159s | [Train] Loss: 2.60392678 Perplexity: 13.52 | [Val] Loss: 2.81051591 Perplexity: 16.62
+[Epoch 016] Time: 3938.8918s | [Train] Loss: 2.56973838 Perplexity: 13.06 | [Val] Loss: 2.80470288 Perplexity: 16.52
+[Epoch 017] Time: 3920.8052s | [Train] Loss: 2.53414200 Perplexity: 12.61 | [Val] Loss: 2.79761663 Perplexity: 16.41
+[Epoch 018] Time: 3912.0670s | [Train] Loss: 2.49769079 Perplexity: 12.15 | [Val] Loss: 2.79488865 Perplexity: 16.36
+[Epoch 019] Time: 3918.2066s | [Train] Loss: 2.46036657 Perplexity: 11.71 | [Val] Loss: 2.78992453 Perplexity: 16.28
+[Epoch 020] Time: 3937.2417s | [Train] Loss: 2.42410781 Perplexity: 11.29 | [Val] Loss: 2.79095110 Perplexity: 16.30
+✓ Experiment 4 succeeded
+=============================
+Results: 3/4 experiments succeeded
+1 experiment(s) failed
