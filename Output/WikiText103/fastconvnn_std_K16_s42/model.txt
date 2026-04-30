@@ -1,0 +1,44 @@
+training: False
+_parameters: {}
+_buffers: {}
+_non_persistent_buffers_set: set()
+_backward_pre_hooks: OrderedDict()
+_backward_hooks: OrderedDict()
+_is_full_backward_hook: None
+_forward_hooks: OrderedDict()
+_forward_hooks_with_kwargs: OrderedDict()
+_forward_hooks_always_called: OrderedDict()
+_forward_pre_hooks: OrderedDict()
+_forward_pre_hooks_with_kwargs: OrderedDict()
+_state_dict_hooks: OrderedDict()
+_state_dict_pre_hooks: OrderedDict()
+_load_state_dict_pre_hooks: OrderedDict()
+_load_state_dict_post_hooks: OrderedDict()
+_modules: {'dropout': Dropout(p=0.1, inplace=False), 'token_embeddings': Embedding(50257, 768), 'position_embeddings': Embedding(1024, 768), 'transformer_blocks': ModuleList(
+  (0-11): 12 x TransformerBlock(
+    (attention): FastCausalMultiHeadConvNNAttention(
+      (w_k): Linear(in_features=768, out_features=768, bias=True)
+      (w_q): Linear(in_features=768, out_features=768, bias=True)
+      (w_v): Linear(in_features=768, out_features=768, bias=True)
+      (w_o): Linear(in_features=768, out_features=768, bias=True)
+      (attn_dropout): Dropout(p=0.1, inplace=False)
+      (resid_dropout): Dropout(p=0.1, inplace=False)
+    )
+    (mlp): MLP(
+      (fc1): Linear(in_features=768, out_features=3072, bias=True)
+      (fc2): Linear(in_features=3072, out_features=768, bias=True)
+      (gelu): GELU(approximate='none')
+      (dropout): Dropout(p=0.1, inplace=False)
+    )
+    (layer_norm1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+    (layer_norm2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+  )
+), 'layer_norm': LayerNorm((768,), eps=1e-05, elementwise_affine=True), 'lm_head': Linear(in_features=768, out_features=50257, bias=False)}
+args: Namespace(vocab_size=50257, max_seq_length=1024, embedding_dim=768, num_attention_heads=12, num_layers=12, dropout=0.1, layer='FastConvNNAttention', convolution_type='standard', K=16, sampling_type='all', num_samples=-1, sample_padding=0, dataset='wikitext103', data_path='/mnt/research/j.farias/mkang2/Datasets', compile=False, compile_mode='default', batch_size=32, num_epochs=20, use_amp=True, clip_grad_norm=1.0, num_workers=14, persistent_workers=False, prefetch_factor=None, pin_memory=True, optimizer='adamw', weight_decay=0.1, lr=0.0006, scheduler='linear', lr_step=20, lr_gamma=0.5, device='cuda', seed=42, output_dir='./Output/WikiText103/fastconvnn_std_K16_s42', test_only=False, ddp=False, ddp_batch_size=32, total_params=124452096, trainable_params=124452096)
+vocab_size: 50257
+max_seq_length: 1024
+embedding_dim: 768
+num_attention_heads: 12
+num_layers: 12
+device: cuda
+name: GPT2_12L_12H_768D_FastConvNNAttention
