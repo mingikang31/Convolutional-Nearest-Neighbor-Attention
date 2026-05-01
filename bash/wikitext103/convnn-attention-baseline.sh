@@ -25,7 +25,7 @@ dataset="wikitext103"
 
 ###### STANDARD CONVOLUTION
 # ConvNN Attention Baseline
-output_dir="./Output/WikiText103/fastconvnn_std_K9_s42"
+output_dir="./Output/WikiText103/fastconvnn_std_K25_s42"
 
 python language_main.py \
     --vocab_size 50257 \
@@ -35,7 +35,7 @@ python language_main.py \
     --num_layers 12 \
     --layer FastConvNNAttention \
     --convolution_type standard \
-    --K 9 \
+    --K 25 \
     --sampling_type all \
     --dataset $dataset \
     --use_amp \
@@ -62,7 +62,7 @@ else
 fi
 
 # ConvNN Attention Baseline
-output_dir="./Output/WikiText103/fastconvnn_std_K16_s42"
+output_dir="./Output/WikiText103/fastconvnn_std_K36_s42"
 
 python language_main.py \
     --vocab_size 50257 \
@@ -72,7 +72,7 @@ python language_main.py \
     --num_layers 12 \
     --layer FastConvNNAttention \
     --convolution_type standard \
-    --K 16 \
+    --K 36 \
     --sampling_type all \
     --dataset $dataset \
     --use_amp \
