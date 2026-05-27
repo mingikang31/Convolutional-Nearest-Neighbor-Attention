@@ -1,5 +1,5 @@
 """
-EfficientConvNNAttention.py
+FlashConvNNAttention.py
 
 - Implementation of ConvNNAttention with Depthwise Convolution using CUDA/C++ for fused operations and pointer manipulation.
 """
@@ -10,7 +10,7 @@ import torch.nn.functional as F
 import numpy as np
 
 '''STILL WORKING ON CUDA IMPLEMENTATION WITH 1x1 K KERNELS USING POINTERS INSTEAD OF GATHERING NEAREST NEIGHBORS INTO A LARGE PRIME TENSOR'''
-class EfficientConvNNAttention(nn.Module):
+class FlashConvNNAttention(nn.Module):
     # TODO finish implementation
     def __init__(self, 
                  d_hidden, 
@@ -19,7 +19,7 @@ class EfficientConvNNAttention(nn.Module):
                  K, 
                  convolution_type = 'depthwise', 
                  seq_length=197):
-        super(EfficientConvNNAttention, self).__init__()
+        super(FlashConvNNAttention, self).__init__()
 
         self.d_hidden = d_hidden 
         self.num_heads = num_heads 

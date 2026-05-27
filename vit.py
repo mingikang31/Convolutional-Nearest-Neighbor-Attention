@@ -22,7 +22,7 @@ from ConvNNAttention import (
 # from ConvNNAttention_Triton_NOTINUSE import MultiHeadConvNNAttention_Triton, FusedPrimeConvTriton
 
 from FastConvNNAttention import FastMultiHeadConvNNAttention
-from EfficientConvNNAttention import EfficientConvNNAttention
+from FlashConvNNAttention import FlashConvNNAttention
 
 
 '''VGG Model Class'''
@@ -252,9 +252,9 @@ class TransformerEncoder(nn.Module):
         elif args.layer == "FastConvNNAttention":
             self.attention = FastMultiHeadConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
 
-        # ** Efficient ConvNN Attention (CUDA + CPP) Layer
-        elif args.layer == "EfficientConvNNAttention":
-            self.attention = EfficientConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
+        # ** Flash ConvNN Attention (CUDA + CPP) Layer
+        elif args.layer == "FlashConvNNAttention":
+            self.attention = FlashConvNNAttention(d_hidden, num_heads, attention_dropout, **convnn_attn_params)
             
         # 5. Kvt Attention Layer
         elif args.layer == "KvtAttention":
