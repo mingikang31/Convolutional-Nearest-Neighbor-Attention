@@ -1,23 +1,27 @@
 """Utility Functions for the Project"""
-import torch 
-from torch import einsum
-import torch.nn as nn 
-import torch.nn.functional as F
-from torch.amp import autocast
-import random 
-import numpy as np 
-from einops import rearrange, repeat, pack, unpack
-import math 
+import torch.nn as nn
+import os 
+from typing import Optional
 
+def print_cuda_info():
+    import torch 
+
+    # Check if CUDA is available
+    print(f"CUDA available: {torch.cuda.is_available()}")
     
-def write_to_file(file_path, data):
-    """
-    Write data to a file in a readable format.
+    # Get number of GPUs
+    print(f"Number of GPUs: {torch.cuda.device_count()}")
 
-    Args:
-        file_path (str): The path to the file.
-        data: The data to write to the file (can be various types).
-    """
+    # Get current GPU name
+    if torch.cuda.is_available():
+        print(f"GPU Name: {torch.cuda.get_device_name(0)}")
+        
+        # Get memory info (in bytes)
+        print(f"Total memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
+        print(f"Allocated memory: {torch.cuda.memory_allocated(0) / 1e9:.2f} GB")
+        print(f"Cached memory: {torch.cuda.memory_reserved(0) / 1e9:.2f} GB")
+
+def write_to_file(file_path, data):
     with open(file_path, 'w') as file:
         if isinstance(data, list):
             # For lists like train_eval_results
@@ -42,6 +46,10 @@ def set_seed(seed):
     Args:
         seed (int): The seed value.
     """
+    import random
+    import numpy as np
+    import torch
+
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -51,7 +59,24 @@ def set_seed(seed):
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
-"""# Local Attention Module"""
+def argsSimpleNameSpace():
+    from types import SimpleNamespace
+        
+    args = SimpleNamespace(
+        a = 1, 
+        b = 2, 
+        c = 3
+    )
+    
+
+""" Local Attention Module """
+import torch
+from torch import nn, einsum
+from torch.amp import autocast
+import torch.nn.functional as F
+from einops import rearrange, repeat, pack, unpack
+import math 
+
 
 class SinusoidalEmbeddings(nn.Module):
     def __init__(
