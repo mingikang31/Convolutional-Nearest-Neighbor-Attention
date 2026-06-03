@@ -15,7 +15,7 @@ conda activate torch-pro6000
 
 cd /mnt/research/j.farias/mkang2/Convolutional-Nearest-Neighbor-Attention
 
-python main.py \
+python vision_main.py \
     --model vit-base \
     --layer FastConvNNAttention \
     --K 100 \

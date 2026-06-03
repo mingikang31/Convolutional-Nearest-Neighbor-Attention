@@ -12,7 +12,7 @@ export OMP_NUM_THREADS=1
 torchrun --nproc_per_node=4 \
          --rdzv_backend=c10d \
          --rdzv_endpoint=localhost:$MASTER_PORT \
-         main.py \
+         vision_main.py \
         --model vit-base \
         --layer KvtAttention \
         --K 9 \
@@ -31,7 +31,7 @@ torchrun --nproc_per_node=4 \
 torchrun --nproc_per_node=4 \
          --rdzv_backend=c10d \
          --rdzv_endpoint=localhost:$MASTER_PORT \
-         main.py \
+         vision_main.py \
         --model vit-base \
         --layer KvtAttention \
         --K 16 \
@@ -50,7 +50,7 @@ torchrun --nproc_per_node=4 \
 torchrun --nproc_per_node=4 \
          --rdzv_backend=c10d \
          --rdzv_endpoint=localhost:$MASTER_PORT \
-         main.py \
+         vision_main.py \
         --model vit-base \
         --layer KvtAttention \
         --K 25 \
@@ -69,7 +69,7 @@ torchrun --nproc_per_node=4 \
 torchrun --nproc_per_node=4 \
          --rdzv_backend=c10d \
          --rdzv_endpoint=localhost:$MASTER_PORT \
-         main.py \
+         vision_main.py \
         --model vit-base \
         --layer KvtAttention \
         --K 36 \
@@ -89,7 +89,7 @@ torchrun --nproc_per_node=4 \
 torchrun --nproc_per_node=4 \
          --rdzv_backend=c10d \
          --rdzv_endpoint=localhost:$MASTER_PORT \
-         main.py \
+         vision_main.py \
         --model vit-base \
         --layer KvtAttention \
         --K 100 \

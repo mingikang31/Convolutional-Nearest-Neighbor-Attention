@@ -12,7 +12,7 @@ export OMP_NUM_THREADS=1
 # torchrun --nproc_per_node=4 \
 #          --rdzv_backend=c10d \
 #          --rdzv_endpoint=localhost:$MASTER_PORT \
-#          main.py \
+#          vision_main.py \
 #         --model vit-base \
 #         --layer ConvNNAttention \
 #         --K 9 \
@@ -35,7 +35,7 @@ export OMP_NUM_THREADS=1
 # torchrun --nproc_per_node=4 \
 #          --rdzv_backend=c10d \
 #          --rdzv_endpoint=localhost:$MASTER_PORT \
-#          main.py \
+#          vision_main.py \
 #         --model vit-base \
 #         --layer ConvNNAttention \
 #         --K 9 \
@@ -58,7 +58,7 @@ export OMP_NUM_THREADS=1
 # torchrun --nproc_per_node=4 \
 #          --rdzv_backend=c10d \
 #          --rdzv_endpoint=localhost:$MASTER_PORT \
-#          main.py \
+#          vision_main.py \
 #         --model vit-base \
 #         --layer ConvNNAttention \
 #         --K 9 \
@@ -80,7 +80,7 @@ export OMP_NUM_THREADS=1
 # torchrun --nproc_per_node=4 \
 #          --rdzv_backend=c10d \
 #          --rdzv_endpoint=localhost:$MASTER_PORT \
-#          main.py \
+#          vision_main.py \
 #         --model vit-base \
 #         --layer ConvNNAttention \
 #         --K 16 \
@@ -103,7 +103,7 @@ export OMP_NUM_THREADS=1
 torchrun --nproc_per_node=4 \
          --rdzv_backend=c10d \
          --rdzv_endpoint=localhost:$MASTER_PORT \
-         main.py \
+         vision_main.py \
         --model vit-base \
         --layer ConvNNAttention \
         --K 25 \
@@ -126,7 +126,7 @@ torchrun --nproc_per_node=4 \
 torchrun --nproc_per_node=4 \
          --rdzv_backend=c10d \
          --rdzv_endpoint=localhost:$MASTER_PORT \
-         main.py \
+         vision_main.py \
         --model vit-base \
         --layer ConvNNAttention \
         --K 36 \
