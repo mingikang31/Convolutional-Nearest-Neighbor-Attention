@@ -21,7 +21,7 @@ torchrun --nproc_per_node=4 \
         --num_samples -1 \
         --num_heads 12 \
         --dataset imagenet1k \
-        --data_path /home/exouser/Datasets \
+        --data_path /media/volume/ImageNet/Datasets \
         --compile \
         --use_amp \
         --device cuda \
@@ -43,7 +43,7 @@ torchrun --nproc_per_node=4 \
         --num_samples -1 \
         --num_heads 12 \
         --dataset imagenet1k \
-        --data_path /home/exouser/Datasets \
+        --data_path /media/volume/ImageNet/Datasets \
         --compile \
         --use_amp \
         --device cuda \
@@ -65,7 +65,7 @@ torchrun --nproc_per_node=4 \
         --num_samples -1 \
         --num_heads 12 \
         --dataset imagenet1k \
-        --data_path /home/exouser/Datasets \
+        --data_path /media/volume/ImageNet/Datasets \
         --compile \
         --use_amp \
         --device cuda \
@@ -74,8 +74,6 @@ torchrun --nproc_per_node=4 \
         --pin_memory \
         --ddp \
         --ddp_batch_size 320 || echo "K=9 Depthwise Separable training failed"
-
-
 
 
 

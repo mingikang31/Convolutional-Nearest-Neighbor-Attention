@@ -383,15 +383,10 @@ class MultiHeadConvNNAttention_ForLoop(nn.Module):
         k = self.split_head(self.W_k(x))
         v = self.split_head(self.W_v(x))
 
-        print("q|k|v shape: ", q.shape) 
 
         attn_matrix = torch.matmul(q, k.transpose(-2, -1)) / np.sqrt(self.d_k)
-        print("attn scores shape: ", attn_matrix.shape) 
-        print() 
 
         attn_output = self.process_heads(v, attn_matrix)
-        print()
-        print("attn output shape: ", attn_output.shape)
         
         output = self.W_o(self.combine_heads(attn_output)) # (B, seq_length, d_hidden)
         return output
