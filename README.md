@@ -248,7 +248,7 @@ Convolutional-Nearest-Neighbor is released under the MIT License. Please see the
 Contributions, issues, and feature requests are welcome\!
 Please reach out to:
 
-  - **Mingi Kang** [mkang2@bowdoin.edu](mailto:mkang2@bowdoin.edu)
+  - **Mingi Kang** [mingikang31@gmail.com](mailto:mingikang31@gmail.com)
   - **Jeova Farias** [j.farias@bowdoin.edu](mailto:j.farias@bowdoin.edu)
 
 <!-- end list -->
